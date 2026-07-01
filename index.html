@@ -215,6 +215,7 @@ body::after{
 </head>
 <body>
 
+<!-- ═══ TOP NAV ═══ -->
 <nav id="topNav">
   <div class="logo">CINE<b>·</b>MOOD</div>
   <div class="nav-icons">
@@ -225,6 +226,7 @@ body::after{
   </div>
 </nav>
 
+<!-- ═══ HERO ═══ -->
 <section id="hero">
   <div class="hero-blob"></div>
   <h1>SET THE<br/><em>MOOD</em></h1>
@@ -232,6 +234,7 @@ body::after{
   <button id="surpriseBtn">🎲 Surprise Me</button>
 </section>
 
+<!-- Surprise Spotlight -->
 <div id="spotlight">
   <div class="sp-inner">
     <img id="spPoster" class="sp-poster" src="" alt=""/>
@@ -244,6 +247,7 @@ body::after{
   </div>
 </div>
 
+<!-- Genre Pills -->
 <div class="pill-row" id="pillRow">
   <button class="pill on" data-g="" data-lbl="🔥 TRENDING">🔥 Trending</button>
   <button class="pill" data-g="28"    data-lbl="💥 ACTION">💥 Action</button>
@@ -256,6 +260,7 @@ body::after{
   <button class="pill" data-g="16"    data-lbl="🌸 ANIME">🌸 Anime</button>
 </div>
 
+<!-- Search bar -->
 <div id="searchBar" style="display:none;padding:0 16px 16px;">
   <div style="display:flex;align-items:center;background:var(--glass);border:1px solid var(--glass-b);border-radius:9px;padding:9px 13px;gap:8px;">
     <span style="color:var(--silver);font-size:14px;">🔍</span>
@@ -272,8 +277,10 @@ body::after{
 <div id="loader"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
 <div id="empty"><div class="ico">🍿</div><p>Kuch nahi mila bhai, doosra try karo!</p></div>
 
+<!-- Grid -->
 <main id="grid"></main>
 
+<!-- ADMIN SIDE OVERLAY PANEL -->
 <div id="overlay-admin" class="overlay" onclick="if(event.target===this) closeOverlay('admin')">
   <div class="overlay-sheet">
     <div class="overlay-handle" onclick="closeOverlay('admin')"></div>
@@ -294,6 +301,7 @@ body::after{
   </div>
 </div>
 
+<!-- OTHER OVERLAYS -->
 <div id="overlay-about" class="overlay" onclick="if(event.target===this) closeOverlay('about')">
   <div class="overlay-sheet"><div class="overlay-handle"></div><div class="overlay-title">ℹ️ About</div><div class="overlay-body"><p>CineWood AI ek premium movie analysis panel hai.</p></div></div>
 </div>
@@ -304,6 +312,7 @@ body::after{
   <div class="overlay-sheet"><div class="overlay-handle"></div><div class="overlay-title">📡 Contact</div><div class="overlay-body"><p>Telegram bot configurations ready.</p></div></div>
 </div>
 
+<!-- DETAIL MODAL -->
 <div id="modal" onclick="if(event.target===this) closeModal()">
   <div class="modal-sheet">
     <button class="modal-close" onclick="closeModal()">✕</button>
@@ -321,12 +330,14 @@ body::after{
       </div>
       <p id="mOverview" class="modal-overview"></p>
       
+      <!-- Review display panel -->
       <div class="vibe-box">
         <div class="vibe-lbl" id="vibeSource">CINE-VIBE ENGINE</div>
         <div class="vibe-head">🔥 HINGLISH REVIEW</div>
         <p id="vibeText" class="vibe-desc">Fetching latest review...</p>
       </div>
 
+      <!-- Admin Editor Control (Input Fields) -->
       <div id="adminForm" class="admin-review-form">
         <div class="admin-input-wrap" style="margin-bottom: 8px;">
           <input type="text" id="adminNameInput" placeholder="Apna Admin Name likho (e.g. HARSH)..." style="font-size: 13px; padding: 8px 12px;"/>
@@ -338,6 +349,7 @@ body::after{
   </div>
 </div>
 
+<!-- BOTTOM NAV -->
 <nav id="bottomNav">
   <div class="bnav-item on" id="bnTrend" onclick="switchTab('trending')">
     <span class="bnav-icon">🔥</span><span class="bnav-label">Trending</span>
@@ -348,19 +360,17 @@ body::after{
   <div class="bnav-item" id="bnSearch" onclick="switchTab('search')">
     <span class="bnav-icon">🔍</span><span class="bnav-label">Search</span>
   </div>
-  <div class="bnav-item" id="bnSearch" onclick="switchTab('search')">
-    <span class="bnav-icon">🔍</span><span class="bnav-label">Search</span>
-  </div>
 </nav>
 
 <button id="btt" onclick="window.scrollTo({top:0,behavior:'smooth'})">▲</button>
 
+<!-- JAVASCRIPT KEYLESS BACKEND GATEWAY LOGIC -->
 <script>
 let activeGenre = '';
 let searchTimer = null;
 let isAdmin = false;
 let currentMovieData = null; 
-let adminPasswordState = ""; // Runtime verification memory slot
+let adminPasswordState = ""; 
 
 // Server Side Endpoint Proxies
 async function fetchTMDB(endpoint, params={}) {
@@ -402,8 +412,9 @@ function renderGrid(movies) {
     card.className = 'card';
     card.onclick = () => openMovieModal(m);
     
+    // 🛡️ Bypassing ISP CDN block using our custom server image proxy endpoint
     let imgHTML = m.poster_path 
-      ? `<img src="https://image.tmdb.org/t/p/w342${m.poster_path}" alt="${m.title}"/>`
+      ? `<img src="/api/image-proxy?url=https://image.tmdb.org/t/p/w342${m.poster_path}" alt="${m.title}"/>`
       : `<div class="card-no-img">🎬</div>`;
       
     card.innerHTML = `
@@ -427,7 +438,9 @@ async function openMovieModal(movie) {
   document.getElementById('mYear').textContent = movie.release_date ? movie.release_date.substring(0,4) : 'N/A';
   document.getElementById('mRat').textContent = `⭐ ${movie.vote_average ? movie.vote_average.toFixed(1) : '0.0'}`;
   document.getElementById('mOverview').textContent = movie.overview || "No overview available.";
-  document.getElementById('mBackdrop').src = movie.backdrop_path ? `https://image.tmdb.org/t/p/w780${movie.backdrop_path}` : '';
+  
+  // 🛡️ Backdrop loading via custom node proxy engine
+  document.getElementById('mBackdrop').src = movie.backdrop_path ? `/api/image-proxy?url=https://image.tmdb.org/t/p/w780${movie.backdrop_path}` : '';
   
   document.getElementById('vibeSource').textContent = "CHECKING DATABASE...";
   document.getElementById('vibeText').textContent = "Please wait...";
@@ -457,7 +470,7 @@ async function openMovieModal(movie) {
   }
 }
 
-// ── SAVE HANDLER (POST to secure backend verification token engine) ──
+// ── SAVE HANDLER ──
 async function saveAdminReview() {
   if(!currentMovieData) return;
   const reviewText = document.getElementById('adminTextInput').value.trim();
@@ -472,7 +485,7 @@ async function saveAdminReview() {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      password: adminPasswordState, // State password safely transferred
+      password: adminPasswordState,
       movieId: currentMovieData.id,
       movieTitle: currentMovieData.title,
       reviewText: reviewText,
@@ -495,22 +508,33 @@ function openOverlay(id) { document.getElementById(`overlay-${id}`).classList.ad
 function closeOverlay(id) { document.getElementById(`overlay-${id}`).classList.remove('open'); }
 
 // ── ADMIN LOGIN ──
-function attemptLogin() {
-  const pwd = document.getElementById('adminPwdInput').value;
+async function attemptLogin() {
+  const pwd = document.getElementById('adminPwdInput').value.trim();
   
-  // Client pre-check session (Backend validates final token in server environment)
-  if(pwd === "Admin@899") {  
-    isAdmin = true;
-    adminPasswordState = pwd; // Stored safely in runtime memory
-    document.getElementById('adminLoginSection').style.display = 'none';
-    document.getElementById('adminLoggedSection').style.display = 'block';
-    document.getElementById('adminOverlayTitle').textContent = '🛠️ Admin Dashboard Unlocked';
-    document.getElementById('adminNavIco').classList.add('unlocked');
-    document.getElementById('adminNavIco').textContent = '🔓';
-    closeOverlay('admin');
-  } else {
-    document.getElementById('adminStatus').textContent = '❌ Wrong password bhai!';
-    document.getElementById('adminPwdInput').value = '';
+  try {
+    let response = await fetch('/api/admin/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pwd })
+    });
+
+    let result = await response.json();
+
+    if(response.ok && result.success) {  
+      isAdmin = true;
+      adminPasswordState = pwd; 
+      document.getElementById('adminLoginSection').style.display = 'none';
+      document.getElementById('adminLoggedSection').style.display = 'block';
+      document.getElementById('adminOverlayTitle').textContent = '🛠️ Admin Dashboard Unlocked';
+      document.getElementById('adminNavIco').classList.add('unlocked');
+      document.getElementById('adminNavIco').textContent = '🔓';
+      closeOverlay('admin');
+    } else {
+      document.getElementById('adminStatus').textContent = '❌ Wrong password bhai!';
+      document.getElementById('adminPwdInput').value = '';
+    }
+  } catch (err) {
+    alert("Server connect karne mein dikkat aa rahi hai!");
   }
 }
 
