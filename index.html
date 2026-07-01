@@ -515,30 +515,10 @@ let currentMovieData = null;
 let adminPasswordState = ""; 
 let currentLoadedMoviesList = []; 
 
-// Server Side Endpoint Proxies
-async function fetchTMDB(endpoint, params={}) {
-  const queryParams = new URLSearchParams(params);
-  try {
-    let res = await fetch(`/api/movies/${endpoint}?${queryParams.toString()}`);
-    return await res.json();
-  } catch(e) { console.error(e); return null; }
+ { showEmpty(true); currentLoadedMoviesList = []; }
 }
-
-async function loadMovies(genreId='') {
-  clearGrid(); showLoader(true);
-  let data;
-  if(genreId) {
-    data = await fetchTMDB('discover/movie', { with_genres: genreId, sort_by: 'popularity.desc' });
-  } else {
-    data = await fetchTMDB('trending/movie/day');
-  }
-  showLoader(false);
-  if(data && data.results && data.results.length) {
-    currentLoadedMoviesList = data.results; 
-    renderGrid(data.results);
-  } else { showEmpty(true); currentLoadedMoviesList = []; }
-}
-
+   // Server Side Endpoint Proxies (Fixed Absolute Routing Pipeline)
+   
 async function searchMovies(query) {
   if(!query.trim()) { loadMovies(activeGenre); return; }
   clearGrid(); showLoader(true);
