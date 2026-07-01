@@ -25,18 +25,21 @@ app.post('/api/admin/login', (req, res) => {
     res.status(401).json({ error: "Galat password hai bhai!" });
 });
 
-// EndPoint 1: Fetch from TMDB safely
+// 🎬 EndPoint 1: Fetch from TMDB safely (Using Proxy Mirror for India/Jio/Airtel Bypass)
 app.get('/api/movies/:endpoint', async (req, res) => {
     try {
         const { endpoint } = req.params;
         const queryParams = new URLSearchParams(req.query);
         queryParams.append('api_key', process.env.TMDB_API_KEY);
 
-        const tmdbUrl = `https://api.themoviedb.org/3/${endpoint}?${queryParams.toString()}`;
+        // Jio aur Airtel blocking bypass karne ke liye official short domain template
+        const tmdbUrl = `https://api.tmdb.org/3/${endpoint}?${queryParams.toString()}`;
+        
         const response = await fetch(tmdbUrl);
         const data = await response.json();
         res.json(data);
     } catch (err) {
+        console.error("TMDB Mirror Fetch Error:", err);
         res.status(500).json({ error: "TMDB Fetch Failed" });
     }
 });
@@ -97,4 +100,4 @@ app.post('/api/review/save', async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running securely on port ${PORT} 🔥`));
-            
+    
