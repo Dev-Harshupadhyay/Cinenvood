@@ -13,10 +13,10 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Securely Initialize Supabase (No Keys Hardcoded!)
+// Securely Initialize Supabase
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
-// 🔐 Secure Admin Login Route (Validates via Render .env Environment)
+// 🔐 Secure Admin Login Route
 app.post('/api/admin/login', (req, res) => {
     const { password } = req.body;
     if (password === process.env.ADMIN_PASSWORD) {
@@ -26,13 +26,12 @@ app.post('/api/admin/login', (req, res) => {
 });
 
 // 🎬 EndPoint 1: Fetch from TMDB safely (Using Proxy Mirror for India/Jio/Airtel Bypass)
-app.get('/api/movies/:endpoint', async (req, res) => {
+app.get('/api/movies/*', async (req, res) => {
     try {
-        const { endpoint } = req.params;
+        const endpoint = req.params[0]; 
         const queryParams = new URLSearchParams(req.query);
         queryParams.append('api_key', process.env.TMDB_API_KEY);
 
-        // Jio aur Airtel blocking bypass karne ke liye official short domain template
         const tmdbUrl = `https://api.tmdb.org/3/${endpoint}?${queryParams.toString()}`;
         
         const response = await fetch(tmdbUrl);
@@ -44,7 +43,23 @@ app.get('/api/movies/:endpoint', async (req, res) => {
     }
 });
 
-// EndPoint 2: Check database or fallback to AI review
+// 🖼️ EndPoint 2: Image Proxy Route (Bypasses Jio/Airtel Image CDN Block)
+app.get('/api/image-proxy', async (req, res) => {
+    const imageUrl = req.query.url;
+    if (!imageUrl) return res.status(400).send("URL parameter missing");
+    
+    try {
+        const response = await fetch(imageUrl);
+        const buffer = await response.arrayBuffer();
+        res.set('Content-Type', 'image/jpeg');
+        res.send(Buffer.from(buffer));
+    } catch (err) {
+        console.error("Image Proxy Error:", err);
+        res.status(500).send("Image fetch failed");
+    }
+});
+
+// EndPoint 3: Check database or fallback to AI review
 app.get('/api/review/:movieId', async (req, res) => {
     const { movieId } = req.params;
     try {
@@ -72,7 +87,7 @@ app.get('/api/review/:movieId', async (req, res) => {
     }
 });
 
-// EndPoint 3: Securely Save Review (Backend Password Verification via Env Token)
+// EndPoint 4: Securely Save Review
 app.post('/api/review/save', async (req, res) => {
     const { password, movieId, movieTitle, reviewText, adminName } = req.body;
 
@@ -100,4 +115,3 @@ app.post('/api/review/save', async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running securely on port ${PORT} 🔥`));
-    
