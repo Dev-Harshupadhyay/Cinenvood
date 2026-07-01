@@ -35,19 +35,26 @@ body::after{
 #topNav{
   position:fixed;top:0;left:0;right:0;height:var(--nav);
   display:flex;align-items:center;justify-content:space-between;
-  padding:0 16px;background:rgba(0,0,0,.78);backdrop-filter:blur(22px);
+  padding:0 12px;background:rgba(0,0,0,.78);backdrop-filter:blur(22px);
   -webkit-backdrop-filter:blur(22px);border-bottom:1px solid var(--glass-b);z-index:600;
 }
-.logo{font-family:'Bebas Neue',sans-serif;font-size:23px;letter-spacing:3px;color:var(--white);user-select:none;}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--white);user-select:none;flex-shrink:0;}
 .logo b{color:var(--red);}
-.nav-icons{display:flex;align-items:center;gap:6px;}
+.nav-icons{display:flex;align-items:center;gap:4px;overflow-x:auto;scrollbar-width:none;}
+.nav-icons::-webkit-scrollbar{display:none;}
 .nav-ico{
-  background:var(--glass);border:1px solid var(--glass-b);border-radius:8px;padding:6px 10px;
-  font-size:11px;font-weight:500;color:var(--silver-l);cursor:pointer;letter-spacing:.3px;
-  transition:all .2s;white-space:nowrap;display:flex;align-items:center;gap:5px;
+  background:var(--glass);border:1px solid var(--glass-b);border-radius:8px;padding:6px 9px;
+  font-size:10.5px;font-weight:500;color:var(--silver-l);cursor:pointer;letter-spacing:.3px;
+  transition:all .2s;white-space:nowrap;display:flex;align-items:center;gap:4px;
 }
 .nav-ico:hover{background:var(--red);border-color:var(--red);color:#fff;}
-.nav-ico.admin-ico{border-color:var(--red-b);color:var(--red);}
+.nav-ico.admin-ico{
+  border-color:var(--red-b);
+  color:var(--red);
+  font-size:13px;
+  padding:6px 12px;
+  font-weight:bold;
+}
 .nav-ico.admin-ico.unlocked{background:var(--red);color:#fff;}
 
 /* ── HERO ───────────────────────────── */
@@ -78,7 +85,8 @@ body::after{
 .sp-poster{width:100%;max-height:250px;object-fit:cover;object-position:top;flex-shrink:0;}
 @media(min-width:540px){.sp-poster{width:150px;max-height:none;}}
 .sp-info{padding:16px;display:flex;flex-direction:column;gap:7px;}
-.sp-title{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;line-height:1.1;}
+.sp-title{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;line-height:1.1;cursor:pointer;}
+.sp-title:hover{color:var(--red);}
 .sp-meta{display:flex;gap:9px;font-size:12px;color:var(--silver);align-items:center;}
 .sp-rat{background:var(--red-dim);border:1px solid var(--red-b);color:var(--red);padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;}
 .sp-ov{font-size:13px;color:var(--silver-l);line-height:1.6;font-weight:300;}
@@ -153,13 +161,105 @@ body::after{
 
 /* ── VIBE BOX ───────────────────────── */
 .vibe-box{
-  background:linear-gradient(135deg,rgba(229,9,20,.08),rgba(229,9,20,.03));border:1px solid var(--red-b);
-  border-radius:10px;padding:14px 15px;position:relative;overflow:hidden;margin-bottom:16px;
+  background:linear-gradient(135deg,rgba(229,9,20,.08),rgba(229,9,20,.03));border:1px solid var(--glass-b);
+  border-radius:10px;padding:14px 15px;position:relative;overflow:hidden;margin-bottom:16px;transition: all 0.3s ease;
 }
 .vibe-box::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(to right,transparent,rgba(229,9,20,.65),transparent);}
-.vibe-lbl{font-size:10px;letter-spacing:2px;color:var(--red);font-weight:600;text-transform:uppercase;margin-bottom:6px;}
-.vibe-head{font-family:'Bebas Neue',sans-serif;font-size:21px;letter-spacing:1.5px;color:var(--white);margin-bottom:5px;}
-.vibe-desc{font-size:12.5px;font-weight:300;color:var(--silver-l);line-height:1.65;}
+.vibe-lbl{font-size:10px;letter-spacing:2px;color:var(--white);font-weight:600;text-transform:uppercase;margin-bottom:6px;transition: all 0.3s;}
+.vibe-head{font-family:'Sora',sans-serif;font-size:14px;font-weight:600;letter-spacing:.5px;color:var(--white);margin-bottom:6px;}
+.vibe-desc{font-size:12.5px;font-weight:300;color:var(--silver-l);line-height:1.65;transition: all 0.3s;}
+
+/* 🔥 PREMIUM NEON RAINBOW ADMIN GLOW EFFECT 🔥 */
+.vibe-box.admin-premium-box {
+  background: linear-gradient(135deg, rgba(255,215,0,0.06), rgba(255,0,128,0.04)) !important;
+  border: 1px dashed rgba(255, 215, Gold, 0.4) !important;
+  box-shadow: 0 4px 20px rgba(255, 215, 0, 0.08);
+}
+.vibe-lbl.admin-glow {
+  font-family: 'Bebas Neue', sans-serif !important;
+  font-size: 15px !important;
+  letter-spacing: 2px !important;
+  font-weight: bold !important;
+  background: linear-gradient(45deg, #ff007f, #ffaa00, #00ffaa, #00aaff, #ff007f);
+  background-size: 400% 400%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: rainbowGlow 6s ease infinite;
+  filter: drop-shadow(0 0 6px rgba(0,255,170,0.5));
+}
+.vibe-desc.admin-bold {
+  font-weight: 600 !important;
+  color: #ffffff !important;
+  font-size: 13.5px !important;
+  letter-spacing: 0.2px;
+  line-height: 1.7 !important;
+}
+
+@keyframes rainbowGlow {
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
+}
+
+/* ── PREMIUM ABOUT ARCHITECTURE CARD ── */
+.premium-about-card {
+  background: linear-gradient(135deg, rgba(229,9,20,0.1), rgba(0,0,0,0.8));
+  border: 1px solid var(--red-b);
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 15px;
+  box-shadow: 0 0 25px rgba(229,9,20,0.15);
+}
+.about-glow-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 32px;
+  letter-spacing: 2px;
+  color: #fff;
+  text-shadow: 0 0 10px var(--red-glow);
+  margin-bottom: 10px;
+}
+.about-glow-title b { color: var(--red); }
+.premium-badge-row {
+  display: flex; gap: 8px; margin: 12px 0 18px; flex-wrap: wrap;
+}
+.premium-badge {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 4px 10px; font-size: 11px; border-radius: 6px;
+  color: var(--silver-l); font-weight: 500;
+}
+.premium-badge.red-b {
+  border-color: var(--red-b); color: var(--red);
+  text-shadow: 0 0 5px rgba(229,9,20,0.3);
+}
+
+/* ── POP-UP GENRE CHOICE CONTAINER ── */
+.genre-pop-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 18px 0 8px;
+}
+.genre-pop-btn {
+  background: var(--deep);
+  border: 1px solid var(--glass-b);
+  border-radius: 8px;
+  color: var(--silver-l);
+  font-family: 'Sora', sans-serif;
+  font-size: 11px;
+  padding: 10px 4px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+.genre-pop-btn:hover {
+  background: var(--red);
+  border-color: var(--red);
+  color: #fff;
+  box-shadow: 0 0 12px var(--red-glow);
+  transform: scale(1.03);
+}
 
 /* Admin Form Panels */
 .admin-review-form{margin-top:14px;display:none;border-top:1px dashed var(--glass-b);padding-top:14px;}
@@ -215,7 +315,6 @@ body::after{
 </head>
 <body>
 
-<!-- ═══ TOP NAV ═══ -->
 <nav id="topNav">
   <div class="logo">CINE<b>·</b>MOOD</div>
   <div class="nav-icons">
@@ -226,15 +325,13 @@ body::after{
   </div>
 </nav>
 
-<!-- ═══ HERO ═══ -->
 <section id="hero">
   <div class="hero-blob"></div>
   <h1>SET THE<br/><em>MOOD</em></h1>
   <p>Apna vibe choose karo. Film dhundo.</p>
-  <button id="surpriseBtn">🎲 Surprise Me</button>
+  <button id="surpriseBtn" onclick="openOverlay('surprise')">🎲 Surprise Me</button>
 </section>
 
-<!-- Surprise Spotlight -->
 <div id="spotlight">
   <div class="sp-inner">
     <img id="spPoster" class="sp-poster" src="" alt=""/>
@@ -247,7 +344,6 @@ body::after{
   </div>
 </div>
 
-<!-- Genre Pills -->
 <div class="pill-row" id="pillRow">
   <button class="pill on" data-g="" data-lbl="🔥 TRENDING">🔥 Trending</button>
   <button class="pill" data-g="28"    data-lbl="💥 ACTION">💥 Action</button>
@@ -260,7 +356,6 @@ body::after{
   <button class="pill" data-g="16"    data-lbl="🌸 ANIME">🌸 Anime</button>
 </div>
 
-<!-- Search bar -->
 <div id="searchBar" style="display:none;padding:0 16px 16px;">
   <div style="display:flex;align-items:center;background:var(--glass);border:1px solid var(--glass-b);border-radius:9px;padding:9px 13px;gap:8px;">
     <span style="color:var(--silver);font-size:14px;">🔍</span>
@@ -277,10 +372,69 @@ body::after{
 <div id="loader"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
 <div id="empty"><div class="ico">🍿</div><p>Kuch nahi mila bhai, doosra try karo!</p></div>
 
-<!-- Grid -->
 <main id="grid"></main>
 
-<!-- ADMIN SIDE OVERLAY PANEL -->
+<div id="overlay-surprise" class="overlay" onclick="if(event.target===this) closeOverlay('surprise')">
+  <div class="overlay-sheet">
+    <div class="overlay-handle" onclick="closeOverlay('surprise')"></div>
+    <div class="overlay-title" style="font-family:'Bebas Neue',sans-serif; font-size: 26px; text-shadow:0 0 8px var(--red-glow);">🎲 Choose Surprise Vibe</div>
+    <p style="font-size: 12px; color:var(--silver-l); padding-top:2px;">Bhai, kaun sa mood hai aaj? Select karo, ek dam solid random choice nikalega system:</p>
+    <div class="genre-pop-grid">
+      <button class="genre-pop-btn" onclick="triggerSurprise('')">🔥 Trending</button>
+      <button class="genre-pop-btn" onclick="triggerSurprise('28')">💥 Action</button>
+      <button class="genre-pop-btn" onclick="triggerSurprise('878')">🚀 Sci-Fi</button>
+      <button class="genre-pop-btn" onclick="triggerSurprise('27')">👻 Horror</button>
+      <button class="genre-pop-btn" onclick="triggerSurprise('35')">😂 Comedy</button>
+      <button class="genre-pop-btn" onclick="triggerSurprise('53')">🔪 Thriller</button>
+      <button class="genre-pop-btn" onclick="triggerSurprise('9648')">🔍 Mystery</button>
+      <button class="genre-pop-btn" onclick="triggerSurprise('10749')">💘 Romance</button>
+      <button class="genre-pop-btn" onclick="triggerSurprise('16')">🌸 Anime</button>
+    </div>
+  </div>
+</div>
+
+<div id="overlay-about" class="overlay" onclick="if(event.target===this) closeOverlay('about')">
+  <div class="overlay-sheet">
+    <div class="overlay-handle" onclick="closeOverlay('about')"></div>
+    <div class="premium-about-card">
+      <div class="about-glow-title">CINE<b>·</b>MOOD <span>AI</span></div>
+      <div class="premium-badge-row">
+        <span class="premium-badge red-b">⚡ LIVE DATABASE SYNC</span>
+        <span class="premium-badge">🎬 TMDB ARCHITECTURE</span>
+        <span class="premium-badge">🧠 INTELLIGENT AI</span>
+      </div>
+      <div class="overlay-body" style="color: #ccc; font-size: 13px; line-height: 1.8;">
+        Bhai, yeh website poori tarah se **Advanced TMDB APIs** aur secure **Supabase Cloud Database** se dynamic connect hokar bani hai! <br/><br/>
+        Iska main aim aapke **Mood/Vibe** ke hisab se best movies dhundhna hai. Yahan par aapko regular review nahi milenge, balki yeh system **Futuristic AI Generation** aur **Premium Admin Editor Control (HARSH)** ka blend hai. Jab admin kisi movie ka customized special review edit karta hai, toh AI system automatic bypass ho jata hai aur wahan admin ki mehnat ka premium review chamak uthta hai!
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="overlay-contact" class="overlay" onclick="if(event.target===this) closeOverlay('contact')">
+  <div class="overlay-sheet">
+    <div class="overlay-handle" onclick="closeOverlay('contact')"></div>
+    <div class="premium-about-card" style="background: linear-gradient(135deg, rgba(229,9,20,0.12), rgba(0,0,0,0.9)); border-color: rgba(0, 255, 170, 0.35); box-shadow: 0 0 25px rgba(0, 255, 170, 0.15);">
+      <div class="about-glow-title" style="text-shadow: 0 0 12px rgba(0, 255, 170, 0.6); color: #fff;">📡 TELEGRAM <b>HUB</b></div>
+      <div class="premium-badge-row">
+        <span class="premium-badge" style="border-color: rgba(0, 255, 170, 0.4); color: #00ffaa;">🟢 FASTEST CORRESPONDENCE</span>
+        <span class="premium-badge">🚀 BACKUP CHANNELS</span>
+      </div>
+      <div class="overlay-body" style="display: flex; flex-direction: column; gap: 14px;">
+        <div style="background: rgba(255,255,255,0.03); border: 1px dashed var(--glass-b); padding: 12px; border-radius: 8px; text-align: center;">
+          <p style="font-size: 11px; color: var(--silver); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px;">Any Problem / Query?</p>
+          <a href="https://t.me/pmharsh" target="_blank" class="vibe-lbl admin-glow" style="font-size: 18px !important; text-decoration: none; display: inline-block;">💬 @pmharsh</a>
+        </div>
+        <p style="font-size: 12px; color: var(--silver-l); font-weight: 500; margin-top: 5px;">Bhai premium backup aur updates ke liye official channels join kar lo:</p>
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 5px;">
+          <a href="https://t.me/+gani_pjJNUc3MTNl" target="_blank" style="display: flex; align-items: center; justify-content: center; background: var(--red); color: #fff; text-decoration: none; padding: 12px; border-radius: 8px; font-weight: 600; font-size: 13px; letter-spacing: 0.5px; box-shadow: 0 0 15px var(--red-glow);">📢 Join Premium Channel 1</a>
+          <a href="https://t.me/TIMEPASS_BACKUP_1" target="_blank" style="display: flex; align-items: center; justify-content: center; background: var(--deep); border: 1px solid var(--red-b); color: #fff; text-decoration: none; padding: 12px; border-radius: 8px; font-weight: 600; font-size: 13px; letter-spacing: 0.5px;">🍿 Join Timepass Backup Channel</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="overlay-admin" class="overlay" onclick="if(event.target===this) closeOverlay('admin')">
   <div class="overlay-sheet">
     <div class="overlay-handle" onclick="closeOverlay('admin')"></div>
@@ -301,18 +455,10 @@ body::after{
   </div>
 </div>
 
-<!-- OTHER OVERLAYS -->
-<div id="overlay-about" class="overlay" onclick="if(event.target===this) closeOverlay('about')">
-  <div class="overlay-sheet"><div class="overlay-handle"></div><div class="overlay-title">ℹ️ About</div><div class="overlay-body"><p>CineWood AI ek premium movie analysis panel hai.</p></div></div>
-</div>
 <div id="overlay-services" class="overlay" onclick="if(event.target===this) closeOverlay('services')">
-  <div class="overlay-sheet"><div class="overlay-handle"></div><div class="overlay-title">✦ Services</div><div class="overlay-body"><p>AI Review and Supabase Sync Services.</p></div></div>
-</div>
-<div id="overlay-contact" class="overlay" onclick="if(event.target===this) closeOverlay('contact')">
-  <div class="overlay-sheet"><div class="overlay-handle"></div><div class="overlay-title">📡 Contact</div><div class="overlay-body"><p>Telegram bot configurations ready.</p></div></div>
+  <div class="overlay-sheet"><div class="overlay-handle" onclick="closeOverlay('services')"></div><div class="overlay-title">✦ Services</div><div class="overlay-body"><p>AI Review and Supabase Sync Services.</p></div></div>
 </div>
 
-<!-- DETAIL MODAL -->
 <div id="modal" onclick="if(event.target===this) closeModal()">
   <div class="modal-sheet">
     <button class="modal-close" onclick="closeModal()">✕</button>
@@ -330,14 +476,12 @@ body::after{
       </div>
       <p id="mOverview" class="modal-overview"></p>
       
-      <!-- Review display panel -->
-      <div class="vibe-box">
+      <div class="vibe-box" id="mReviewBox">
         <div class="vibe-lbl" id="vibeSource">CINE-VIBE ENGINE</div>
         <div class="vibe-head">🔥 HINGLISH REVIEW</div>
         <p id="vibeText" class="vibe-desc">Fetching latest review...</p>
       </div>
 
-      <!-- Admin Editor Control (Input Fields) -->
       <div id="adminForm" class="admin-review-form">
         <div class="admin-input-wrap" style="margin-bottom: 8px;">
           <input type="text" id="adminNameInput" placeholder="Apna Admin Name likho (e.g. HARSH)..." style="font-size: 13px; padding: 8px 12px;"/>
@@ -349,7 +493,6 @@ body::after{
   </div>
 </div>
 
-<!-- BOTTOM NAV -->
 <nav id="bottomNav">
   <div class="bnav-item on" id="bnTrend" onclick="switchTab('trending')">
     <span class="bnav-icon">🔥</span><span class="bnav-label">Trending</span>
@@ -364,13 +507,13 @@ body::after{
 
 <button id="btt" onclick="window.scrollTo({top:0,behavior:'smooth'})">▲</button>
 
-<!-- JAVASCRIPT KEYLESS BACKEND GATEWAY LOGIC -->
 <script>
 let activeGenre = '';
 let searchTimer = null;
 let isAdmin = false;
 let currentMovieData = null; 
 let adminPasswordState = ""; 
+let currentLoadedMoviesList = []; 
 
 // Server Side Endpoint Proxies
 async function fetchTMDB(endpoint, params={}) {
@@ -391,8 +534,9 @@ async function loadMovies(genreId='') {
   }
   showLoader(false);
   if(data && data.results && data.results.length) {
+    currentLoadedMoviesList = data.results; 
     renderGrid(data.results);
-  } else { showEmpty(true); }
+  } else { showEmpty(true); currentLoadedMoviesList = []; }
 }
 
 async function searchMovies(query) {
@@ -412,7 +556,6 @@ function renderGrid(movies) {
     card.className = 'card';
     card.onclick = () => openMovieModal(m);
     
-    // 🛡️ Bypassing ISP CDN block using our custom server image proxy endpoint
     let imgHTML = m.poster_path 
       ? `<img src="/api/image-proxy?url=https://image.tmdb.org/t/p/w342${m.poster_path}" alt="${m.title}"/>`
       : `<div class="card-no-img">🎬</div>`;
@@ -431,6 +574,52 @@ function renderGrid(movies) {
   });
 }
 
+// ── TRIGGER SURPRISE CALLED FROM POP-UP PANEL ──
+async function triggerSurprise(selectedGenreId) {
+  closeOverlay('surprise');
+  showLoader(true);
+  let targetedMovies = [];
+
+  if (selectedGenreId) {
+    let data = await fetchTMDB('discover/movie', { with_genres: selectedGenreId, sort_by: 'popularity.desc', page: Math.floor(Math.random() * 3) + 1 });
+    if(data && data.results && data.results.length) {
+      targetedMovies = data.results;
+    }
+  } else {
+    if(currentLoadedMoviesList.length === 0) {
+      let data = await fetchTMDB('trending/movie/day');
+      if(data && data.results) currentLoadedMoviesList = data.results;
+    }
+    targetedMovies = currentLoadedMoviesList;
+  }
+
+  showLoader(false);
+
+  if(targetedMovies && targetedMovies.length > 0) {
+    let randomMovie = targetedMovies[Math.floor(Math.random() * targetedMovies.length)];
+    
+    const spotlight = document.getElementById('spotlight');
+    document.getElementById('spPoster').src = randomMovie.poster_path ? `/api/image-proxy?url=https://image.tmdb.org/t/p/w342${randomMovie.poster_path}` : '';
+    document.getElementById('spTitle').textContent = randomMovie.title;
+    document.getElementById('spYear').textContent = randomMovie.release_date ? randomMovie.release_date.substring(0,4) : 'N/A';
+    document.getElementById('spRat').textContent = `⭐ ${randomMovie.vote_average ? randomMovie.vote_average.toFixed(1) : '0.0'}`;
+    document.getElementById('spOv').textContent = randomMovie.overview || "No description space.";
+    
+    document.getElementById('spTitle').onclick = () => openMovieModal(randomMovie);
+
+    spotlight.style.display = 'flex';
+    spotlight.classList.add('on');
+    spotlight.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  } else {
+    alert("Bhai data pipeline fetch refresh ho rahi hai, doosra try karo!");
+  }
+}
+
+document.getElementById('spClose').onclick = function() {
+  document.getElementById('spotlight').classList.remove('on');
+  document.getElementById('spotlight').style.display = 'none';
+};
+
 // ── OPEN MODAL & BACKEND ROUTER CALL ──
 async function openMovieModal(movie) {
   currentMovieData = movie;
@@ -438,12 +627,17 @@ async function openMovieModal(movie) {
   document.getElementById('mYear').textContent = movie.release_date ? movie.release_date.substring(0,4) : 'N/A';
   document.getElementById('mRat').textContent = `⭐ ${movie.vote_average ? movie.vote_average.toFixed(1) : '0.0'}`;
   document.getElementById('mOverview').textContent = movie.overview || "No overview available.";
-  
-  // 🛡️ Backdrop loading via custom node proxy engine
   document.getElementById('mBackdrop').src = movie.backdrop_path ? `/api/image-proxy?url=https://image.tmdb.org/t/p/w780${movie.backdrop_path}` : '';
   
-  document.getElementById('vibeSource').textContent = "CHECKING DATABASE...";
-  document.getElementById('vibeText').textContent = "Please wait...";
+  const boxEl = document.getElementById('mReviewBox');
+  const labelEl = document.getElementById('vibeSource');
+  const textEl = document.getElementById('vibeText');
+  
+  boxEl.classList.remove('admin-premium-box');
+  labelEl.classList.remove('admin-glow');
+  textEl.classList.remove('admin-bold');
+  labelEl.textContent = "CHECKING DATABASE...";
+  textEl.textContent = "Please wait...";
   document.getElementById('modal').classList.add('open');
   
   const adminForm = document.getElementById('adminForm');
@@ -459,11 +653,16 @@ async function openMovieModal(movie) {
     let res = await fetch(`/api/review/${movie.id}`);
     let data = await res.json();
     
-    document.getElementById('vibeSource').textContent = data.source;
-    document.getElementById('vibeText').textContent = data.review;
+    labelEl.textContent = data.source;
+    textEl.textContent = data.review;
     
-    if(isAdmin && data.custom) {
-       document.getElementById('adminTextInput').value = data.review;
+    if(data.custom) {
+       boxEl.classList.add('admin-premium-box');
+       labelEl.classList.add('admin-glow');
+       textEl.classList.add('admin-bold');
+       if(isAdmin) {
+          document.getElementById('adminTextInput').value = data.review;
+       }
     }
   } catch(err) {
     console.error("Error connecting to server backend router");
@@ -496,8 +695,15 @@ async function saveAdminReview() {
   let result = await response.json();
   if(result.success) {
     alert("Review successfully save ho gaya backend database mein! 🔥");
-    document.getElementById('vibeSource').textContent = `⭐ EXPERT CHOICE BY ${adminName.toUpperCase()}`;
-    document.getElementById('vibeText').textContent = reviewText;
+    const boxEl = document.getElementById('mReviewBox');
+    const labelEl = document.getElementById('vibeSource');
+    const textEl = document.getElementById('vibeText');
+    
+    boxEl.classList.add('admin-premium-box');
+    labelEl.classList.add('admin-glow');
+    textEl.classList.add('admin-bold');
+    labelEl.textContent = `👑 EXPERT CHOICE BY ${adminName.toUpperCase()}`;
+    textEl.textContent = reviewText;
   } else {
     alert("Error: " + result.error);
   }
@@ -557,6 +763,9 @@ document.querySelectorAll('.pill').forEach(p => {
     activeGenre = this.getAttribute('data-g');
     document.getElementById('secLabel').textContent = this.getAttribute('data-lbl') + " MOVIES";
     loadMovies(activeGenre);
+    
+    document.getElementById('spotlight').classList.remove('on');
+    document.getElementById('spotlight').style.display = 'none';
   }
 });
 
@@ -595,4 +804,4 @@ function showEmpty(on)  { document.getElementById('empty').classList.toggle('on'
 loadMovies();
 </script>
 </body>
-</html>
+     </html>
