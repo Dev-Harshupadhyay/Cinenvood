@@ -1,47 +1,39 @@
-# Cinenvood
-https://dev-harshupadhyay.github.io/Cinenvood/
+# 🎬 CINE-MOOD AI
 
-# CineWood AI - Hinglish Movie Review Generator
+Cine-Mood ek premium aur high-end movie analysis panel hai jo users ko unke mood aur vibe ke hisab se best movies recommend karta hai. Yeh project advanced API architecture aur secure real-time cloud database sync se bana hai.
 
-CineWood AI is a clean, modern web application that leverages advanced Artificial Intelligence to generate engaging, relatable, and entertaining movie reviews in **Hinglish** (a natural blend of Hindi and English). By fetching real-time movie data via API, the platform provides users with instant, pop-culture-infused critiques that resonate with modern audiences.
-
----
-
-## 🚀 Features
-
-*   **Real-Time Movie Search:** Integrates with movie databases to fetch accurate movie details, posters, and metadata.
-*   **AI-Powered Hinglish Generation:** Uses state-of-the-art LLM APIs to generate authentic, witty, and contextual Hinglish reviews.
-*   **Clean & Minimal UI:** A modern, distraction-free interface focused entirely on a seamless user experience.
-*   **Responsive Design:** Fully optimized for mobile, tablet, and desktop screens.
+🌐 **Live Link:** [https://cinenvood.onrender.com/](https://cinenvood.onrender.com/)
 
 ---
 
-## 🛠️ Tech Stack
+## 🔥 Key Features
 
-*   **Frontend:** HTML5, CSS3 (Tailwind CSS), JavaScript (ES6+)
-*   **Backend:** Node.js, Express.js
-*   **APIs Integrated:**
-    *   *Movie Data:* OMDb API / TMDB API
-    *   *AI Generation:* OpenAI GPT / Google Gemini API (Configured for Hinglish prompting)
-
----
-
-## 📋 Prerequisites
-
-Before you begin, ensure you have the following installed:
-*   [Node.js](https://nodejs.org/) (v16.x or higher)
-*   npm (comes bundled with Node.js)
-
-You will also need API keys for:
-1.  TMDB or OMDb (For movie details)
-2.  OpenAI or Gemini (For AI review generation)
+- **⚡ Full-Domain ISP Block Bypass:** Jio, Airtel aur local broadband networks par TMDB posters load na hone wali dikkat ko backend engine aur mirror custom image-proxy routing se 100% resolve kiya gaya hai.
+- **🎲 Smart Surprise Me (Vibe Control):** Agar aapne koi specific genre filter (jaise Action, Sci-Fi, Anime) select kiya hai, toh button usi stream ki random hit movie spotlight mein display karega. Default par yeh trending collection se pick karta hai.
+- **🧠 Hybrid Review Engine:** Website par automated Intelligent AI reviews aate hain, lekin jaise hi Admin apna special handpicked review database mein add karta hai, AI automatic bypass ho jata hai.
+- **👑 Premium Admin Dashboard:** Aakarshak neon animations aur real-time update controls ke sath secure admin panel integrated hai. Admin ke custom reviews poori text-bold formats aur dynamic **Neon Rainbow Glow** graphics ke sath custom card panel par chamakte hain.
+- **📱 Fully Mobile Responsive UI:** Fixed header-footer mapping ke sath mobile aur desktop dono layouts par seamless modern Netflix-Red × Obsidian interface.
 
 ---
 
-## 🔧 Installation & Setup
+## 🛠️ Tech Stack & Architecture
 
-Follow these steps to get the project running locally:
+- **Frontend:** HTML5, CSS3 (Custom Glassmorphism, Neon Keyframe Animations), Vanilla JavaScript (Async/Await APIs).
+- **Backend:** Node.js, Express.js (High-performance API Proxy routing).
+- **Database:** Supabase Cloud Storage Engine (Real-time custom entries synchronization).
+- **APIs Used:** TMDB (The Movie Database) Core Pipelines.
+- **Stability Handlers:** Axios integration server framework compatibility ke liye.
 
-### 1. Clone the Repository
-```bash
-git clone https://github.com/your-username/cinewood-ai.git
+---
+
+## 🔐 Environment Variables Configuration
+
+Project ko locally chalane ya Render par deploy karne ke liye niche diye gaye credentials variables setup hone zaroorat hain:
+
+```env
+PORT=3000
+TMDB_API_KEY=your_tmdb_api_key
+SUPABASE_URL=your_supabase_project_url
+SUPABASE_KEY=your_supabase_anon_public_key
+ADMIN_PASSWORD=your_secure_admin_dashboard_password
+
