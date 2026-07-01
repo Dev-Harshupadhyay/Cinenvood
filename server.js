@@ -2,13 +2,14 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const axios = require('axios'); // Stability integration
 const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Frontend file ko direct load karne ke liye routing
+// Frontend routing pipeline
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
@@ -25,7 +26,7 @@ app.post('/api/admin/login', (req, res) => {
     res.status(401).json({ error: "Galat password hai bhai!" });
 });
 
-// 🎬 EndPoint 1: Fetch from TMDB safely (Using Proxy Mirror for India/Jio/Airtel Bypass)
+// 🎬 EndPoint 1: Fetch from TMDB safely (Using Axios Proxy Mirror for Jio/Airtel Bypass)
 app.get('/api/movies/*', async (req, res) => {
     try {
         const endpoint = req.params[0]; 
@@ -34,27 +35,26 @@ app.get('/api/movies/*', async (req, res) => {
 
         const tmdbUrl = `https://api.tmdb.org/3/${endpoint}?${queryParams.toString()}`;
         
-        const response = await fetch(tmdbUrl);
-        const data = await response.json();
-        res.json(data);
+        // Axios framework request routing for high node version compatibility
+        const response = await axios.get(tmdbUrl);
+        res.json(response.data);
     } catch (err) {
-        console.error("TMDB Mirror Fetch Error:", err);
+        console.error("TMDB Mirror Fetch Error:", err.message);
         res.status(500).json({ error: "TMDB Fetch Failed" });
     }
 });
 
-// 🖼️ EndPoint 2: Image Proxy Route (Bypasses Jio/Airtel Image CDN Block)
+// 🖼️ EndPoint 2: Image Proxy Route (Bypasses Jio/Airtel Image CDN Block with Buffer Streaming)
 app.get('/api/image-proxy', async (req, res) => {
     const imageUrl = req.query.url;
     if (!imageUrl) return res.status(400).send("URL parameter missing");
     
     try {
-        const response = await fetch(imageUrl);
-        const buffer = await response.arrayBuffer();
+        const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
         res.set('Content-Type', 'image/jpeg');
-        res.send(Buffer.from(buffer));
+        res.send(Buffer.from(response.data));
     } catch (err) {
-        console.error("Image Proxy Error:", err);
+        console.error("Image Proxy Error:", err.message);
         res.status(500).send("Image fetch failed");
     }
 });
@@ -71,7 +71,7 @@ app.get('/api/review/:movieId', async (req, res) => {
 
         if (data) {
             return res.json({ 
-                source: `⭐ EXPERT CHOICE BY ${data.admin_name.toUpperCase()}`, 
+                source: `👑 EXPERT CHOICE BY ${data.admin_name.toUpperCase()}`, 
                 review: data.admin_review, 
                 custom: true 
             });
