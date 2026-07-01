@@ -172,7 +172,7 @@ body::after{
 /* 🔥 PREMIUM NEON RAINBOW ADMIN GLOW EFFECT 🔥 */
 .vibe-box.admin-premium-box {
   background: linear-gradient(135deg, rgba(255,215,0,0.06), rgba(255,0,128,0.04)) !important;
-  border: 1px dashed rgba(255, 215, Gold, 0.4) !important;
+  border: 1px dashed rgba(255, 215, 0, 0.4) !important;
   box-shadow: 0 4px 20px rgba(255, 215, 0, 0.08);
 }
 .vibe-lbl.admin-glow {
@@ -456,7 +456,7 @@ body::after{
 </div>
 
 <div id="overlay-services" class="overlay" onclick="if(event.target===this) closeOverlay('services')">
-  <div class="overlay-sheet"><div class="overlay-handle" onclick="closeOverlay('services')"></div><div class="overlay-title">✦ Services</div><div class="overlay-body"><p>AI Review and Supabase Sync Services.</p></div></div>
+  <div class="overlay-sheet"><div class="overlay-handle"></div><div class="overlay-title">✦ Services</div><div class="overlay-body"><p>AI Review and Supabase Sync Services.</p></div></div>
 </div>
 
 <div id="modal" onclick="if(event.target===this) closeModal()">
@@ -515,10 +515,33 @@ let currentMovieData = null;
 let adminPasswordState = ""; 
 let currentLoadedMoviesList = []; 
 
- { showEmpty(true); currentLoadedMoviesList = []; }
+// Server Side Endpoint Proxies (Fixed Absolute Routing Pipeline)
+async function fetchTMDB(endpoint, params={}) {
+  const queryParams = new URLSearchParams(params);
+  try {
+    let res = await fetch(`${window.location.origin}/api/movies/${endpoint}?${queryParams.toString()}`);
+    return await res.json();
+  } catch(e) { 
+    console.error("TMDB Gateway Error:", e); 
+    return null; 
+  }
 }
-   // Server Side Endpoint Proxies (Fixed Absolute Routing Pipeline)
-   
+
+async function loadMovies(genreId='') {
+  clearGrid(); showLoader(true);
+  let data;
+  if(genreId) {
+    data = await fetchTMDB('discover/movie', { with_genres: genreId, sort_by: 'popularity.desc' });
+  } else {
+    data = await fetchTMDB('trending/movie/day');
+  }
+  showLoader(false);
+  if(data && data.results && data.results.length) {
+    currentLoadedMoviesList = data.results; 
+    renderGrid(data.results);
+  } else { showEmpty(true); currentLoadedMoviesList = []; }
+}
+
 async function searchMovies(query) {
   if(!query.trim()) { loadMovies(activeGenre); return; }
   clearGrid(); showLoader(true);
@@ -784,4 +807,4 @@ function showEmpty(on)  { document.getElementById('empty').classList.toggle('on'
 loadMovies();
 </script>
 </body>
-     </html>
+   </html>
