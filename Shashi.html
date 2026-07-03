@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>CINE-MOOD</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+/* ═══════════════════════════════════════════
+   CINE-MOOD v3  ·  Netflix-Red × Obsidian
+═══════════════════════════════════════════ */
+:root{
+  --black:#000;--obsidian:#0b0b0b;--deep:#111;
+  --card:rgba(255,255,255,.04);
+  --red:#e50914;--red-glow:rgba(229,9,20,.5);
+  --red-dim:rgba(229,9,20,.12);--red-b:rgba(229,9,20,.35);
+  --blue:#0a84ff;--blue-glow:rgba(10,132,255,.5);
+  --blue-dim:rgba(10,132,255,.12);--blue-b:rgba(10,132,255,.35);
+  --glass:rgba(255,255,255,.055);--glass-b:rgba(255,255,255,.09);
+  --silver:#777;--silver-l:#bbb;--white:#f0f0f0;
+  --nav:58px;--bot:62px;--r:12px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--black);color:var(--white);
+  font-family:'Sora',sans-serif;min-height:100vh;
+  overflow-x:hidden;
+  padding-bottom:calc(var(--bot)+16px);
+}
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.022'/%3E%3C/svg%3E");
+}
+
+/* ── TOP NAV ─────────────────────────── */
+#topNav{
+  position:fixed;top:0;left:0;right:0;height:var(--nav);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 12px;background:rgba(0,0,0,.78);backdrop-filter:blur(22px);
+  -webkit-backdrop-filter:blur(22px);border-bottom:1px solid var(--glass-b);z-index:600;
+}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--white);user-select:none;flex-shrink:0;}
+.logo b{color:var(--red);}
+.nav-icons{display:flex;align-items:center;gap:4px;overflow-x:auto;scrollbar-width:none;}
+.nav-icons::-webkit-scrollbar{display:none;}
+.nav-ico{
+  background:var(--glass);border:1px solid var(--glass-b);border-radius:8px;padding:6px 9px;
+  font-size:10.5px;font-weight:500;color:var(--silver-l);cursor:pointer;letter-spacing:.3px;
+  transition:all .2s;white-space:nowrap;display:flex;align-items:center;gap:4px;
+}
+.nav-ico:hover{background:var(--red);border-color:var(--red);color:#fff;}
+.nav-ico.admin-ico{
+  border-color:var(--red-b);
+  color:var(--red);
+  font-size:13px;
+  padding:6px 12px;
+  font-weight:bold;
+}
+.nav-ico.admin-ico.unlocked{background:var(--red);color:#fff;}
+
+/* ── HAMBURGER BUTTON ───────────────── */
+#hamburgerBtn{
+  width:38px;height:34px;flex-shrink:0;background:var(--glass);border:1px solid var(--glass-b);
+  border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:5px;cursor:pointer;transition:all .25s;
+}
+#hamburgerBtn:hover{border-color:var(--red-b);background:var(--red-dim);}
+#hamburgerBtn span{width:18px;height:2px;background:var(--silver-l);border-radius:2px;transition:all .3s cubic-bezier(.32,1,.46,1);}
+#hamburgerBtn.open{background:var(--red);border-color:var(--red);box-shadow:0 0 16px var(--red-glow);}
+#hamburgerBtn.open span{background:#fff;}
+#hamburgerBtn.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}
+#hamburgerBtn.open span:nth-child(2){opacity:0;}
+#hamburgerBtn.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
+
+/* ── DROPDOWN MENU (opens under fixed nav) ── */
+#navDropdown{
+  position:fixed;top:var(--nav);left:0;right:0;z-index:590;
+  background:rgba(8,8,8,.94);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
+  border-bottom:1px solid var(--glass-b);
+  display:flex;flex-direction:column;gap:8px;padding:14px 16px;
+  transform:translateY(-8px);opacity:0;pointer-events:none;
+  transition:transform .3s cubic-bezier(.32,1,.46,1),opacity .25s;
+  max-height:calc(100vh - var(--nav));overflow-y:auto;
+}
+#navDropdown.show{transform:translateY(0);opacity:1;pointer-events:auto;}
+#navDropdown .nav-ico{
+  width:100%;justify-content:flex-start;padding:12px 14px;font-size:13px;border-radius:10px;
+}
+#navBackdrop{
+  position:fixed;inset:0;z-index:580;background:rgba(0,0,0,.55);opacity:0;pointer-events:none;
+  transition:opacity .25s;
+}
+#navBackdrop.show{opacity:1;pointer-events:auto;}
+
+/* ── HERO ───────────────────────────── */
+#hero{padding:calc(var(--nav)+26px) 18px 26px;text-align:center;position:relative;overflow:hidden;}
+.hero-blob{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-58%);width:380px;height:240px;
+  background:radial-gradient(ellipse,rgba(229,9,20,.2) 0%,transparent 70%);pointer-events:none;
+}
+#hero h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(56px,15vw,110px);letter-spacing:5px;line-height:.92;position:relative;z-index:1;}
+#hero h1 em{font-style:normal;color:var(--red);}
+#hero p{color:var(--silver);font-size:13px;letter-spacing:1.5px;font-weight:300;margin:10px 0 22px;position:relative;z-index:1;}
+#surpriseBtn{
+  position:relative;z-index:1;background:var(--red);color:#fff;border:none;padding:12px 28px;
+  font-family:'Sora',sans-serif;font-size:13px;font-weight:600;letter-spacing:.4px;border-radius:8px;
+  cursor:pointer;box-shadow:0 0 28px var(--red-glow);transition:transform .2s,box-shadow .2s;
+}
+#surpriseBtn:hover{transform:scale(1.05);box-shadow:0 0 48px var(--red-glow);}
+#surpriseBtn:active{transform:scale(.96);}
+
+/* ── SURPRISE SPOTLIGHT ─────────────── */
+#spotlight{
+  display:none;margin:0 16px 22px;background:var(--glass);border:1px solid var(--glass-b);
+  backdrop-filter:blur(18px);border-radius:var(--r);overflow:hidden;animation:fadeUp .4s ease;
+}
+#spotlight.on{display:flex;}
+.sp-inner{display:flex;flex-direction:column;width:100%;}
+@media(min-width:540px){.sp-inner{flex-direction:row;}}
+.sp-poster{width:100%;max-height:250px;object-fit:cover;object-position:top;flex-shrink:0;}
+@media(min-width:540px){.sp-poster{width:150px;max-height:none;}}
+.sp-info{padding:16px;display:flex;flex-direction:column;gap:7px;}
+.sp-title{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;line-height:1.1;cursor:pointer;}
+.sp-title:hover{color:var(--red);}
+.sp-meta{display:flex;gap:9px;font-size:12px;color:var(--silver);align-items:center;}
+.sp-rat{background:var(--red-dim);border:1px solid var(--red-b);color:var(--red);padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;}
+.sp-ov{font-size:13px;color:var(--silver-l);line-height:1.6;font-weight:300;}
+.sp-close{align-self:flex-start;margin-top:auto;background:var(--glass);border:1px solid var(--glass-b);color:var(--silver);font-family:'Sora',sans-serif;font-size:11px;padding:5px 12px;border-radius:6px;cursor:pointer;}
+
+/* ── GENRE PILLS ────────────────────── */
+.pill-row{display:flex;gap:8px;flex-wrap:nowrap;overflow-x:auto;padding:0 16px 20px;scrollbar-width:none;}
+.pill-row::-webkit-scrollbar{display:none;}
+.pill{
+  flex-shrink:0;background:var(--glass);border:1px solid var(--glass-b);color:var(--silver-l);
+  padding:7px 15px;border-radius:50px;font-size:11.5px;font-weight:500;cursor:pointer;
+  backdrop-filter:blur(10px);transition:all .2s;white-space:nowrap;
+}
+.pill:hover,.pill.on{background:var(--red);border-color:var(--red);color:#fff;box-shadow:0 0 18px var(--red-glow);}
+
+/* ── SEC HEAD ───────────────────────── */
+.sec-head{display:flex;align-items:center;gap:10px;padding:4px 16px 14px;}
+.sec-head h2{font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:2px;color:var(--silver-l);white-space:nowrap;}
+.sec-line{flex:1;height:1px;background:linear-gradient(to right,var(--glass-b),transparent);}
+
+/* ── LOADER ─────────────────────────── */
+#loader{display:none;justify-content:center;align-items:center;gap:7px;padding:50px;}
+#loader.on{display:flex;}
+.dot{width:8px;height:8px;background:var(--red);border-radius:50%;animation:bounce .75s ease infinite;}
+.dot:nth-child(2){animation-delay:.15s;}
+.dot:nth-child(3){animation-delay:.3s;}
+
+/* ── GRID & CARDS ───────────────────── */
+#grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:11px;padding:0 16px;}
+.card{
+  position:relative;border-radius:var(--r);overflow:hidden;cursor:pointer;background:var(--card);
+  border:1px solid var(--glass-b);transition:transform .25s,box-shadow .25s;animation:fadeUp .35s ease both;
+}
+.card:hover{
+  transform:translateY(-5px) scale(1.025);
+  box-shadow:0 0 0 1.5px var(--red-b),0 8px 32px rgba(229,9,20,.25),0 16px 40px rgba(0,0,0,.55);
+}
+.card img{width:100%;aspect-ratio:2/3;object-fit:cover;display:block;}
+.card-no-img{width:100%;aspect-ratio:2/3;background:linear-gradient(135deg,#1c1c1c,#0a0a0a);display:flex;align-items:center;justify-content:center;font-size:30px;color:var(--silver);}
+.card-info{padding:8px 9px 10px;}
+.card-title{font-size:11px;font-weight:500;color:var(--silver-l);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.card-foot{display:flex;justify-content:space-between;align-items:center;margin-top:4px;}
+.card-year{font-size:10px;color:var(--silver);}
+.card-rat{font-size:10px;color:var(--red);font-weight:600;}
+
+/* ── MAIN MODAL ─────────────────────── */
+#modal{position:fixed;inset:0;z-index:700;display:flex;align-items:flex-end;background:rgba(0,0,0,0);pointer-events:none;transition:background .3s;}
+#modal.open{background:rgba(0,0,0,.88);pointer-events:auto;}
+.modal-sheet{
+  width:100%;max-height:94vh;background:var(--obsidian);border-radius:20px 20px 0 0;
+  border-top:1px solid var(--glass-b);overflow:hidden;transform:translateY(100%);
+  transition:transform .38s cubic-bezier(.32,1,.46,1);display:flex;flex-direction:column;
+}
+#modal.open .modal-sheet{transform:translateY(0);}
+.modal-close{
+  position:absolute;top:12px;right:12px;z-index:10;background:rgba(0,0,0,.6);backdrop-filter:blur(10px);
+  border:1px solid var(--glass-b);color:var(--silver-l);border-radius:50%;width:32px;height:32px;
+  font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+}
+.modal-backdrop-wrap{position:relative;flex-shrink:0;}
+.modal-backdrop{width:100%;height:195px;object-fit:cover;object-position:center top;display:block;}
+.modal-grad{height:56px;margin-top:-56px;background:linear-gradient(to bottom,transparent,var(--obsidian));}
+.modal-handle{width:36px;height:4px;background:var(--glass-b);border-radius:2px;margin:10px auto 14px;cursor:pointer;flex-shrink:0;}
+.modal-body{padding:0 18px 36px;overflow-y:auto;flex:1;}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:29px;letter-spacing:2px;line-height:1;}
+.modal-meta{display:flex;flex-wrap:wrap;gap:7px;margin:9px 0 14px;align-items:center;}
+.meta-chip{font-size:11px;padding:3px 9px;border-radius:50px;font-weight:500;}
+.chip-y{background:var(--glass);border:1px solid var(--glass-b);color:var(--silver-l);}
+.chip-r{background:var(--red-dim);border:1px solid var(--red-b);color:var(--red);}
+.chip-g{background:var(--glass);border:1px solid var(--glass-b);color:var(--silver-l);}
+.modal-overview{font-size:13px;font-weight:300;color:var(--silver-l);line-height:1.72;margin-bottom:20px;}
+
+/* ── VIBE BOX ───────────────────────── */
+.vibe-box{
+  background:linear-gradient(135deg,rgba(229,9,20,.08),rgba(229,9,20,.03));border:1px solid var(--glass-b);
+  border-radius:10px;padding:14px 15px;position:relative;overflow:hidden;margin-bottom:16px;transition: all 0.3s ease;
+}
+.vibe-box::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(to right,transparent,rgba(229,9,20,.65),transparent);}
+.vibe-lbl{font-size:10px;letter-spacing:2px;color:var(--white);font-weight:600;text-transform:uppercase;margin-bottom:6px;transition: all 0.3s;}
+.vibe-head{font-family:'Sora',sans-serif;font-size:14px;font-weight:600;letter-spacing:.5px;color:var(--white);margin-bottom:6px;}
+.vibe-desc{font-size:12.5px;font-weight:300;color:var(--silver-l);line-height:1.65;transition: all 0.3s;}
+
+/* 🔥 PREMIUM NEON RAINBOW ADMIN GLOW EFFECT 🔥 */
+.vibe-box.admin-premium-box {
+  background: linear-gradient(135deg, rgba(255,215,0,0.06), rgba(255,0,128,0.04)) !important;
+  border: 1px dashed rgba(255, 215, 0, 0.4) !important;
+  box-shadow: 0 4px 20px rgba(255, 215, 0, 0.08);
+}
+.vibe-lbl.admin-glow {
+  font-family: 'Bebas Neue', sans-serif !important;
+  font-size: 15px !important;
+  letter-spacing: 2px !important;
+  font-weight: bold !important;
+  background: linear-gradient(45deg, #ff007f, #ffaa00, #00ffaa, #00aaff, #ff007f);
+  background-size: 400% 400%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: rainbowGlow 6s ease infinite;
+  filter: drop-shadow(0 0 6px rgba(0,255,170,0.5));
+}
+.vibe-desc.admin-bold {
+  font-weight: 600 !important;
+  color: #ffffff !important;
+  font-size: 13.5px !important;
+  letter-spacing: 0.2px;
+  line-height: 1.7 !important;
+}
+
+@keyframes rainbowGlow {
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
+}
+
+/* ── PREMIUM ABOUT ARCHITECTURE CARD ── */
+.premium-about-card {
+  background: linear-gradient(135deg, rgba(229,9,20,0.1), rgba(0,0,0,0.8));
+  border: 1px solid var(--red-b);
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 15px;
+  box-shadow: 0 0 25px rgba(229,9,20,0.15);
+}
+.about-glow-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 32px;
+  letter-spacing: 2px;
+  color: #fff;
+  text-shadow: 0 0 10px var(--red-glow);
+  margin-bottom: 10px;
+}
+.about-glow-title b { color: var(--red); }
+.premium-badge-row {
+  display: flex; gap: 8px; margin: 12px 0 18px; flex-wrap: wrap;
+}
+.premium-badge {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 4px 10px; font-size: 11px; border-radius: 6px;
+  color: var(--silver-l); font-weight: 500;
+}
+.premium-badge.red-b {
+  border-color: var(--red-b); color: var(--red);
+  text-shadow: 0 0 5px rgba(229,9,20,0.3);
+}
+
+/* ── POP-UP GENRE CHOICE CONTAINER ── */
+.genre-pop-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 18px 0 8px;
+}
+.genre-pop-btn {
+  background: var(--deep);
+  border: 1px solid var(--glass-b);
+  border-radius: 8px;
+  color: var(--silver-l);
+  font-family: 'Sora', sans-serif;
+  font-size: 11px;
+  padding: 10px 4px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+.genre-pop-btn:hover {
+  background: var(--red);
+  border-color: var(--red);
+  color: #fff;
+  box-shadow: 0 0 12px var(--red-glow);
+  transform: scale(1.03);
+}
+
+/* Admin Form Panels */
+.admin-review-form{margin-top:14px;display:none;border-top:1px dashed var(--glass-b);padding-top:14px;}
+.admin-review-form.show{display:block;}
+.admin-review-form textarea{
+  width:100%;background:var(--deep);border:1px solid var(--glass-b);border-radius:8px;
+  color:var(--white);font-family:'Sora',sans-serif;font-size:12px;padding:9px 12px;resize:none;outline:none;min-height:80px;line-height:1.6;
+}
+.admin-save-btn{
+  margin-top:7px;background:var(--red);color:#fff;border:none;padding:7px 18px;
+  border-radius:7px;font-family:'Sora',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:transform .15s;
+}
+.admin-save-btn:active{transform:scale(.95);}
+
+/* ── ABOUT / SERVICES ACCORDION ─────── */
+.info-accordion{margin:30px 16px 6px;display:flex;flex-direction:column;gap:14px;}
+
+/* ── NAV ABOUT/SERVICES TOGGLE PANEL ── */
+.nav-ico.active{color:#fff;}
+.nav-ico[data-panel="navAbout"].active{background:var(--red);border-color:var(--red);box-shadow:0 0 14px var(--red-glow);}
+.nav-ico[data-panel="navServices"].active{background:var(--blue);border-color:var(--blue);box-shadow:0 0 14px var(--blue-glow);}
+.nav-info-panel{
+  position:fixed;top:var(--nav);left:0;right:0;z-index:595;
+  padding:12px 16px 16px;max-height:calc(100vh - var(--nav) - 12px);overflow-y:auto;
+  pointer-events:none;
+}
+.nav-info-panel .acc-card{margin-top:0;pointer-events:auto;box-shadow:0 18px 40px rgba(0,0,0,.55);}
+.nav-panel-body{padding-top:0;}
+.acc-card.about .nav-panel-body b{color:var(--red);font-weight:600;}
+.acc-card.services .nav-panel-body b{color:var(--blue);font-weight:600;}
+.acc-card{
+  background:var(--glass);border:1px solid var(--glass-b);border-left:3px solid var(--glass-b);
+  border-radius:var(--r);overflow:hidden;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  transition:border-color .3s,box-shadow .3s;
+}
+.acc-card.about{border-left-color:var(--red);}
+.acc-card.services{border-left-color:var(--blue);}
+.acc-card.about.open{box-shadow:0 0 26px rgba(229,9,20,.14);}
+.acc-card.services.open{box-shadow:0 0 26px rgba(10,132,255,.14);}
+.acc-header{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:16px 18px;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;
+}
+.acc-header h3{
+  font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:2px;color:var(--white);
+  display:flex;align-items:center;gap:9px;line-height:1;
+}
+.acc-card.about .acc-header h3 em{color:var(--red);font-style:normal;text-shadow:0 0 10px var(--red-glow);}
+.acc-card.services .acc-header h3 em{color:var(--blue);font-style:normal;text-shadow:0 0 10px var(--blue-glow);}
+.acc-sub{font-size:10.5px;color:var(--silver);letter-spacing:.5px;margin-top:3px;font-weight:400;}
+.acc-chevron{
+  width:26px;height:26px;border-radius:50%;flex-shrink:0;background:rgba(255,255,255,.05);
+  display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--silver-l);
+  transition:transform .35s cubic-bezier(.32,1,.46,1),color .3s,background .3s;
+}
+.acc-card.open .acc-chevron{transform:rotate(180deg);}
+.acc-card.about.open .acc-chevron{color:var(--red);background:var(--red-dim);}
+.acc-card.services.open .acc-chevron{color:var(--blue);background:var(--blue-dim);}
+.acc-body-wrap{max-height:0;overflow:hidden;transition:max-height .45s cubic-bezier(.32,1,.46,1);}
+.acc-card.open .acc-body-wrap{max-height:700px;}
+.acc-body{padding:0 18px 20px;font-size:13px;line-height:1.75;color:var(--silver-l);font-weight:300;}
+.service-item{display:flex;gap:12px;padding:12px 0;border-top:1px solid var(--glass-b);}
+.service-item:first-child{border-top:none;padding-top:2px;}
+.service-ico{
+  width:34px;height:34px;border-radius:9px;flex-shrink:0;
+  background:var(--blue-dim);border:1px solid var(--blue-b);
+  display:flex;align-items:center;justify-content:center;font-size:15px;
+}
+.service-text h4{font-size:13.5px;font-weight:600;color:var(--white);margin-bottom:3px;letter-spacing:.2px;}
+.service-text p{font-size:12px;color:var(--silver);line-height:1.6;font-weight:300;}
+
+/* ── NATIVE TRAILER PLAYER ──────────── */
+.trailer-btn{
+  display:none;align-items:center;gap:8px;background:var(--red);color:#fff;border:none;
+  padding:10px 20px;border-radius:8px;font-family:'Sora',sans-serif;font-size:12.5px;font-weight:600;
+  letter-spacing:.3px;cursor:pointer;margin:2px 0 18px;box-shadow:0 0 18px var(--red-glow);
+  transition:transform .2s;
+}
+.trailer-btn.show{display:inline-flex;}
+.trailer-btn:active{transform:scale(.95);}
+.trailer-frame-wrap{
+  position:relative;width:100%;aspect-ratio:16/9;border-radius:10px;overflow:hidden;
+  margin:0 0 18px;border:1px solid var(--glass-b);background:#000;display:none;
+}
+.trailer-frame-wrap.show{display:block;animation:fadeUp .35s ease;}
+.trailer-frame-wrap iframe{width:100%;height:100%;border:0;display:block;}
+.trailer-empty{font-size:11.5px;color:var(--silver);margin:2px 0 16px;font-style:italic;}
+
+/* ── OVERLAYS ───────────────────────── */
+.overlay{position:fixed;inset:0;z-index:750;display:flex;align-items:flex-end;background:rgba(0,0,0,0);pointer-events:none;transition:background .3s;}
+.overlay.open{background:rgba(0,0,0,.85);pointer-events:auto;}
+.overlay-sheet{width:100%;max-height:85vh;background:var(--obsidian);border-radius:20px 20px 0 0;border-top:1px solid var(--glass-b);overflow-y:auto;padding:0 22px 40px;transform:translateY(100%);transition:transform .35s cubic-bezier(.32,1,.46,1);}
+.overlay.open .overlay-sheet{transform:translateY(0);}
+.overlay-handle{width:36px;height:4px;background:var(--glass-b);border-radius:2px;margin:12px auto 20px;cursor:pointer;}
+.overlay-title{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2.5px;color:var(--white);margin-bottom:14px;}
+.overlay-body{font-size:13.5px;font-weight:300;color:var(--silver-l);line-height:1.78;}
+
+.admin-input-wrap{margin-bottom:14px;}
+.admin-input-wrap input{width:100%;background:var(--deep);border:1px solid var(--glass-b);border-radius:8px;color:var(--white);font-family:'Sora',sans-serif;font-size:14px;padding:11px 14px;outline:none;}
+.admin-login-btn{width:100%;background:var(--red);color:#fff;border:none;padding:12px;border-radius:8px;font-family:'Sora',sans-serif;font-size:14px;font-weight:600;cursor:pointer;}
+.admin-status{font-size:12px;color:var(--silver);margin-top:8px;text-align:center;}
+.admin-logged-section{display:none;}
+
+/* ── BOTTOM NAV ─────────────────────── */
+#bottomNav{
+  position:fixed;bottom:0;left:0;right:0;height:var(--bot);background:rgba(0,0,0,.82);
+  backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border-top:1px solid var(--glass-b);
+  display:flex;align-items:center;z-index:600;padding-bottom:env(safe-area-inset-bottom,0px);
+}
+.bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;padding:8px 0;color:var(--silver);transition:color .2s;}
+.bnav-item.on,.bnav-item:hover{color:var(--red);}
+.bnav-icon{font-size:20px;line-height:1;}
+.bnav-label{font-size:9.5px;font-weight:500;letter-spacing:.3px;}
+
+#empty{display:none;text-align:center;padding:60px 20px;color:var(--silver);}
+#empty.on{display:block;}
+#btt{
+  position:fixed;right:14px;bottom:calc(var(--bot)+12px);width:40px;height:40px;background:var(--red);
+  border-radius:50%;border:none;cursor:pointer;color:#fff;font-size:18px;display:flex;align-items:center;
+  justify-content:center;box-shadow:0 0 20px var(--red-glow);opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;z-index:590;
+}
+#btt.show{opacity:1;pointer-events:auto;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
+@keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-9px);}}
+</style>
+</head>
+<body>
+
+<nav id="topNav">
+  <div class="logo">CINE<b>·</b>MOOD</div>
+  <div id="hamburgerBtn" onclick="toggleHamburger()">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<div id="navBackdrop" onclick="closeAllNav()"></div>
+
+<div id="navDropdown">
+  <div class="nav-ico" data-panel="navAbout" onclick="toggleNavPanel('navAbout')">ℹ️ About</div>
+  <div class="nav-ico" data-panel="navServices" onclick="toggleNavPanel('navServices')">✦ Services</div>
+  <div class="nav-ico" onclick="openOverlay('contact');closeHamburger()">📡 Contact</div>
+  <div class="nav-ico admin-ico" id="adminNavIco" onclick="openOverlay('admin');closeHamburger()">🔐 Admin</div>
+</div>
+
+<div class="nav-info-panel">
+  <div class="acc-card about" id="navAbout">
+    <div class="acc-body-wrap" id="navAboutBody">
+      <div class="acc-body nav-panel-body">
+        Seedha bolu bhai — jab movie dekhni ho, sabse zyada time genre scroll karne mein hi nikal jata hai. Cine·Mood usi problem ko khatam karta hai: apna vibe batao, baaki kaam hamara.<br/><br/>
+        Peeche ek <b>AI engine</b> chalta hai jo lakhon movies ke data ko chhaan ke tumhare mood se best match nikalta hai — instant, bina kisi fizool scrolling ke. Aur sirf machine pe hi depend nahi karte: humari <b>admin team</b> khud kuch titles dekh ke unpe apni genuine, hand-picked opinion deti hai. Toh jo bhi review ya recommendation tumhe milega, wo ya toh smart algorithm ka kaam hoga, ya kisi real insaan ka honest take — dono milke Cine·Mood ko sach mein alag banate hain.
+      </div>
+    </div>
+  </div>
+  <div class="acc-card services" id="navServices">
+    <div class="acc-body-wrap" id="navServicesBody">
+      <div class="acc-body nav-panel-body">
+        <div class="service-item">
+          <div class="service-ico">🎯</div>
+          <div class="service-text">
+            <h4>AI Vibe Matching</h4>
+            <p>Smart algorithms tumhara current mood padhte hain aur usi hisaab se movies curate karte hain — sirf genre tag pe depend nahi karna padta.</p>
+          </div>
+        </div>
+        <div class="service-item">
+          <div class="service-ico">▶️</div>
+          <div class="service-text">
+            <h4>Seamless Trailer Integration</h4>
+            <p>Trailers ab Cine·Mood ke andar hi, clean in-app player mein chalte hain — YouTube pe redirect hone ki koi zarurat nahi.</p>
+          </div>
+        </div>
+        <div class="service-item">
+          <div class="service-ico">👑</div>
+          <div class="service-text">
+            <h4>Expert Hybrid Curation</h4>
+            <p>Admin ke handpicked choices aur AI ke smart insights ka mix — har recommendation pe ek insaani check ka bharosa milta hai.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section id="hero">
+  <div class="hero-blob"></div>
+  <h1>SET THE<br/><em>MOOD</em></h1>
+  <p>Apna vibe choose karo. Film dhundo.</p>
+  <button id="surpriseBtn" onclick="openOverlay('surprise')">🎲 Surprise Me</button>
+</section>
+
+<div id="spotlight">
+  <div class="sp-inner">
+    <img id="spPoster" class="sp-poster" src="" alt=""/>
+    <div class="sp-info">
+      <div class="sp-title" id="spTitle"></div>
+      <div class="sp-meta"><span id="spYear"></span><span class="sp-rat" id="spRat"></span></div>
+      <p class="sp-ov" id="spOv"></p>
+      <button class="sp-close" id="spClose">✕ Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="pill-row" id="pillRow">
+  <button class="pill on" data-g="" data-lbl="🔥 TRENDING">🔥 Trending</button>
+  <button class="pill" data-g="28"    data-lbl="💥 ACTION">💥 Action</button>
+  <button class="pill" data-g="878"   data-lbl="🚀 SCI-FI">🚀 Sci-Fi</button>
+  <button class="pill" data-g="27"    data-lbl="👻 HORROR">👻 Horror</button>
+  <button class="pill" data-g="35"    data-lbl="😂 COMEDY">😂 Comedy</button>
+  <button class="pill" data-g="53"    data-lbl="🔪 THRILLER">🔪 Thriller</button>
+  <button class="pill" data-g="9648"  data-lbl="🔍 MYSTERY">🔍 Mystery</button>
+  <button class="pill" data-g="10749" data-lbl="💘 ROMANCE">💘 Romance</button>
+  <button class="pill" data-g="16"    data-lbl="🌸 ANIME">🌸 Anime</button>
+</div>
+
+<div id="searchBar" style="display:none;padding:0 16px 16px;">
+  <div style="display:flex;align-items:center;background:var(--glass);border:1px solid var(--glass-b);border-radius:9px;padding:9px 13px;gap:8px;">
+    <span style="color:var(--silver);font-size:14px;">🔍</span>
+    <input type="text" id="searchInput" placeholder="Movie ka naam likho..." autocomplete="off"
+      style="background:transparent;border:none;outline:none;color:var(--white);font-family:'Sora',sans-serif;font-size:13px;width:100%;"/>
+  </div>
+</div>
+
+<div class="sec-head">
+  <h2 id="secLabel">TRENDING NOW</h2>
+  <div class="sec-line"></div>
+</div>
+
+<div id="loader"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+<div id="empty"><div class="ico">🍿</div><p>Kuch nahi mila bhai, doosra try karo!</p></div>
+
+<main id="grid"></main>
+
+<div id="overlay-surprise" class="overlay" onclick="if(event.target===this) closeOverlay('surprise')">
+  <div class="overlay-sheet">
+    <div class="overlay-handle" onclick="closeOverlay('surprise')"></div>
+    <div class="overlay-title" style="font-family:'Bebas Neue',sans-serif; font-size: 26px; text-shadow:0 0 8px var(--red-glow);">🎲 Choose Surprise Vibe</div>
+    <p style="font-size: 12px; color:var(--silver-l); padding-top:2px;">Bhai, kaun sa mood hai aaj? Select karo, ek dam solid random choice nikalega system:</p>
+    <div class="genre-pop-grid">
+      <button class="genre-pop-btn" onclick="triggerSurprise('')">🔥 Trending</button>
+      <button class="genre-pop-btn" onclick="triggerSurprise('28')">💥 Action</button>
+      <button class="genre-pop-btn" onclick="triggerSurprise('878')">🚀 Sci-Fi</button>
+      <button class="genre-pop-btn" onclick="triggerSurprise('27')">👻 Horror</button>
+      <button class="genre-pop-btn" onclick="triggerSurprise('35')">😂 Comedy</button>
+      <button class="genre-pop-btn" onclick="triggerSurprise('53')">🔪 Thriller</button>
+      <button class="genre-pop-btn" onclick="triggerSurprise('9648')">🔍 Mystery</button>
+      <button class="genre-pop-btn" onclick="triggerSurprise('10749')">💘 Romance</button>
+      <button class="genre-pop-btn" onclick="triggerSurprise('16')">🌸 Anime</button>
+    </div>
+  </div>
+</div>
+
+<div id="overlay-contact" class="overlay" onclick="if(event.target===this) closeOverlay('contact')">
+  <div class="overlay-sheet">
+    <div class="overlay-handle" onclick="closeOverlay('contact')"></div>
+    <div class="premium-about-card" style="background: linear-gradient(135deg, rgba(229,9,20,0.12), rgba(0,0,0,0.9)); border-color: rgba(0, 255, 170, 0.35); box-shadow: 0 0 25px rgba(0, 255, 170, 0.15);">
+      <div class="about-glow-title" style="text-shadow: 0 0 12px rgba(0, 255, 170, 0.6); color: #fff;">📡 TELEGRAM <b>HUB</b></div>
+      <div class="premium-badge-row">
+        <span class="premium-badge" style="border-color: rgba(0, 255, 170, 0.4); color: #00ffaa;">🟢 FASTEST CORRESPONDENCE</span>
+        <span class="premium-badge">🚀 BACKUP CHANNELS</span>
+      </div>
+      <div class="overlay-body" style="display: flex; flex-direction: column; gap: 14px;">
+        <div style="background: rgba(255,255,255,0.03); border: 1px dashed var(--glass-b); padding: 12px; border-radius: 8px; text-align: center;">
+          <p style="font-size: 11px; color: var(--silver); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px;">Any Problem / Query?</p>
+          <a href="https://t.me/pmharsh" target="_blank" class="vibe-lbl admin-glow" style="font-size: 18px !important; text-decoration: none; display: inline-block;">💬 @pmharsh</a>
+        </div>
+        <p style="font-size: 12px; color: var(--silver-l); font-weight: 500; margin-top: 5px;">Bhai premium backup aur updates ke liye official channels join kar lo:</p>
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 5px;">
+          <a href="https://t.me/+gani_pjJNUc3MTNl" target="_blank" style="display: flex; align-items: center; justify-content: center; background: var(--red); color: #fff; text-decoration: none; padding: 12px; border-radius: 8px; font-weight: 600; font-size: 13px; letter-spacing: 0.5px; box-shadow: 0 0 15px var(--red-glow);">📢 Join Premium Channel 1</a>
+          <a href="https://t.me/TIMEPASS_BACKUP_1" target="_blank" style="display: flex; align-items: center; justify-content: center; background: var(--deep); border: 1px solid var(--red-b); color: #fff; text-decoration: none; padding: 12px; border-radius: 8px; font-weight: 600; font-size: 13px; letter-spacing: 0.5px;">🍿 Join Timepass Backup Channel</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="overlay-admin" class="overlay" onclick="if(event.target===this) closeOverlay('admin')">
+  <div class="overlay-sheet">
+    <div class="overlay-handle" onclick="closeOverlay('admin')"></div>
+    <div class="overlay-title" id="adminOverlayTitle">🔐 Admin Login</div>
+    <div class="overlay-body">
+      <div id="adminLoginSection">
+        <div class="admin-input-wrap">
+          <input type="password" id="adminPwdInput" placeholder="Enter Admin Password..."/>
+        </div>
+        <button class="admin-login-btn" onclick="attemptLogin()">Verify Access</button>
+        <div class="admin-status" id="adminStatus">🔒 Access Restricted</div>
+      </div>
+      <div id="adminLoggedSection" class="admin-logged-section">
+        <p style="color:#00ff88; margin-bottom:15px;">✔️ Unlocked! Ab aap kisi bhi movie ko khol kar review edit kar sakte hain.</p>
+        <button class="admin-login-btn" style="background:#555;" onclick="adminLogout()">Lock Dashboard</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="modal" onclick="if(event.target===this) closeModal()">
+  <div class="modal-sheet">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-backdrop-wrap">
+      <img id="mBackdrop" class="modal-backdrop" src="" alt=""/>
+      <div class="modal-grad"></div>
+    </div>
+    <div class="modal-handle" onclick="closeModal()"></div>
+    <div class="modal-body">
+      <h2 id="mTitle" class="modal-title"></h2>
+      <div class="modal-meta">
+        <span id="mYear" class="meta-chip chip-y"></span>
+        <span id="mRat" class="meta-chip chip-r"></span>
+        <span id="mGenre" class="meta-chip chip-g"></span>
+      </div>
+      <p id="mOverview" class="modal-overview"></p>
+
+      <button class="trailer-btn" id="trailerBtn" onclick="playTrailer()">▶ Watch Trailer</button>
+      <div class="trailer-frame-wrap" id="trailerFrameWrap">
+        <iframe id="trailerFrame" src="" title="Trailer" frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen></iframe>
+      </div>
+      <p class="trailer-empty" id="trailerEmpty" style="display:none;">Is movie ka trailer abhi available nahi hai bhai.</p>
+      
+      <div class="vibe-box" id="mReviewBox">
+        <div class="vibe-lbl" id="vibeSource">CINE-VIBE ENGINE</div>
+        <div class="vibe-head">🔥 HINGLISH REVIEW</div>
+        <p id="vibeText" class="vibe-desc">Fetching latest review...</p>
+      </div>
+
+      <div id="adminForm" class="admin-review-form">
+        <div class="admin-input-wrap" style="margin-bottom: 8px;">
+          <input type="text" id="adminNameInput" placeholder="Apna Admin Name likho (e.g. HARSH)..." style="font-size: 13px; padding: 8px 12px;"/>
+        </div>
+        <textarea id="adminTextInput" placeholder="Bhai apna premium review likho yahan... AI review bypass ho jayega!"></textarea>
+        <button class="admin-save-btn" onclick="saveAdminReview()">Save Custom Review</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<nav id="bottomNav">
+  <div class="bnav-item on" id="bnTrend" onclick="switchTab('trending')">
+    <span class="bnav-icon">🔥</span><span class="bnav-label">Trending</span>
+  </div>
+  <div class="bnav-item" id="bnGenre" onclick="switchTab('genres')">
+    <span class="bnav-icon">🎭</span><span class="bnav-label">Genres</span>
+  </div>
+  <div class="bnav-item" id="bnSearch" onclick="switchTab('search')">
+    <span class="bnav-icon">🔍</span><span class="bnav-label">Search</span>
+  </div>
+</nav>
+
+<button id="btt" onclick="window.scrollTo({top:0,behavior:'smooth'})">▲</button>
+
+<script>
+let activeGenre = '';
+let searchTimer = null;
+let isAdmin = false;
+let currentMovieData = null; 
+let adminPasswordState = ""; 
+let currentLoadedMoviesList = []; 
+
+// Server Side Endpoint Proxies (Fixed Absolute Routing Pipeline)
+async function fetchTMDB(endpoint, params={}) {
+  const queryParams = new URLSearchParams(params);
+  try {
+    let res = await fetch(`${window.location.origin}/api/movies/${endpoint}?${queryParams.toString()}`);
+    return await res.json();
+  } catch(e) { 
+    console.error("TMDB Gateway Error:", e); 
+    return null; 
+  }
+}
+
+async function loadMovies(genreId='') {
+  clearGrid(); showLoader(true);
+  let data;
+  if(genreId) {
+    data = await fetchTMDB('discover/movie', { with_genres: genreId, sort_by: 'popularity.desc' });
+  } else {
+    data = await fetchTMDB('trending/movie/day');
+  }
+  showLoader(false);
+  if(data && data.results && data.results.length) {
+    currentLoadedMoviesList = data.results; 
+    renderGrid(data.results);
+  } else { showEmpty(true); currentLoadedMoviesList = []; }
+}
+
+async function searchMovies(query) {
+  if(!query.trim()) { loadMovies(activeGenre); return; }
+  clearGrid(); showLoader(true);
+  let data = await fetchTMDB('search/movie', { query: query });
+  showLoader(false);
+  if(data && data.results && data.results.length) {
+    renderGrid(data.results);
+  } else { showEmpty(true); }
+}
+
+function renderGrid(movies) {
+  const grid = document.getElementById('grid');
+  movies.forEach(m => {
+    let card = document.createElement('div');
+    card.className = 'card';
+    card.onclick = () => openMovieModal(m);
+    
+    let imgHTML = m.poster_path 
+      ? `<img src="/api/image-proxy?url=https://image.tmdb.org/t/p/w342${m.poster_path}" alt="${m.title}"/>`
+      : `<div class="card-no-img">🎬</div>`;
+      
+    card.innerHTML = `
+      ${imgHTML}
+      <div class="card-info">
+        <div class="card-title">${m.title}</div>
+        <div class="card-foot">
+          <span class="card-year">${m.release_date ? m.release_date.substring(0,4) : 'N/A'}</span>
+          <span class="card-rat">⭐ ${m.vote_average ? m.vote_average.toFixed(1) : '0.0'}</span>
+        </div>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+// ── TRIGGER SURPRISE CALLED FROM POP-UP PANEL ──
+async function triggerSurprise(selectedGenreId) {
+  closeOverlay('surprise');
+  showLoader(true);
+  let targetedMovies = [];
+
+  if (selectedGenreId) {
+    let data = await fetchTMDB('discover/movie', { with_genres: selectedGenreId, sort_by: 'popularity.desc', page: Math.floor(Math.random() * 3) + 1 });
+    if(data && data.results && data.results.length) {
+      targetedMovies = data.results;
+    }
+  } else {
+    if(currentLoadedMoviesList.length === 0) {
+      let data = await fetchTMDB('trending/movie/day');
+      if(data && data.results) currentLoadedMoviesList = data.results;
+    }
+    targetedMovies = currentLoadedMoviesList;
+  }
+
+  showLoader(false);
+
+  if(targetedMovies && targetedMovies.length > 0) {
+    let randomMovie = targetedMovies[Math.floor(Math.random() * targetedMovies.length)];
+    
+    const spotlight = document.getElementById('spotlight');
+    document.getElementById('spPoster').src = randomMovie.poster_path ? `/api/image-proxy?url=https://image.tmdb.org/t/p/w342${randomMovie.poster_path}` : '';
+    document.getElementById('spTitle').textContent = randomMovie.title;
+    document.getElementById('spYear').textContent = randomMovie.release_date ? randomMovie.release_date.substring(0,4) : 'N/A';
+    document.getElementById('spRat').textContent = `⭐ ${randomMovie.vote_average ? randomMovie.vote_average.toFixed(1) : '0.0'}`;
+    document.getElementById('spOv').textContent = randomMovie.overview || "No description space.";
+    
+    document.getElementById('spTitle').onclick = () => openMovieModal(randomMovie);
+
+    spotlight.style.display = 'flex';
+    spotlight.classList.add('on');
+    spotlight.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  } else {
+    alert("Bhai data pipeline fetch refresh ho rahi hai, doosra try karo!");
+  }
+}
+
+document.getElementById('spClose').onclick = function() {
+  document.getElementById('spotlight').classList.remove('on');
+  document.getElementById('spotlight').style.display = 'none';
+};
+
+// ── OPEN MODAL & BACKEND ROUTER CALL ──
+async function openMovieModal(movie) {
+  currentMovieData = movie;
+  document.getElementById('mTitle').textContent = movie.title;
+  document.getElementById('mYear').textContent = movie.release_date ? movie.release_date.substring(0,4) : 'N/A';
+  document.getElementById('mRat').textContent = `⭐ ${movie.vote_average ? movie.vote_average.toFixed(1) : '0.0'}`;
+  document.getElementById('mOverview').textContent = movie.overview || "No overview available.";
+  document.getElementById('mBackdrop').src = movie.backdrop_path ? `/api/image-proxy?url=https://image.tmdb.org/t/p/w780${movie.backdrop_path}` : '';
+
+  // trailer UI reset — purani movie ka trailer bilkul hide/reset ho jaye
+  resetTrailerUI();
+  fetchTrailer(movie.id);
+
+  const boxEl = document.getElementById('mReviewBox');
+  const labelEl = document.getElementById('vibeSource');
+  const textEl = document.getElementById('vibeText');
+  
+  boxEl.classList.remove('admin-premium-box');
+  labelEl.classList.remove('admin-glow');
+  textEl.classList.remove('admin-bold');
+  labelEl.textContent = "CHECKING DATABASE...";
+  textEl.textContent = "Please wait...";
+  document.getElementById('modal').classList.add('open');
+  
+  const adminForm = document.getElementById('adminForm');
+  if(isAdmin) {
+    adminForm.classList.add('show');
+    document.getElementById('adminTextInput').value = '';
+    document.getElementById('adminNameInput').value = document.getElementById('adminNameInput').value || '';
+  } else {
+    adminForm.classList.remove('show');
+  }
+
+  try {
+    let res = await fetch(`/api/review/${movie.id}`);
+    let data = await res.json();
+    
+    labelEl.textContent = data.source;
+    textEl.textContent = data.review;
+    
+    if(data.custom) {
+       boxEl.classList.add('admin-premium-box');
+       labelEl.classList.add('admin-glow');
+       textEl.classList.add('admin-bold');
+       if(isAdmin) {
+          document.getElementById('adminTextInput').value = data.review;
+       }
+    }
+  } catch(err) {
+    console.error("Error connecting to server backend router");
+  }
+}
+
+// ── TRAILER: TMDB videos endpoint se native inline player ──
+let currentTrailerKey = null;
+
+function resetTrailerUI() {
+  currentTrailerKey = null;
+  const btn = document.getElementById('trailerBtn');
+  const wrap = document.getElementById('trailerFrameWrap');
+  const frame = document.getElementById('trailerFrame');
+  const empty = document.getElementById('trailerEmpty');
+  btn.classList.remove('show');
+  wrap.classList.remove('show');
+  frame.src = '';
+  empty.style.display = 'none';
+}
+
+async function fetchTrailer(movieId) {
+  try {
+    // TMDB ka /videos endpoint by default sirf en-US + null-language videos deta hai,
+    // "include_video_language" pass karke hum sab YouTube trailers pakad lete hain
+    let data = await fetchTMDB(`movie/${movieId}/videos`, { include_video_language: 'en,null,hi' });
+    console.log('Trailer API response for movie', movieId, data); // debug ke liye — F12 console mein dikhega
+
+    const results = (data && data.results) ? data.results : [];
+
+    // pehle official YouTube "Trailer" dhoondo, warna koi bhi YouTube video le lo
+    let vid = results.find(v => v.site === 'YouTube' && v.type === 'Trailer' && v.official)
+           || results.find(v => v.site === 'YouTube' && v.type === 'Trailer')
+           || results.find(v => v.site === 'YouTube');
+
+    if (vid) {
+      currentTrailerKey = vid.key;
+      document.getElementById('trailerBtn').classList.add('show');
+    } else if (data && data.error) {
+      // backend/TMDB proxy ne khud error diya — trailer available na hone se alag cheez hai
+      console.error('Trailer proxy error:', data.error);
+      document.getElementById('trailerEmpty').textContent = '⚠️ Trailer load nahi ho paaya (server error).';
+      document.getElementById('trailerEmpty').style.display = 'block';
+    } else {
+      document.getElementById('trailerEmpty').textContent = 'Is movie ka trailer abhi available nahi hai bhai.';
+      document.getElementById('trailerEmpty').style.display = 'block';
+    }
+  } catch(err) {
+    console.error("Trailer fetch error:", err);
+    document.getElementById('trailerEmpty').textContent = '⚠️ Trailer load nahi ho paaya (network error).';
+    document.getElementById('trailerEmpty').style.display = 'block';
+  }
+}
+
+function playTrailer() {
+  if (!currentTrailerKey) return;
+  const frame = document.getElementById('trailerFrame');
+  const wrap = document.getElementById('trailerFrameWrap');
+  const btn = document.getElementById('trailerBtn');
+
+  // native inline embed — YouTube pe redirect nahi hota, sab kuch andar hi chalta hai
+  frame.src = `https://www.youtube.com/embed/${currentTrailerKey}?autoplay=1&rel=0&modestbranding=1`;
+  wrap.classList.add('show');
+  btn.classList.remove('show');
+}
+
+// ── SAVE HANDLER ──
+async function saveAdminReview() {
+  if(!currentMovieData) return;
+  const reviewText = document.getElementById('adminTextInput').value.trim();
+  const adminName = document.getElementById('adminNameInput').value.trim() || 'Admin';
+  
+  if(!reviewText) {
+    alert("Review field khali hai bhai!");
+    return;
+  }
+
+  let response = await fetch('/api/review/save', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      password: adminPasswordState,
+      movieId: currentMovieData.id,
+      movieTitle: currentMovieData.title,
+      reviewText: reviewText,
+      adminName: adminName
+    })
+  });
+
+  let result = await response.json();
+  if(result.success) {
+    alert("Review successfully save ho gaya backend database mein! 🔥");
+    const boxEl = document.getElementById('mReviewBox');
+    const labelEl = document.getElementById('vibeSource');
+    const textEl = document.getElementById('vibeText');
+    
+    boxEl.classList.add('admin-premium-box');
+    labelEl.classList.add('admin-glow');
+    textEl.classList.add('admin-bold');
+    labelEl.textContent = `👑 EXPERT CHOICE BY ${adminName.toUpperCase()}`;
+    textEl.textContent = reviewText;
+  } else {
+    alert("Error: " + result.error);
+  }
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  // trailer band karo taaki background mein audio na chalta rahe
+  document.getElementById('trailerFrame').src = '';
+}
+function openOverlay(id) { document.getElementById(`overlay-${id}`).classList.add('open'); }
+function closeOverlay(id) { document.getElementById(`overlay-${id}`).classList.remove('open'); }
+
+// ── ABOUT / SERVICES ACCORDION TOGGLE (JS-driven height animation) ──
+function toggleAccordion(id) {
+  const card = document.getElementById(id);
+  const isOpen = card.classList.contains('open');
+
+  // agar koi doosra accordion already khula hai, use pehle band karo
+  document.querySelectorAll('.acc-card.open').forEach(otherCard => {
+    if (otherCard !== card) otherCard.classList.remove('open');
+  });
+
+  card.classList.toggle('open', !isOpen);
+}
+
+// nav ke About/Services pill par click hone par panel toggle + pill ko highlight karo
+function toggleNavPanel(id) {
+  toggleAccordion(id);
+  document.querySelectorAll('.nav-ico[data-panel]').forEach(btn => {
+    const panel = document.getElementById(btn.dataset.panel);
+    btn.classList.toggle('active', panel.classList.contains('open'));
+  });
+  closeHamburger(); // dropdown menu band karo taaki panel saaf dikhe
+  const anyOpen = document.querySelector('.acc-card.open');
+  document.getElementById('navBackdrop').classList.toggle('show', !!anyOpen);
+}
+
+// ── HAMBURGER MENU ──
+function toggleHamburger() {
+  const btn = document.getElementById('hamburgerBtn');
+  const dd = document.getElementById('navDropdown');
+  const isOpen = dd.classList.contains('show');
+  if (isOpen) { closeHamburger(); return; }
+  dd.classList.add('show');
+  btn.classList.add('open');
+  document.getElementById('navBackdrop').classList.add('show');
+}
+function closeHamburger() {
+  document.getElementById('navDropdown').classList.remove('show');
+  document.getElementById('hamburgerBtn').classList.remove('open');
+  // backdrop sirf tabhi band karo jab koi About/Services panel bhi open na ho
+  if (!document.querySelector('.acc-card.open')) {
+    document.getElementById('navBackdrop').classList.remove('show');
+  }
+}
+// backdrop pe tap karne se dropdown + open accordion dono band ho jaate hain
+function closeAllNav() {
+  closeHamburger();
+  document.querySelectorAll('.acc-card.open').forEach(c => c.classList.remove('open'));
+  document.querySelectorAll('.nav-ico[data-panel]').forEach(btn => btn.classList.remove('active'));
+  document.getElementById('navBackdrop').classList.remove('show');
+}
+
+// jab window resize ho, khule accordion ki height dobara set karo taaki content cut na ho
+// ── ADMIN LOGIN ──
+async function attemptLogin() {
+  const pwd = document.getElementById('adminPwdInput').value.trim();
+  
+  try {
+    let response = await fetch('/api/admin/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pwd })
+    });
+
+    let result = await response.json();
+
+    if(response.ok && result.success) {  
+      isAdmin = true;
+      adminPasswordState = pwd; 
+      document.getElementById('adminLoginSection').style.display = 'none';
+      document.getElementById('adminLoggedSection').style.display = 'block';
+      document.getElementById('adminOverlayTitle').textContent = '🛠️ Admin Dashboard Unlocked';
+      document.getElementById('adminNavIco').classList.add('unlocked');
+      document.getElementById('adminNavIco').textContent = '🔓';
+      closeOverlay('admin');
+    } else {
+      document.getElementById('adminStatus').textContent = '❌ Wrong password bhai!';
+      document.getElementById('adminPwdInput').value = '';
+    }
+  } catch (err) {
+    alert("Server connect karne mein dikkat aa rahi hai!");
+  }
+}
+
+function adminLogout() {
+  isAdmin = false;
+  adminPasswordState = "";
+  document.getElementById('adminLoginSection').style.display = 'block';
+  document.getElementById('adminLoggedSection').style.display = 'none';
+  document.getElementById('adminOverlayTitle').textContent = '🔐 Admin Login';
+  document.getElementById('adminNavIco').classList.remove('unlocked');
+  document.getElementById('adminNavIco').textContent = '🔐';
+  closeOverlay('admin');
+}
+
+// UI Event Triggers
+document.querySelectorAll('.pill').forEach(p => {
+  p.onclick = function() {
+    document.querySelectorAll('.pill').forEach(b => b.classList.remove('on'));
+    this.classList.add('on');
+    activeGenre = this.getAttribute('data-g');
+    document.getElementById('secLabel').textContent = this.getAttribute('data-lbl') + " MOVIES";
+    loadMovies(activeGenre);
+    
+    document.getElementById('spotlight').classList.remove('on');
+    document.getElementById('spotlight').style.display = 'none';
+  }
+});
+
+function switchTab(tab) {
+  document.querySelectorAll('.bnav-item').forEach(b => b.classList.remove('on'));
+  const sb = document.getElementById('searchBar');
+  if (tab === 'trending') {
+    document.getElementById('bnTrend').classList.add('on');
+    sb.style.display = 'none';
+    document.getElementById('searchInput').value = '';
+    loadMovies('');
+  } else if (tab === 'genres') {
+    document.getElementById('bnGenre').classList.add('on');
+    sb.style.display = 'none';
+    document.getElementById('pillRow').scrollIntoView({ behavior:'smooth' });
+  } else if (tab === 'search') {
+    document.getElementById('bnSearch').classList.add('on');
+    sb.style.display = 'block';
+    setTimeout(() => document.getElementById('searchInput').focus(), 100);
+  }
+}
+
+document.getElementById('searchInput').addEventListener('input', function() {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => searchMovies(this.value), 320);
+});
+
+window.addEventListener('scroll', () => {
+  document.getElementById('btt').classList.toggle('show', window.scrollY > 380);
+});
+
+function clearGrid() { document.getElementById('grid').innerHTML = ''; showEmpty(false); }
+function showLoader(on) { document.getElementById('loader').classList.toggle('on', on); }
+function showEmpty(on)  { document.getElementById('empty').classList.toggle('on', on); }
+
+loadMovies();
+</script>
+</body>
+   </html>
