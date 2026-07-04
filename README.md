@@ -4,6 +4,7 @@ Cine-Mood ek premium aur high-end movie analysis panel hai jo users ko unke mood
 
 🌐 **Live Link:** [https://cinenvood.onrender.com/](https://cinenvood.onrender.com/)
 
+https://glittery-brisket-528.notion.site/Cine-Mood-Website-Notes-API-DB-1cc259fb6c744e20855c2b47ad8b9ac0
 ---
 
 ## 🔥 Key Features
@@ -23,17 +24,3 @@ Cine-Mood ek premium aur high-end movie analysis panel hai jo users ko unke mood
 - **Database:** Supabase Cloud Storage Engine (Real-time custom entries synchronization).
 - **APIs Used:** TMDB (The Movie Database) Core Pipelines.
 - **Stability Handlers:** Axios integration server framework compatibility ke liye.
-
----
-
-## 🔐 Environment Variables Configuration
-
-Project ko locally chalane ya Render par deploy karne ke liye niche diye gaye credentials variables setup hone zaroorat hain:
-
-```env
-PORT=3000
-TMDB_API_KEY=your_tmdb_api_key
-SUPABASE_URL=your_supabase_project_url
-SUPABASE_KEY=your_supabase_anon_public_key
-ADMIN_PASSWORD=your_secure_admin_dashboard_password
-
