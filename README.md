@@ -4,7 +4,8 @@ Cine-Mood ek premium aur high-end movie analysis panel hai jo users ko unke mood
 
 🌐 **Live Link:** [https://cinenvood.onrender.com/](https://cinenvood.onrender.com/)
 
-https://glittery-brisket-528.notion.site/Cine-Mood-Website-Notes-API-DB-1cc259fb6c744e20855c2b47ad8b9ac0
+[**View Cinevood Technical Notes (Notion)**](https://glittery-brisket-528.notion.site/Cine-Mood-Website-Notes-API-DB-1cc259fb6c744e20855c2b47ad8b9ac0)
+
 ---
 
 ## 🔥 Key Features
