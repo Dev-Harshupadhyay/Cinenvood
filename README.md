@@ -1,13 +1,23 @@
 <div align="center">
 
-# 🎬 CINE-MOOD AI
-### *The Ultimate Mood-Driven Cinematic Intelligence Platform*
+# 🎬 <span style="background: linear-gradient(to right, #ff416c, #ff4b2b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800;">CINE-MOOD AI</span>
+### ✨ *The Ultimate Mood-Driven Cinematic Intelligence Platform* ✨
 
-[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-CineMood-red?style=for-the-badge&logo=render&logoColor=white)](https://cinenvood.onrender.com/)
-[![Technical Notes](https://img.shields.io/badge/📑_Notion_Docs-Technical_Notes-black?style=for-the-badge&logo=notion&logoColor=white)](https://glittery-brisket-528.notion.site/Cine-Mood-Website-Notes-API-DB-1cc259fb6c744e20855c2b47ad8b9ac0)
-[![Status](https://img.shields.io/badge/Status-Active_%26_Optimized-success?style=for-the-badge)]()
+<br>
 
-*A premium, high-end movie analysis panel that curates elite recommendations tailored precisely to your mood and vibe, built with advanced API architecture and secure real-time cloud sync.*
+<a href="https://cinenvood.onrender.com/">
+  <img src="https://img.shields.io/badge/🚀_LIVE_DEMO-CINE_MOOD-red?style=for-the-badge&logo=render&logoColor=white" alt="Live Demo" />
+</a>
+<a href="https://glittery-brisket-528.notion.site/Cine-Mood-Website-Notes-API-DB-1cc259fb6c744e20855c2b47ad8b9ac0">
+  <img src="https://img.shields.io/badge/📑_NOTION_DOCS-TECHNICAL_NOTES-blueviolet?style=for-the-badge&logo=notion&logoColor=white" alt="Technical Notes" />
+</a>
+<a href="https://supabase.com/">
+  <img src="https://img.shields.io/badge/⚡_DATABASE-SUPABASE_CLOUD-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase" />
+</a>
+
+<br><br>
+
+> *A premium, high-end movie analysis panel that curates elite recommendations tailored precisely to your mood and vibe, powered by robust API architecture and real-time cloud sync.*
 
 </div>
 
@@ -27,10 +37,10 @@
 
 | Layer | Technologies & Tools |
 | :--- | :--- |
-| **Frontend** | HTML5, CSS3 (Custom Glassmorphism, Neon Keyframe Animations), Vanilla JavaScript (Async/Await) |
-| **Backend** | Node.js, Express.js (High-performance API Proxy Routing) |
-| **Database** | Supabase Cloud Storage Engine (Real-time custom entries synchronization) |
-| **APIs & Stability** | TMDB (The Movie Database) Core Pipelines, Axios Server Integration |
+| **Frontend** | <img src="https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=html5&logoColor=white" /> <img src="https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white" /> <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black" /> *(Custom Glassmorphism & Neon Animations)* |
+| **Backend** | <img src="https://img.shields.io/badge/Node.js-339933?style=flat-square&logo=nodedotjs&logoColor=white" /> <img src="https://img.shields.io/badge/Express.js-000000?style=flat-square&logo=express&logoColor=white" /> *(High-performance API Proxy Routing)* |
+| **Database** | <img src="https://img.shields.io/badge/Supabase-3ECF8E?style=flat-square&logo=supabase&logoColor=white" /> *(Real-time custom entries & secure sync)* |
+| **APIs & Tools** | <img src="https://img.shields.io/badge/TMDB-01B4E4?style=flat-square&logo=themoviedatabase&logoColor=white" /> <img src="https://img.shields.io/badge/Axios-5A29E4?style=flat-square&logo=axios&logoColor=white" /> |
 
 ---
 
@@ -40,6 +50,8 @@ Agar aap is project ko apne local machine par run karna chahte hain, toh in step
 
 1. **Clone the Repository:**
    ```bash
-   git clone [https://github.com/your-username/cine-mood-ai.git](https://github.com/your-username/cine-mood-ai.git)
-   cd cine-mood-ai
-   
+   git clone [https://github.com/Dev-Harshupadhyay/Cinenwood.git](https://github.com/Dev-Harshupadhyay/Cinenwood.git)
+   cd Cinenwood
+   <div align="center">
+<p>Crafted with 🖤 and Code by <b>Harsh</b></p>
+</div>
