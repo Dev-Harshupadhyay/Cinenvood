@@ -5,17 +5,13 @@
 
 <br>
 
-<a href="https://cinenvood.onrender.com/">
-  <img src="https://img.shields.io/badge/🚀_LIVE_DEMO-CINE_MOOD-red?style=for-the-badge&logo=render&logoColor=white" alt="Live Demo" />
-</a>
-<a href="https://glittery-brisket-528.notion.site/Cine-Mood-Website-Notes-API-DB-1cc259fb6c744e20855c2b47ad8b9ac0">
-  <img src="https://img.shields.io/badge/📑_NOTION_DOCS-TECHNICAL_NOTES-blueviolet?style=for-the-badge&logo=notion&logoColor=white" alt="Technical Notes" />
-</a>
-<a href="https://supabase.com/">
-  <img src="https://img.shields.io/badge/⚡_DATABASE-SUPABASE_CLOUD-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase" />
-</a>
+<p>
+  <a href="https://cinenvood.onrender.com/"><img src="https://img.shields.io/badge/🚀_Live_App-CineMood-red?style=for-the-badge&logo=render&logoColor=white" alt="Live Demo"></a>
+  <a href="https://glittery-brisket-528.notion.site/Cine-Mood-Website-Notes-API-DB-1cc259fb6c744e20855c2b47ad8b9ac0"><img src="https://img.shields.io/badge/📑_Tech_Docs-Notion-blueviolet?style=for-the-badge&logo=notion&logoColor=white" alt="Notion Docs"></a>
+  <a href="https://supabase.com/"><img src="https://img.shields.io/badge/⚡_Database-Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase"></a>
+</p>
 
-<br><br>
+<br>
 
 > *A premium, high-end movie analysis panel that curates elite recommendations tailored precisely to your mood and vibe, powered by robust API architecture and real-time cloud sync.*
 
@@ -52,26 +48,16 @@ Agar aap is project ko apne local machine par run karna chahte hain, toh in step
    ```bash
    git clone [https://github.com/Dev-Harshupadhyay/Cinenwood.git](https://github.com/Dev-Harshupadhyay/Cinenwood.git)
    cd Cinenwood
-   <br>
-
----
-
-<div align="center">
-
-  <p><b>Connect with the Developer</b></p>
-  
-  <a href="https://github.com/Dev-Harshupadhyay">
-    <img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" />
-  </a>
-  <a href="https://cinenvood.onrender.com/">
-    <img src="https://img.shields.io/badge/Website-FF4B2B?style=for-the-badge&logo=google-chrome&logoColor=white" alt="Website" />
-  </a>
-
-  <br><br>
-  
-  <p style="font-size: 14px; color: #8b949e;">
-    Crafted with 🖤 and Code by <b style="color: #ff416c;">Harsh</b>
-  </p>
-  <p style="font-size: 12px; color: #6e7681;">© 2026 Cine-Mood AI. All Rights Reserved.</p>
-
-</div>
+  <div align="center">
+<p><b>Connect with the Developer</b></p>
+<a href="https://github.com/Dev-Harshupadhyay">
+<img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" />
+</a>
+<a href="https://cinenvood.onrender.com/">
+<img src="https://img.shields.io/badge/Website-FF4B2B?style=for-the-badge&logo=google-chrome&logoColor=white" alt="Website" />
+</a>
+<p style="font-size: 14px; color: #8b949e;">
+Crafted with 🖤 and Code by <b style="color: #ff416c;">Harsh</b>
+</p>
+<p style="font-size: 12px; color: #6e7681;">© 2026 Cine-Mood AI. All Rights Reserved.</p>
+</div> 
