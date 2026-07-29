@@ -35,12 +35,9 @@ app.get('/api/movies/*', async (req, res) => {
 
         const tmdbUrl = `https://api.tmdb.org/3/${endpoint}?${queryParams.toString()}`;
 
-        // Axios framework request routing for high node version compatibility
         const response = await axios.get(tmdbUrl);
         res.json(response.data);
     } catch (err) {
-        // Ab hum TMDB ka asli error (status + message) bhi log aur return karte hain,
-        // taaki "no data" aur "actual failure" mein pehchaan ho sake (e.g. 401 invalid key, 404 bad endpoint)
         const status = err.response?.status || 500;
         const tmdbMessage = err.response?.data?.status_message || err.message;
         console.error(`TMDB Mirror Fetch Error [${status}] on /${req.params[0]}:`, tmdbMessage);
@@ -118,5 +115,6 @@ app.post('/api/review/save', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running securely on port ${PORT} 🔥`));
-                
+app.listen(PORT, () => {
+    console.log(`Server running securely on port ${PORT} 🔥 (Ready for external Cron-Job ping)`);
+});
