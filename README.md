@@ -52,6 +52,26 @@ Agar aap is project ko apne local machine par run karna chahte hain, toh in step
    ```bash
    git clone [https://github.com/Dev-Harshupadhyay/Cinenwood.git](https://github.com/Dev-Harshupadhyay/Cinenwood.git)
    cd Cinenwood
-   <div align="center">
-<p>Crafted with 🖤 and Code by <b>Harsh</b></p>
+   <br>
+
+---
+
+<div align="center">
+
+  <p><b>Connect with the Developer</b></p>
+  
+  <a href="https://github.com/Dev-Harshupadhyay">
+    <img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" />
+  </a>
+  <a href="https://cinenvood.onrender.com/">
+    <img src="https://img.shields.io/badge/Website-FF4B2B?style=for-the-badge&logo=google-chrome&logoColor=white" alt="Website" />
+  </a>
+
+  <br><br>
+  
+  <p style="font-size: 14px; color: #8b949e;">
+    Crafted with 🖤 and Code by <b style="color: #ff416c;">Harsh</b>
+  </p>
+  <p style="font-size: 12px; color: #6e7681;">© 2026 Cine-Mood AI. All Rights Reserved.</p>
+
 </div>
