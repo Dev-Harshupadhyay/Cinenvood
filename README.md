@@ -5,11 +5,25 @@
 
 <br>
 
-<p>
-  <a href="https://cinenvood.onrender.com/"><img src="https://img.shields.io/badge/🚀_Live_App-CineMood-red?style=for-the-badge&logo=render&logoColor=white" alt="Live Demo"></a>
-  <a href="https://glittery-brisket-528.notion.site/Cine-Mood-Website-Notes-API-DB-1cc259fb6c744e20855c2b47ad8b9ac0"><img src="https://img.shields.io/badge/📑_Tech_Docs-Notion-blueviolet?style=for-the-badge&logo=notion&logoColor=white" alt="Notion Docs"></a>
-  <a href="https://supabase.com/"><img src="https://img.shields.io/badge/⚡_Database-Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase"></a>
-</p>
+<table align="center" border="0">
+  <tr>
+    <td align="center">
+      <a href="https://cinenvood.onrender.com/">
+        <img src="https://img.shields.io/badge/🚀_LIVE_APP-CINE_MOOD_AI-red?style=for-the-badge&logo=render&logoColor=white" alt="Live Demo" />
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://glittery-brisket-528.notion.site/Cine-Mood-Website-Notes-API-DB-1cc259fb6c744e20855c2b47ad8b9ac0">
+        <img src="https://img.shields.io/badge/📑_ARCH_DOCS-NOTION_NOTES-blueviolet?style=for-the-badge&logo=notion&logoColor=white" alt="Technical Notes" />
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://supabase.com/">
+        <img src="https://img.shields.io/badge/⚡_DATABASE-SUPABASE_CLOUD-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase" />
+      </a>
+    </td>
+  </tr>
+</table>
 
 <br>
 
@@ -31,11 +45,11 @@
 
 ## 🛠️ Tech Stack & Architecture
 
-| Layer | Technologies & Tools |
+| Layer | Technologies & Tools Integration |
 | :--- | :--- |
-| **Frontend** | <img src="https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=html5&logoColor=white" /> <img src="https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white" /> <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black" /> *(Custom Glassmorphism & Neon Animations)* |
-| **Backend** | <img src="https://img.shields.io/badge/Node.js-339933?style=flat-square&logo=nodedotjs&logoColor=white" /> <img src="https://img.shields.io/badge/Express.js-000000?style=flat-square&logo=express&logoColor=white" /> *(High-performance API Proxy Routing)* |
-| **Database** | <img src="https://img.shields.io/badge/Supabase-3ECF8E?style=flat-square&logo=supabase&logoColor=white" /> *(Real-time custom entries & secure sync)* |
+| **Frontend** | <img src="https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=html5&logoColor=white" /> <img src="https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white" /> <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black" /> *(Custom Glassmorphism & Neon Keyframes)* |
+| **Backend** | <img src="https://img.shields.io/badge/Node.js-339933?style=flat-square&logo=nodedotjs&logoColor=white" /> <img src="https://img.shields.io/badge/Express.js-000000?style=flat-square&logo=express&logoColor=white" /> *(High-Performance API Proxy Routing)* |
+| **Database** | <img src="https://img.shields.io/badge/Supabase-3ECF8E?style=flat-square&logo=supabase&logoColor=white" /> *(Real-time custom entries & secure state synchronization)* |
 | **APIs & Tools** | <img src="https://img.shields.io/badge/TMDB-01B4E4?style=flat-square&logo=themoviedatabase&logoColor=white" /> <img src="https://img.shields.io/badge/Axios-5A29E4?style=flat-square&logo=axios&logoColor=white" /> |
 
 ---
@@ -48,16 +62,4 @@ Agar aap is project ko apne local machine par run karna chahte hain, toh in step
    ```bash
    git clone [https://github.com/Dev-Harshupadhyay/Cinenwood.git](https://github.com/Dev-Harshupadhyay/Cinenwood.git)
    cd Cinenwood
-  <div align="center">
-<p><b>Connect with the Developer</b></p>
-<a href="https://github.com/Dev-Harshupadhyay">
-<img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" />
-</a>
-<a href="https://cinenvood.onrender.com/">
-<img src="https://img.shields.io/badge/Website-FF4B2B?style=for-the-badge&logo=google-chrome&logoColor=white" alt="Website" />
-</a>
-<p style="font-size: 14px; color: #8b949e;">
-Crafted with 🖤 and Code by <b style="color: #ff416c;">Harsh</b>
-</p>
-<p style="font-size: 12px; color: #6e7681;">© 2026 Cine-Mood AI. All Rights Reserved.</p>
-</div> 
+   
