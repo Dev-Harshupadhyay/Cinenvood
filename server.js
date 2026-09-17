@@ -506,53 +506,11 @@ function parseExpertFields(text='') {
   const n=rating?Math.min(10,Math.max(0,Number(rating[1]))):null;
   return {rating:n,platform:platform?.[1]?.trim()||null,parental_guidance:guidance?.[1]?.trim()||null,verdict:n==null?null:n>=8.5?'MUST WATCH':n>=7?'WORTH WATCHING':n>=5?'ONE-TIME WATCH':'SKIP IT'};
 }
+app.get('/api/admin/reviews/movie/:movieId', requireAdmin, async(req,res)=>{
+  try{const {data,error}=await supabaseAdmin.from('admin_reviews').select('*').eq('movie_id',String(req.params.movieId)).maybeSingle();if(error)throw error;res.json({review:data||null})}catch(e){res.status(500).json({error:'Review load nahi hua'})}
+});
 app.post('/api/admin/reviews/save', requireAdmin, async(req,res)=>{
   try{const movieId=String(req.body?.movieId||'').trim(),movieTitle=String(req.body?.movieTitle||'').trim(),reviewText=String(req.body?.reviewText||'').trim(),adminName=String(req.body?.adminName||'Scapegoat').trim().slice(0,50)||'Scapegoat';if(!movieId||!movieTitle||!reviewText)return res.status(400).json({error:'Movie ID, title aur review required hain'});if(reviewText.length>12000)return res.status(400).json({error:'Review maximum 12,000 characters ka ho sakta hai'});const fields=parseExpertFields(reviewText);const {data,error}=await supabaseAdmin.from('admin_reviews').upsert({movie_id:movieId,movie_title:movieTitle,admin_name:adminName,review_text:reviewText,...fields,published:true,updated_at:new Date().toISOString()},{onConflict:'movie_id'}).select().single();if(error)throw error;await supabaseAdmin.from('custom_reviews').upsert({movie_id:movieId,movie_title:movieTitle,admin_name:adminName,admin_review:reviewText,updated_at:new Date().toISOString()},{onConflict:'movie_id'});res.json({success:true,review:data})}catch(e){console.error('Admin review save:',e.message);res.status(500).json({error:'Review save nahi hua: '+e.message})}
-});
-
-// Privacy-first event collection. Browser ID is salted+hashed before storage.
-app.post('/api/analytics/event', async (req,res)=>{
-    try{const visitorId=String(req.body?.visitorId||'').slice(0,100), type=String(req.body?.type||'visit');if(!visitorId||!['visit','movie_open','search','google_login'].includes(type))return res.status(400).json({error:'Invalid event'});const hash=crypto.createHash('sha256').update(visitorId+(process.env.ANALYTICS_SALT||adminSecret())).digest('hex');if(type==='visit'){const day=new Date();day.setUTCHours(0,0,0,0);const {count}=await supabaseAdmin.from('analytics_events').select('*',{count:'exact',head:true}).eq('visitor_hash',hash).eq('event_type','visit').gte('created_at',day.toISOString());if(count)return res.json({success:true,deduplicated:true})}let ref='';try{ref=new URL(String(req.body.referrer||'')).hostname}catch{}const {error}=await supabaseAdmin.from('analytics_events').insert({visitor_hash:hash,session_id:String(req.body.sessionId||'').slice(0,80),event_type:type,movie_id:req.body.movieId?String(req.body.movieId):null,path:String(req.body.path||'').slice(0,180),referrer_host:ref.slice(0,120)});if(error)throw error;res.json({success:true})}catch(e){res.status(500).json({error:'Analytics unavailable'})}
-});
-
-app.get('/api/admin/analytics', requireAdmin, async (req,res)=>{
-  try{const days=Math.min(30,Math.max(7,Number(req.query.days)||7)),since=new Date(Date.now()-(days-1)*86400000);since.setUTCHours(0,0,0,0);
-    const [eventsQ,userRevQ,commentsQ,adminLikesQ,userLikesQ,adminReviewsQ,usersQ]=await Promise.all([
-      supabaseAdmin.from('analytics_events').select('visitor_hash,event_type,movie_id,created_at').gte('created_at',since.toISOString()).limit(10000),
-      supabaseAdmin.from('user_reviews').select('id,user_name,review_text,movie_title,created_at').gte('created_at',since.toISOString()).order('created_at',{ascending:false}).limit(200),
-      supabaseAdmin.from('admin_review_comments').select('id,comment_text,created_at,admin_review_id').gte('created_at',since.toISOString()).order('created_at',{ascending:false}).limit(200),
-      supabaseAdmin.from('admin_review_likes').select('admin_review_id,created_at').gte('created_at',since.toISOString()).limit(5000),
-      supabaseAdmin.from('user_review_likes').select('review_id,created_at').gte('created_at',since.toISOString()).limit(5000),
-      supabaseAdmin.from('admin_reviews').select('id,movie_id,movie_title,admin_name,updated_at').eq('published',true),
-      supabaseAdmin.auth.admin.listUsers({page:1,perPage:1000})
-    ]);
-    for(const q of [eventsQ,userRevQ,commentsQ,adminLikesQ,userLikesQ,adminReviewsQ])if(q.error)throw q.error;
-    const events=eventsQ.data||[], reviews=userRevQ.data||[], comments=commentsQ.data||[], adminLikes=adminLikesQ.data||[],userLikes=userLikesQ.data||[],ars=adminReviewsQ.data||[];
-    const daily=[];for(let i=0;i<days;i++){const d=new Date(since.getTime()+i*86400000),key=d.toISOString().slice(0,10),de=events.filter(x=>x.created_at.slice(0,10)===key);daily.push({date:key,label:d.toLocaleDateString('en-IN',{day:'2-digit',month:'short'}),visitors:new Set(de.filter(x=>x.event_type==='visit').map(x=>x.visitor_hash)).size,views:de.length,reviews:reviews.filter(x=>x.created_at.slice(0,10)===key).length,comments:comments.filter(x=>x.created_at.slice(0,10)===key).length})}
-    const topMovies=ars.map(a=>({id:a.id,title:a.movie_title||`Movie ${a.movie_id}`,likes:adminLikes.filter(x=>x.admin_review_id===a.id).length,comments:comments.filter(x=>x.admin_review_id===a.id).length})).sort((a,b)=>(b.likes+b.comments)-(a.likes+a.comments)).slice(0,5);
-    const recent=[...reviews.map(x=>({type:'review',title:x.user_name||'Viewer',text:x.review_text,movie:x.movie_title,at:x.created_at})),...comments.map(x=>({type:'comment',title:'Viewer comment',text:x.comment_text,movie:ars.find(a=>a.id===x.admin_review_id)?.movie_title||'',at:x.created_at}))].sort((a,b)=>new Date(b.at)-new Date(a.at)).slice(0,8);
-    res.json({range:days,summary:{visitors:new Set(events.filter(x=>x.event_type==='visit').map(x=>x.visitor_hash)).size,views:events.length,reviews:reviews.length,comments:comments.length,likes:adminLikes.length+userLikes.length,users:usersQ.data?.users?.length||0,adminReviews:ars.length},daily,topMovies,recent});
-  }catch(e){console.error('Analytics dashboard:',e.message);res.status(500).json({error:'Dashboard data load failed'})}
-});
-
-// 📊 Admin stats (dashboard redesign ke liye)
-app.get('/api/admin/stats', requireAdmin, async (req, res) => {
-    if (PREVIEW) {
-        return res.json({ adminReviews: 0, userReviews: previewReviews.size, aiModel: GEMINI_MODEL + ' (preview)' });
-    }
-    try {
-        const [adminRev, userRev] = await Promise.all([
-            supabase.from('custom_reviews').select('movie_id', { count: 'exact', head: true }),
-            supabase.from('user_reviews').select('id', { count: 'exact', head: true })
-        ]);
-        res.json({
-            adminReviews: adminRev.count || 0,
-            userReviews: userRev.count || 0,
-            aiModel: GEMINI_MODEL
-        });
-    } catch (err) {
-        res.json({ adminReviews: 0, userReviews: 0, aiModel: GEMINI_MODEL });
-    }
 });
 
 const PORT = process.env.PORT || 3000;

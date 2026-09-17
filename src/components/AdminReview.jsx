@@ -29,7 +29,7 @@ export default function AdminReview({ movieId, fallback, isLoggedIn, onLogin }) 
   if (!data) return <section className="expert-card skeleton-block" aria-label="Loading expert review"/>;
   if (!review) return fallback ? <section className="ai-review"><span>✦ CINE·MOOD AI</span><p>{fallback.review}</p></section> : null;
   return <section className="expert-card">
-    <div className="expert-kicker"><span className="crown">S</span><div><small>OFFICIAL CINE·MOOD EDITORIAL</small><h3>{(review.admin_name || 'Scapegoat').toUpperCase()}’S VERDICT</h3></div><b className="verified">✓ VERIFIED</b></div>
+    <div className="expert-kicker"><span className="crown">S</span><div><small>OFFICIAL CINE·MOOD EDITORIAL</small><h3>{(review.admin_name || 'Scapegoat').toUpperCase()}’S VERDICT</h3><span className="made-label">REVIEW MADE BY {(review.admin_name || 'Scapegoat').toUpperCase()}</span></div><b className="verified">✓ VERIFIED</b></div>
     <div className="expert-article">{formatted.title&&<h4>🎬 {formatted.title}</h4>}{formatted.paragraphs.map((p,i)=><p key={i}>{p}</p>)}</div>
     <div className="review-facts">
       <div className="rating-fact"><small>MY RATING</small><strong>{formatted.rating ? `${formatted.rating}/10` : 'EDITOR’S PICK'}</strong>{formatted.ratingNote&&<span>{formatted.ratingNote}</span>}</div>

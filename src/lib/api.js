@@ -44,14 +44,4 @@ export async function api(path, options = {}, withAuth = false) {
   return data;
 }
 
-export function trackEvent(type='visit', extra={}) {
-  try {
-    let visitorId=localStorage.getItem('cine_visitor_id');
-    if(!visitorId){visitorId=crypto.randomUUID();localStorage.setItem('cine_visitor_id',visitorId)}
-    let sessionId=sessionStorage.getItem('cine_session_id');
-    if(!sessionId){sessionId=crypto.randomUUID();sessionStorage.setItem('cine_session_id',sessionId)}
-    fetch('/api/analytics/event',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({visitorId,sessionId,type,path:location.pathname,referrer:document.referrer,...extra}),keepalive:true}).catch(()=>{});
-  } catch {}
-}
-
 export const imageUrl = (path, size = 'w500') => path ? `/api/image-proxy?url=${encodeURIComponent(`https://image.tmdb.org/t/p/${size}${path}`)}` : '';
