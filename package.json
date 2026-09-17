@@ -4,16 +4,26 @@
   "description": "Cine-Mood Premium AI Movie Panel",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "dev": "vite --host 0.0.0.0",
+    "server": "node server.js",
+    "build": "vite build",
+    "start": "npm run build && node server.js"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.39.0",
+    "@supabase/supabase-js": "^2.57.4",
     "axios": "^1.6.0",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
+    "pg": "^8.13.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "ws": "^8.21.3"
   },
   "author": "HARSH",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "vite": "^6.1.0"
+  }
 }
