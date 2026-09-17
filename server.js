@@ -24,7 +24,9 @@ const supabase = createClient(SUPA_URL, SUPA_KEY, { realtime: { transport: requi
    GEMINI AI CONFIG — har movie ka UNIQUE review generate hota hai
    (Render pe GEMINI_API_KEY env var set karo — fallback key hai)
    ═══════════════════════════════════════════════════════════ */
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyCuR4z9GBJCyqW6OPuXBdH-69RgBe7zp6Q';
+// 🔑 Gemini key SIRF env se (GEMINI_API_KEY) — code mein hardcode mat karna!
+// (GitHub pe push hone se Google keys auto-detect karke block kar deta hai)
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
 
 // 🎬 PREVIEW_MODE (local testing only — Render pe set nahi hota)
 // Movies/images live site se proxy, user-reviews in-memory, admin pwd test123
@@ -419,4 +421,5 @@ app.get('/api/admin/stats', async (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server running securely on port ${PORT} 🔥 (Gemini AI: ${GEMINI_MODEL})`);
+if (!GEMINI_API_KEY) console.log('⚠️  GEMINI_API_KEY set NAHI hai — AI reviews fallback text pe chalenge. Render dashboard → Environment mein key daalo.');
 });
