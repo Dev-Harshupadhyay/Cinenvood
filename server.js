@@ -499,6 +499,17 @@ app.post('/api/comments/:commentId/like', async (req,res)=>{
 });
 
 
+function parseExpertFields(text='') {
+  const rating=String(text).match(/My Rating\s*✨?\s*:\s*([\d.]+)\s*\/\s*10/i);
+  const platform=String(text).match(/📺\s*Platform\s*:\s*(.+)/i);
+  const guidance=String(text).match(/⚠️\s*Parental Guidance\s*:\s*(.+)/i);
+  const n=rating?Math.min(10,Math.max(0,Number(rating[1]))):null;
+  return {rating:n,platform:platform?.[1]?.trim()||null,parental_guidance:guidance?.[1]?.trim()||null,verdict:n==null?null:n>=8.5?'MUST WATCH':n>=7?'WORTH WATCHING':n>=5?'ONE-TIME WATCH':'SKIP IT'};
+}
+app.post('/api/admin/reviews/save', requireAdmin, async(req,res)=>{
+  try{const movieId=String(req.body?.movieId||'').trim(),movieTitle=String(req.body?.movieTitle||'').trim(),reviewText=String(req.body?.reviewText||'').trim(),adminName=String(req.body?.adminName||'Scapegoat').trim().slice(0,50)||'Scapegoat';if(!movieId||!movieTitle||!reviewText)return res.status(400).json({error:'Movie ID, title aur review required hain'});if(reviewText.length>12000)return res.status(400).json({error:'Review maximum 12,000 characters ka ho sakta hai'});const fields=parseExpertFields(reviewText);const {data,error}=await supabaseAdmin.from('admin_reviews').upsert({movie_id:movieId,movie_title:movieTitle,admin_name:adminName,review_text:reviewText,...fields,published:true,updated_at:new Date().toISOString()},{onConflict:'movie_id'}).select().single();if(error)throw error;await supabaseAdmin.from('custom_reviews').upsert({movie_id:movieId,movie_title:movieTitle,admin_name:adminName,admin_review:reviewText,updated_at:new Date().toISOString()},{onConflict:'movie_id'});res.json({success:true,review:data})}catch(e){console.error('Admin review save:',e.message);res.status(500).json({error:'Review save nahi hua: '+e.message})}
+});
+
 // Privacy-first event collection. Browser ID is salted+hashed before storage.
 app.post('/api/analytics/event', async (req,res)=>{
     try{const visitorId=String(req.body?.visitorId||'').slice(0,100), type=String(req.body?.type||'visit');if(!visitorId||!['visit','movie_open','search','google_login'].includes(type))return res.status(400).json({error:'Invalid event'});const hash=crypto.createHash('sha256').update(visitorId+(process.env.ANALYTICS_SALT||adminSecret())).digest('hex');if(type==='visit'){const day=new Date();day.setUTCHours(0,0,0,0);const {count}=await supabaseAdmin.from('analytics_events').select('*',{count:'exact',head:true}).eq('visitor_hash',hash).eq('event_type','visit').gte('created_at',day.toISOString());if(count)return res.json({success:true,deduplicated:true})}let ref='';try{ref=new URL(String(req.body.referrer||'')).hostname}catch{}const {error}=await supabaseAdmin.from('analytics_events').insert({visitor_hash:hash,session_id:String(req.body.sessionId||'').slice(0,80),event_type:type,movie_id:req.body.movieId?String(req.body.movieId):null,path:String(req.body.path||'').slice(0,180),referrer_host:ref.slice(0,120)});if(error)throw error;res.json({success:true})}catch(e){res.status(500).json({error:'Analytics unavailable'})}
