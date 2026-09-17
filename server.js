@@ -556,7 +556,10 @@ app.get('/api/admin/stats', requireAdmin, async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+if (require.main === module) {
+  app.listen(PORT, () => {
     console.log(`Server running securely on port ${PORT} 🔥 (Gemini AI: ${GEMINI_MODEL})`);
-if (!GEMINI_API_KEY) console.log('⚠️  GEMINI_API_KEY set NAHI hai — AI reviews fallback text pe chalenge. Render dashboard → Environment mein key daalo.');
-});
+    if (!GEMINI_API_KEY) console.log('⚠️ GEMINI_API_KEY missing — AI reviews fallback text pe chalenge.');
+  });
+}
+module.exports = app;
