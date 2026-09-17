@@ -134,3 +134,7 @@ revoke insert, update, delete on public.comment_likes from anon, authenticated;
 revoke insert, update, delete on public.user_review_likes from anon, authenticated;
 
 grant select on public.profiles, public.admin_reviews, public.admin_review_likes, public.admin_review_comments, public.comment_likes, public.user_review_likes to anon, authenticated;
+
+-- Server uses the Supabase secret/service role for verified writes.
+grant all privileges on public.profiles, public.admin_reviews, public.admin_review_likes, public.admin_review_comments, public.comment_likes, public.user_reviews, public.user_review_likes to service_role;
+grant usage, select on all sequences in schema public to service_role;

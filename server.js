@@ -40,6 +40,9 @@ async function viewer(req, required = true) {
     return data.user;
 }
 const authError = (res, e) => res.status(e.status || 500).json({ error: e.message || 'Request failed' });
+function asViewer(req) {
+    return createClient(SUPA_URL, SUPA_KEY, { auth:{persistSession:false}, global:{headers:{Authorization:req.headers.authorization}} });
+}
 
 /* ═══════════════════════════════════════════════════════════
    GEMINI AI CONFIG — har movie ka UNIQUE review generate hota hai
@@ -448,10 +451,10 @@ app.get('/api/user-reviews/:movieId', async (req, res) => {
     } catch(e){authError(res,e)}
 });
 app.post('/api/user-reviews', async (req,res)=>{
-    try{const user=await viewer(req);if(user.is_anonymous)return res.status(403).json({error:'Google login required'});const text=String(req.body?.text||'').trim();if(!text||text.length>500)return res.status(400).json({error:'Review 1–500 characters ka hona chahiye'});const {data:profile}=await supabaseAdmin.from('profiles').select('display_name').eq('id',user.id).maybeSingle();const {error}=await supabaseAdmin.from('user_reviews').insert({movie_id:String(req.body.movieId),movie_title:String(req.body.movieTitle||''),user_id:user.id,user_name:profile?.display_name||user.user_metadata?.full_name||'Movie fan',review_text:text,like_count:0});if(error)throw error;res.json({success:true})}catch(e){authError(res,e)}
+    try{const user=await viewer(req);const db=asViewer(req);if(user.is_anonymous)return res.status(403).json({error:'Google login required'});const text=String(req.body?.text||'').trim();if(!text||text.length>500)return res.status(400).json({error:'Review 1–500 characters ka hona chahiye'});const {data:profile}=await supabaseAdmin.from('profiles').select('display_name').eq('id',user.id).maybeSingle();const {error}=await db.from('user_reviews').insert({movie_id:String(req.body.movieId),movie_title:String(req.body.movieTitle||''),user_id:user.id,user_name:profile?.display_name||user.user_metadata?.full_name||'Movie fan',review_text:text,like_count:0});if(error)throw error;res.json({success:true})}catch(e){authError(res,e)}
 });
 app.post('/api/user-reviews/:reviewId/like',async(req,res)=>{
-    try{const user=await viewer(req);if(user.is_anonymous)return res.status(403).json({error:'Google login required'});const id=Number(req.params.reviewId);const {data:old}=await supabaseAdmin.from('user_review_likes').select('user_id').eq('review_id',id).eq('user_id',user.id).maybeSingle();const q=old?supabaseAdmin.from('user_review_likes').delete().eq('review_id',id).eq('user_id',user.id):supabaseAdmin.from('user_review_likes').insert({review_id:id,user_id:user.id});const {error}=await q;if(error)throw error;res.json({success:true,liked:!old})}catch(e){authError(res,e)}
+    try{const user=await viewer(req);const db=asViewer(req);if(user.is_anonymous)return res.status(403).json({error:'Google login required'});const id=Number(req.params.reviewId);const {data:old}=await db.from('user_review_likes').select('user_id').eq('review_id',id).eq('user_id',user.id).maybeSingle();const q=old?db.from('user_review_likes').delete().eq('review_id',id).eq('user_id',user.id):db.from('user_review_likes').insert({review_id:id,user_id:user.id});const {error}=await q;if(error)throw error;res.json({success:true,liked:!old})}catch(e){authError(res,e)}
 });
 
 /* Premium Scapegoat verdict community: persistent likes + threaded-ready comments */
@@ -480,22 +483,22 @@ app.get('/api/admin-reviews/:movieId/community', async (req, res) => {
 });
 
 app.post('/api/admin-reviews/:reviewId/like', async (req, res) => {
-    try { const user = await viewer(req); const reviewId = Number(req.params.reviewId);
-        const { data: old } = await supabaseAdmin.from('admin_review_likes').select('user_id').eq('admin_review_id', reviewId).eq('user_id', user.id).maybeSingle();
-        const q = old ? supabaseAdmin.from('admin_review_likes').delete().eq('admin_review_id', reviewId).eq('user_id', user.id) : supabaseAdmin.from('admin_review_likes').insert({ admin_review_id: reviewId, user_id: user.id });
+    try { const user = await viewer(req); const db=asViewer(req); const reviewId = Number(req.params.reviewId);
+        const { data: old } = await db.from('admin_review_likes').select('user_id').eq('admin_review_id', reviewId).eq('user_id', user.id).maybeSingle();
+        const q = old ? db.from('admin_review_likes').delete().eq('admin_review_id', reviewId).eq('user_id', user.id) : db.from('admin_review_likes').insert({ admin_review_id: reviewId, user_id: user.id });
         const { error } = await q; if (error) throw error; res.json({ success:true, liked:!old });
     } catch(e){ authError(res,e); }
 });
 
 app.post('/api/admin-reviews/:reviewId/comments', async (req, res) => {
-    try { const user=await viewer(req); const text=String(req.body?.text||'').trim(); if(!text||text.length>500) return res.status(400).json({error:'Comment 1–500 characters ka hona chahiye'});
-        const since = new Date(Date.now()-15000).toISOString(); const { count } = await supabaseAdmin.from('admin_review_comments').select('*',{count:'exact',head:true}).eq('user_id',user.id).gte('created_at',since); if(count) return res.status(429).json({error:'15 seconds baad next comment post karo'});
-        const { data,error }=await supabaseAdmin.from('admin_review_comments').insert({admin_review_id:Number(req.params.reviewId),user_id:user.id,comment_text:text,parent_comment_id:req.body?.parentId||null}).select().single(); if(error)throw error;res.json({success:true,comment:data});
+    try { const user=await viewer(req); const db=asViewer(req); const text=String(req.body?.text||'').trim(); if(!text||text.length>500) return res.status(400).json({error:'Comment 1–500 characters ka hona chahiye'});
+        const since = new Date(Date.now()-15000).toISOString(); const { count } = await db.from('admin_review_comments').select('*',{count:'exact',head:true}).eq('user_id',user.id).gte('created_at',since); if(count) return res.status(429).json({error:'15 seconds baad next comment post karo'});
+        const { data,error }=await db.from('admin_review_comments').insert({admin_review_id:Number(req.params.reviewId),user_id:user.id,comment_text:text,parent_comment_id:req.body?.parentId||null}).select().single(); if(error)throw error;res.json({success:true,comment:data});
     } catch(e){authError(res,e)}
 });
 
 app.post('/api/comments/:commentId/like', async (req,res)=>{
-    try{const user=await viewer(req);const id=Number(req.params.commentId);const {data:old}=await supabaseAdmin.from('comment_likes').select('user_id').eq('comment_id',id).eq('user_id',user.id).maybeSingle();const q=old?supabaseAdmin.from('comment_likes').delete().eq('comment_id',id).eq('user_id',user.id):supabaseAdmin.from('comment_likes').insert({comment_id:id,user_id:user.id});const {error}=await q;if(error)throw error;res.json({success:true,liked:!old})}catch(e){authError(res,e)}
+    try{const user=await viewer(req);const db=asViewer(req);const id=Number(req.params.commentId);const {data:old}=await db.from('comment_likes').select('user_id').eq('comment_id',id).eq('user_id',user.id).maybeSingle();const q=old?db.from('comment_likes').delete().eq('comment_id',id).eq('user_id',user.id):db.from('comment_likes').insert({comment_id:id,user_id:user.id});const {error}=await q;if(error)throw error;res.json({success:true,liked:!old})}catch(e){authError(res,e)}
 });
 
 
