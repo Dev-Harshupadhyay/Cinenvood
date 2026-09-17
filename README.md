@@ -62,7 +62,70 @@ Agar aap is project ko apne local machine par run karna chahte hain, toh in step
    ```bash
    git clone [https://github.com/Dev-Harshupadhyay/Cinenwood.git](https://github.com/Dev-Harshupadhyay/Cinenwood.git)
    cd Cinenwood
-   
+   ```
+
+---
+
+## 🗄️ Supabase Setup (User Reviews ke liye — EK BAAR)
+
+**Motcale-style user reviews + ❤️ likes** ke liye Supabase dashboard mein ye table banao:
+
+1. [supabase.com](https://supabase.com) → apna project kholo
+2. **SQL Editor** → **New query** → neeche wala SQL paste karo → **Run**
+
+```sql
+CREATE TABLE IF NOT EXISTS user_reviews (
+  id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  movie_id text NOT NULL,
+  movie_title text,
+  user_name text NOT NULL DEFAULT 'Guest',
+  review_text text NOT NULL,
+  like_count integer NOT NULL DEFAULT 0,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+-- Index: movie ke hisaab se fast lookup
+CREATE INDEX IF NOT EXISTS idx_user_reviews_movie ON user_reviews(movie_id);
+
+-- RLS policies (public read/write — server-side creds se use hota hai)
+ALTER TABLE user_reviews ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Public read user reviews" ON user_reviews
+  FOR SELECT USING (true);
+
+CREATE POLICY "Public insert user reviews" ON user_reviews
+  FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Public update likes" ON user_reviews
+  FOR UPDATE USING (true) WITH CHECK (true);
+
+-- Admin delete ke liye (ADMIN_PASSWORD server pe check hota hai)
+CREATE POLICY "Public delete user reviews" ON user_reviews
+  FOR DELETE USING (true);
+
+-- Security: anonymous update sirf like_count column tak limit karo
+-- (review_text / user_name koi bhi edit nahi kar sakta)
+REVOKE UPDATE ON user_reviews FROM anon, authenticated;
+GRANT UPDATE (like_count) ON user_reviews TO anon, authenticated;
+```
+
+3. Done! 🎉 Ab har movie ke neeche **USER REVIEWS** section dikhega — review likho, ❤️ like karo.
+
+> **Admin delete** server-side `ADMIN_PASSWORD` se protected hai — koi policy ki zaroorat nahi.
+
+---
+
+## 🎬 Local Preview Mode (bina TMDB/Supabase keys)
+
+```bash
+PREVIEW_MODE=1 node server.js
+```
+- Movies + images **live site se proxy** hongi (TMDB key ki zaroorat nahi)
+- **Real Gemini AI reviews** chalenge (unique har movie ke liye)
+- User reviews in-memory chalenge (test karne ke liye)
+- Admin panel: password **test123**
+
+---
 <div align="center">
 
   <p><b>Connect with the Developer</b></p>

@@ -491,9 +491,110 @@ body::after{
 
 @keyframes fadeUp{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
 @keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-9px);}}
+
+/* ═══════════ USER REVIEWS + LIKES (Motcale-style) ═══════════ */
+.ureviews-wrap{margin-top:16px;background:var(--glass);border:1px solid var(--glass-b);border-radius:14px;padding:14px;}
+.ur-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.ur-title{font-size:12px;font-weight:700;letter-spacing:1.5px;color:var(--white);}
+.ur-count{font-size:10px;font-weight:800;background:var(--red-dim);border:1px solid var(--red-b);color:#ff6b6b;padding:3px 10px;border-radius:99px;}
+.ur-form{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
+.ur-form input,.ur-form textarea{width:100%;background:rgba(0,0,0,.45);border:1px solid var(--glass-b);border-radius:10px;color:var(--white);font-family:'Sora',sans-serif;font-size:12.5px;padding:10px 12px;outline:none;transition:border-color .2s;}
+.ur-form textarea{min-height:64px;resize:vertical;}
+.ur-form input:focus,.ur-form textarea:focus{border-color:var(--red);}
+.ur-post-btn{background:linear-gradient(120deg,#e50914,#ff4b2b);border:none;color:#fff;font-weight:800;font-size:11.5px;letter-spacing:1.5px;padding:11px;border-radius:10px;cursor:pointer;transition:transform .15s,box-shadow .2s;}
+.ur-post-btn:hover{box-shadow:0 0 20px var(--red-glow);}
+.ur-post-btn:active{transform:scale(.96);}
+.ur-post-btn:disabled{opacity:.6;cursor:wait;}
+.ur-list{display:flex;flex-direction:column;gap:10px;}
+.ur-item{background:rgba(0,0,0,.35);border:1px solid var(--glass-b);border-radius:12px;padding:12px;animation:urIn .3s ease both;}
+@keyframes urIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+.ur-top{display:flex;align-items:center;gap:9px;margin-bottom:8px;}
+.ur-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#e50914,#ff4b2b);display:grid;place-items:center;font-weight:800;font-size:13px;color:#fff;flex-shrink:0;}
+.ur-meta{flex:1;min-width:0;}
+.ur-meta b{display:block;font-size:12px;}
+.ur-meta small{font-size:9.5px;color:var(--silver);}
+.ur-del{background:transparent;border:1px solid rgba(255,80,80,.4);color:#ff8080;border-radius:8px;padding:4px 8px;cursor:pointer;font-size:12px;}
+.ur-del:active{transform:scale(.9);}
+.ur-text{font-size:12px;color:var(--silver-l);line-height:1.65;margin:0 0 9px;word-break:break-word;}
+.ur-like{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.05);border:1px solid var(--glass-b);border-radius:99px;padding:6px 13px;color:var(--white);font-size:11px;font-weight:700;cursor:pointer;transition:all .2s;font-family:'Sora',sans-serif;}
+.ur-like:hover{border-color:var(--red);background:var(--red-dim);}
+.ur-like:active{transform:scale(.9);}
+.ur-like.liked{border-color:var(--red);background:var(--red-dim);box-shadow:0 0 12px var(--red-glow);}
+.ur-like .ur-heart{font-size:13px;line-height:1;}
+.ur-loading,.ur-empty{text-align:center;color:var(--silver);font-size:11.5px;padding:14px 6px;line-height:1.7;}
+
+/* ═══════════ ADMIN PANEL PREMIUM ═══════════ */
+.admin-hero-ico{width:54px;height:54px;margin:0 auto 12px;border-radius:16px;display:grid;place-items:center;font-size:24px;background:var(--red-dim);border:1px solid var(--red-b);box-shadow:0 0 24px var(--red-glow);}
+.admin-hero-sub{text-align:center;font-size:11px;color:var(--silver);margin-bottom:16px;letter-spacing:.5px;}
+.admin-welcome{text-align:center;font-size:12.5px;color:#00ff88;background:rgba(0,255,136,.06);border:1px solid rgba(0,255,136,.25);border-radius:12px;padding:12px;margin-bottom:14px;line-height:1.6;}
+.admin-welcome small{color:var(--silver-l);font-size:11px;}
+.admin-stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+.astat{text-align:center;background:var(--glass);border:1px solid var(--glass-b);border-radius:12px;padding:12px 6px;}
+.astat b{display:block;font-size:17px;color:#ff6b6b;}
+.astat small{font-size:7.5px;letter-spacing:1.2px;color:var(--silver);font-weight:700;}
+.admin-tip{font-size:10.5px;color:var(--silver-l);background:rgba(255,255,255,.03);border:1px dashed var(--glass-b);border-radius:10px;padding:10px 12px;line-height:1.7;margin-bottom:14px;}
+.admin-lock-btn{background:linear-gradient(120deg,#333,#555)!important;}
+
+/* ═══════════ CONTACT: DEVELOPER + SUPPORT ═══════════ */
+.dev-card-cine{border:1px solid var(--glass-b);border-radius:16px;overflow:hidden;background:var(--glass);margin-bottom:14px;}
+.devc-banner{height:52px;background:linear-gradient(120deg,#1a0000,#4a0505 45%,var(--red));position:relative;}
+.devc-banner::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(115deg,transparent 0 12px,rgba(255,255,255,.05) 12px 13px),radial-gradient(100px 50px at 80% 10%,rgba(255,255,255,.18),transparent 70%);}
+.devc-row{display:flex;align-items:flex-end;justify-content:space-between;padding:0 14px;margin-top:-22px;position:relative;z-index:2;}
+.devc-avatar{width:52px;height:52px;border-radius:15px;background:linear-gradient(135deg,#e50914,#ff4b2b);display:grid;place-items:center;font-weight:900;font-size:22px;color:#fff;border:3px solid #0b0b0b;box-shadow:0 8px 20px var(--red-glow);}
+.devc-verified{font-size:8.5px;font-weight:900;letter-spacing:1.5px;color:#00ffaa;border:1px solid rgba(0,255,170,.4);background:rgba(0,255,170,.08);padding:5px 10px;border-radius:99px;margin-bottom:8px;}
+.devc-body{padding:10px 14px 14px;}
+.devc-eyebrow{font-size:8.5px;letter-spacing:2.5px;color:#ff6b6b;font-weight:900;}
+.devc-name{font-size:16px;display:block;margin:3px 0 6px;}
+.devc-bio{font-size:11px;color:var(--silver-l);line-height:1.7;margin:0 0 10px;}
+.devc-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+.devc-tags span{font-size:8.5px;font-weight:800;letter-spacing:1px;padding:4px 10px;border-radius:99px;border:1px solid var(--red-b);color:#ff9b9b;background:var(--red-dim);}
+.devc-links{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;}
+.devc-links a{display:flex;align-items:center;justify-content:center;gap:5px;text-decoration:none;color:var(--white);font-size:10.5px;font-weight:700;background:rgba(255,255,255,.05);border:1px solid var(--glass-b);border-radius:10px;padding:9px 4px;transition:all .2s;}
+.devc-links a:hover{border-color:var(--red);background:var(--red-dim);}
+.devc-links a:active{transform:scale(.95);}
+.sup-card-cine{border:1px solid var(--red-b);border-radius:16px;background:linear-gradient(150deg,rgba(229,9,20,.09),rgba(0,0,0,.3));padding:14px;margin-bottom:14px;}
+.supc-title{font-size:11px;font-weight:900;letter-spacing:2px;color:#ff6b6b;margin-bottom:8px;}
+.supc-sub{font-size:10.5px;color:var(--silver-l);line-height:1.7;margin:0 0 12px;}
+.sup-amt-row{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:9px;}
+.sup-chip{padding:9px 0;border-radius:10px;border:1px solid var(--glass-b);background:rgba(255,255,255,.04);color:var(--silver-l);font-weight:800;font-size:12px;cursor:pointer;transition:all .18s;font-family:'Sora',sans-serif;}
+.sup-chip:hover,.sup-chip.sel{border-color:var(--red);color:#fff;background:var(--red-dim);}
+.sup-chip:active{transform:scale(.94);}
+.sup-custom-row{display:flex;align-items:center;border:1px solid var(--glass-b);border-radius:10px;background:rgba(0,0,0,.4);overflow:hidden;margin-bottom:4px;}
+.sup-custom-row span{padding:0 12px;color:var(--silver);font-weight:800;}
+.sup-custom-row input{flex:1;background:transparent;border:none;outline:none;color:#fff;font-size:15px;font-weight:700;padding:11px 12px 11px 0;font-family:'Sora',sans-serif;min-width:0;}
+.sup-qr{width:140px;height:140px;margin:10px auto;border-radius:14px;border:3px solid #fff;overflow:hidden;background:#fff;}
+.sup-qr img{width:100%;height:100%;object-fit:contain;}
+.sup-pay-btn{width:100%;background:linear-gradient(120deg,#b3000f,#e50914,#ff4b2b);border:1px solid rgba(255,120,120,.5);color:#fff;font-weight:900;font-size:12.5px;letter-spacing:1px;padding:14px;border-radius:12px;cursor:pointer;box-shadow:0 0 22px var(--red-glow);transition:transform .15s,filter .2s;font-family:'Sora',sans-serif;margin-top:4px;}
+.sup-pay-btn:hover{filter:brightness(1.1);}
+.sup-pay-btn:active{transform:scale(.97);}
+.sup-id-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:11px;border:1px dashed var(--glass-b);border-radius:11px;padding:9px 12px;background:rgba(0,0,0,.35);}
+.sup-id{font-family:monospace;font-weight:700;font-size:12.5px;color:#fff;}
+.sup-id small{display:block;font-size:7.5px;letter-spacing:1.5px;color:var(--silver);margin-bottom:2px;font-family:'Sora',sans-serif;}
+.sup-copy{border:1px solid var(--red-b);background:var(--red-dim);color:#ff9b9b;border-radius:99px;padding:7px 12px;font-size:10px;font-weight:800;cursor:pointer;}
+.sup-copy:active{transform:scale(.92);}
+.tg-hub-cine{border:1px solid var(--glass-b);border-radius:16px;background:var(--glass);padding:14px;}
+.tg-hub-cine .tg-a{display:flex;align-items:center;justify-content:center;text-decoration:none;padding:11px;border-radius:10px;font-weight:700;font-size:12.5px;letter-spacing:.5px;margin-top:8px;transition:transform .15s;}
+.tg-a-red{background:var(--red);color:#fff;box-shadow:0 0 15px var(--red-glow);}
+.tg-a-ghost{background:rgba(255,255,255,.04);border:1px solid var(--red-b);color:#fff;}
+.tg-a:active{transform:scale(.97);}
+
+/* ═══════════ TOAST ═══════════ */
+#toastHost{position:fixed;left:50%;bottom:calc(var(--bot) + 18px);transform:translateX(-50%);z-index:99999;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;width:max-content;max-width:92vw;}
+.toast{background:rgba(10,10,12,.97);border:1px solid var(--red-b);color:#fff;font-size:12px;font-weight:700;padding:11px 18px;border-radius:99px;box-shadow:0 0 22px var(--red-glow);animation:tInC .25s ease both;}
+.toast.out{animation:tOutC .3s ease both;}
+@keyframes tInC{from{opacity:0;transform:translateY(12px) scale(.93);}to{opacity:1;transform:none;}}
+@keyframes tOutC{to{opacity:0;transform:translateY(8px) scale(.95);}}
+
+/* ═══════════ CARD PREMIUM POLISH ═══════════ */
+.card{transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease;}
+.card:hover{transform:translateY(-4px);box-shadow:0 14px 30px rgba(0,0,0,.6),0 0 18px var(--red-glow);}
+.card img{transition:transform .35s ease;}
+.card:hover img{transform:scale(1.06);}
+@media(hover:none){.card:hover{transform:none;}}
 </style>
 </head>
 <body>
+<div id="toastHost" aria-live="polite"></div>
 
 <nav id="topNav">
   <div class="logo">CINE<b>·</b>MOOD</div>
@@ -621,42 +722,93 @@ body::after{
 <div id="overlay-contact" class="overlay" onclick="if(event.target===this) closeOverlay('contact')">
   <div class="overlay-sheet">
     <div class="overlay-handle" onclick="closeOverlay('contact')"></div>
-    <div class="premium-about-card" style="background: linear-gradient(135deg, rgba(229,9,20,0.12), rgba(0,0,0,0.9)); border-color: rgba(0, 255, 170, 0.35); box-shadow: 0 0 25px rgba(0, 255, 170, 0.15);">
-      <div class="about-glow-title" style="text-shadow: 0 0 12px rgba(0, 255, 170, 0.6); color: #fff;">📡 TELEGRAM <b>HUB</b></div>
-      <div class="premium-badge-row">
-        <span class="premium-badge" style="border-color: rgba(0, 255, 170, 0.4); color: #00ffaa;">🟢 FASTEST CORRESPONDENCE</span>
-        <span class="premium-badge">🚀 BACKUP CHANNELS</span>
-      </div>
-      <div class="overlay-body" style="display: flex; flex-direction: column; gap: 14px;">
-        <div style="background: rgba(255,255,255,0.03); border: 1px dashed var(--glass-b); padding: 12px; border-radius: 8px; text-align: center;">
-          <p style="font-size: 11px; color: var(--silver); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px;">Any Problem / Query?</p>
-          <a href="https://t.me/pmharsh" target="_blank" class="vibe-lbl admin-glow" style="font-size: 18px !important; text-decoration: none; display: inline-block;">💬 @pmharsh</a>
+    <div class="overlay-title">📲 CONTACT & SUPPORT</div>
+    <div class="overlay-body">
+
+      <!-- DEVELOPER CARD (solid) -->
+      <div class="dev-card-cine">
+        <div class="devc-banner" aria-hidden="true"></div>
+        <div class="devc-row">
+          <div class="devc-avatar">H</div>
+          <span class="devc-verified">✓ VERIFIED DEV</span>
         </div>
-        <p style="font-size: 12px; color: var(--silver-l); font-weight: 500; margin-top: 5px;">Bhai premium backup aur updates ke liye official channels join kar lo:</p>
-        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 5px;">
-          <a href="https://t.me/+gani_pjJNUc3MTNl" target="_blank" style="display: flex; align-items: center; justify-content: center; background: var(--red); color: #fff; text-decoration: none; padding: 12px; border-radius: 8px; font-weight: 600; font-size: 13px; letter-spacing: 0.5px; box-shadow: 0 0 15px var(--red-glow);">📢 Join Premium Channel 1</a>
-          <a href="https://t.me/TIMEPASS_BACKUP_1" target="_blank" style="display: flex; align-items: center; justify-content: center; background: var(--deep); border: 1px solid var(--red-b); color: #fff; text-decoration: none; padding: 12px; border-radius: 8px; font-weight: 600; font-size: 13px; letter-spacing: 0.5px;">🍿 Join Timepass Backup Channel</a>
+        <div class="devc-body">
+          <div class="devc-eyebrow">CREATOR · DEVELOPER</div>
+          <b class="devc-name">Harsh Dev ⚡</b>
+          <p class="devc-bio">CINE-MOOD AI ke creator — premium web interfaces, Telegram automation bots aur UI/UX projects banata hoon. HTML, CSS, JavaScript aur Python ke saath.</p>
+          <div class="devc-tags">
+            <span>HTML/CSS</span><span>JavaScript</span><span>Python</span><span>Telegram Bots</span>
+          </div>
+          <div class="devc-links">
+            <a href="https://t.me/pmharsh" target="_blank" rel="noopener noreferrer">✈️ @pmharsh</a>
+            <a href="mailto:pmharshu2035@gmail.com">✉️ Email</a>
+            <a href="https://new-profotilo-flame.vercel.app/" target="_blank" rel="noopener noreferrer">🌐 Website</a>
+          </div>
         </div>
       </div>
+
+      <!-- SUPPORT & DONATE (same UPI logic — default ₹50, changeable, deeplink) -->
+      <div class="sup-card-cine">
+        <div class="supc-title">❤️ SUPPORT & DONATE</div>
+        <p class="supc-sub">Ye project free hai bhai — chhota sa support karke dev ko motivate kar sakte ho. UPI se direct:</p>
+        <div class="sup-amt-row">
+          <button class="sup-chip" data-amt="25" type="button">₹25</button>
+          <button class="sup-chip sel" data-amt="50" type="button">₹50</button>
+          <button class="sup-chip" data-amt="100" type="button">₹100</button>
+          <button class="sup-chip" data-amt="200" type="button">₹200</button>
+        </div>
+        <div class="sup-custom-row">
+          <span>₹</span>
+          <input type="number" id="supAmt" value="50" min="1" step="1" aria-label="Custom amount"/>
+        </div>
+        <div class="sup-qr"><img id="supQr" alt="Support UPI QR" loading="lazy" decoding="async"/></div>
+        <button class="sup-pay-btn" id="supBtn" type="button">❤️ SUPPORT ₹50 VIA UPI</button>
+        <div class="sup-id-row">
+          <div class="sup-id"><small>UPI ID</small>pmharsh@fam</div>
+          <button class="sup-copy" id="supCopy" type="button">COPY</button>
+        </div>
+        <p class="supc-sub" style="margin:10px 0 0;text-align:center;">Button dabao → UPI app open hoga (GPay/PhonePe/Paytm/BHIM)</p>
+      </div>
+
+      <!-- TELEGRAM HUB (same links) -->
+      <div class="tg-hub-cine">
+        <div class="supc-title">📡 TELEGRAM HUB</div>
+        <p class="supc-sub" style="margin-bottom:2px;">Premium backup aur updates ke liye official channels join kar lo:</p>
+        <a class="tg-a tg-a-red" href="https://t.me/+gani_pjJNUc3MTNl" target="_blank" rel="noopener noreferrer">📢 Join Premium Channel 1</a>
+        <a class="tg-a tg-a-ghost" href="https://t.me/TIMEPASS_BACKUP_1" target="_blank" rel="noopener noreferrer">🍿 Join Timepass Backup Channel</a>
+      </div>
+
     </div>
+  </div>
+</div>
   </div>
 </div>
 
 <div id="overlay-admin" class="overlay" onclick="if(event.target===this) closeOverlay('admin')">
   <div class="overlay-sheet">
     <div class="overlay-handle" onclick="closeOverlay('admin')"></div>
-    <div class="overlay-title" id="adminOverlayTitle">🔐 Admin Login</div>
+    <div class="overlay-title" id="adminOverlayTitle">🔐 ADMIN ACCESS</div>
     <div class="overlay-body">
+      <!-- LOGIN -->
       <div id="adminLoginSection">
+        <div class="admin-hero-ico">🛡️</div>
+        <p class="admin-hero-sub">Restricted zone — sirf owner ke liye</p>
         <div class="admin-input-wrap">
           <input type="password" id="adminPwdInput" placeholder="Enter Admin Password..."/>
         </div>
-        <button class="admin-login-btn" onclick="attemptLogin()">Verify Access</button>
+        <button class="admin-login-btn" onclick="attemptLogin()">🔓 UNLOCK DASHBOARD</button>
         <div class="admin-status" id="adminStatus">🔒 Access Restricted</div>
       </div>
+      <!-- LOGGED IN -->
       <div id="adminLoggedSection" class="admin-logged-section">
-        <p style="color:#00ff88; margin-bottom:15px;">✔️ Unlocked! Ab aap kisi bhi movie ko khol kar review edit kar sakte hain.</p>
-        <button class="admin-login-btn" style="background:#555;" onclick="adminLogout()">Lock Dashboard</button>
+        <div class="admin-welcome">✔️ <b>Dashboard Unlocked!</b><br/><small>Kisi bhi movie ko khol kar review edit karo — AI review bypass ho jayega.</small></div>
+        <div class="admin-stats-row">
+          <div class="astat"><b id="astAdmin">—</b><small>👑 ADMIN REVIEWS</small></div>
+          <div class="astat"><b id="astUser">—</b><small>💬 USER REVIEWS</small></div>
+          <div class="astat"><b id="astAI">🤖</b><small>GEMINI ENGINE</small></div>
+        </div>
+        <div class="admin-tip">💡 <b>Tip:</b> Movie kholo → neeche admin editor se apna premium review likho → Save. User reviews par admin ke liye 🗑 delete button bhi dikhega.</div>
+        <button class="admin-login-btn admin-lock-btn" onclick="adminLogout()">🔒 LOCK DASHBOARD</button>
       </div>
     </div>
   </div>
@@ -691,6 +843,20 @@ body::after{
         <div class="vibe-lbl" id="vibeSource">CINE-VIBE ENGINE</div>
         <div class="vibe-head">🔥 HINGLISH REVIEW</div>
         <p id="vibeText" class="vibe-desc">Fetching latest review...</p>
+      </div>
+
+      <!-- USER REVIEWS + LIKES (Motcale-style) -->
+      <div class="ureviews-wrap">
+        <div class="ur-head">
+          <span class="ur-title">💬 USER REVIEWS</span>
+          <span class="ur-count" id="urCount">0</span>
+        </div>
+        <div class="ur-form">
+          <input type="text" id="urNameInput" placeholder="Apna naam (optional)..." maxlength="30"/>
+          <textarea id="urTextInput" placeholder="Movie ke baare mein apna review likho bhai... (max 500)" maxlength="500"></textarea>
+          <button class="ur-post-btn" id="urPostBtn" onclick="postUserReview()">⚡ POST REVIEW</button>
+        </div>
+        <div id="urList" class="ur-list"></div>
       </div>
 
       <div id="adminForm" class="admin-review-form">
@@ -885,6 +1051,9 @@ async function openMovieModal(movie) {
   } catch(err) {
     console.error("Error connecting to server backend router");
   }
+
+  // User reviews + likes bhi load karo (Motcale-style)
+  loadUserReviews(movie.id);
 }
 
 // ── TRAILER: TMDB videos endpoint se native inline player ──
@@ -972,7 +1141,7 @@ async function saveAdminReview() {
 
   let result = await response.json();
   if(result.success) {
-    alert("Review successfully save ho gaya backend database mein! 🔥");
+    showToast("✅ Review save ho gayi database mein! 🔥");
     const boxEl = document.getElementById('mReviewBox');
     const labelEl = document.getElementById('vibeSource');
     const textEl = document.getElementById('vibeText');
@@ -983,7 +1152,7 @@ async function saveAdminReview() {
     labelEl.textContent = `👑 EXPERT CHOICE BY ${adminName.toUpperCase()}`;
     textEl.textContent = reviewText;
   } else {
-    alert("Error: " + result.error);
+    showToast("❌ Error: " + result.error);
   }
 }
 
@@ -1068,6 +1237,12 @@ async function attemptLogin() {
       document.getElementById('adminOverlayTitle').textContent = '🛠️ Admin Dashboard Unlocked';
       document.getElementById('adminNavIco').classList.add('unlocked');
       document.getElementById('adminNavIco').textContent = '🔓';
+      loadAdminStats();
+      if(currentMovieData) {
+        loadUserReviews(currentMovieData.id); // delete buttons dikhao
+        const af = document.getElementById('adminForm');
+        if(af) af.classList.add('show'); // admin review form bhi dikha do
+      }
       closeOverlay('admin');
     } else {
       document.getElementById('adminStatus').textContent = '❌ Wrong password bhai!';
@@ -1086,6 +1261,7 @@ function adminLogout() {
   document.getElementById('adminOverlayTitle').textContent = '🔐 Admin Login';
   document.getElementById('adminNavIco').classList.remove('unlocked');
   document.getElementById('adminNavIco').textContent = '🔐';
+  if(currentMovieData) loadUserReviews(currentMovieData.id); // delete buttons hatao
   closeOverlay('admin');
 }
 
@@ -1134,6 +1310,209 @@ window.addEventListener('scroll', () => {
 function clearGrid() { document.getElementById('grid').innerHTML = ''; showEmpty(false); }
 function showLoader(on) { document.getElementById('loader').classList.toggle('on', on); }
 function showEmpty(on)  { document.getElementById('empty').classList.toggle('on', on); }
+
+
+// ═══════════════════════════════════════════════════════
+// 🤖 USER REVIEWS + ❤️ LIKES (Motcale-style) + SUPPORT
+// ═══════════════════════════════════════════════════════
+
+// ── Toast (premium alerts) ──
+function showToast(msg) {
+  const host = document.getElementById('toastHost');
+  if (!host) { alert(msg); return; }
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  host.appendChild(t);
+  setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 320); }, 1900);
+}
+
+function escapeHtml(v) {
+  return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+}
+
+// ── Likes (localStorage dedup — ek device ek like) ──
+const LIKED_KEY = 'cine_liked_ids';
+function getLikedIds() { try { return JSON.parse(localStorage.getItem(LIKED_KEY) || '[]'); } catch { return []; } }
+function setLikedIds(a) { try { localStorage.setItem(LIKED_KEY, JSON.stringify(a)); } catch {} }
+
+function timeAgo(iso) {
+  const diff = (Date.now() - new Date(iso).getTime()) / 1000;
+  if (isNaN(diff)) return '';
+  if (diff < 60) return 'abhi';
+  if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+  if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+  return Math.floor(diff / 86400) + 'd ago';
+}
+
+// ── Movie ke user reviews load + render ──
+async function loadUserReviews(movieId) {
+  const list = document.getElementById('urList');
+  const count = document.getElementById('urCount');
+  if (!list) return;
+  list.innerHTML = '<div class="ur-loading">⏳ Reviews load ho rahi hain...</div>';
+  try {
+    const res = await fetch(`/api/reviews/${movieId}`);
+    const data = await res.json();
+    const reviews = data.reviews || [];
+    count.textContent = reviews.length;
+    if (!reviews.length) {
+      list.innerHTML = data.tableMissing
+        ? '<div class="ur-empty">🚧 User reviews system almost ready hai bhai!<br/>(Database table setup baaki hai — README dekho)</div>'
+        : '<div class="ur-empty">🏟️ Pehla review tum likho bhai — upar form se!</div>';
+      return;
+    }
+    const liked = getLikedIds();
+    list.innerHTML = reviews.map(r => `
+      <div class="ur-item">
+        <div class="ur-top">
+          <span class="ur-avatar">${escapeHtml(String(r.user_name || 'G').charAt(0).toUpperCase())}</span>
+          <div class="ur-meta">
+            <b>${escapeHtml(r.user_name)}</b>
+            <small>${timeAgo(r.created_at)}</small>
+          </div>
+          ${isAdmin ? `<button class="ur-del" onclick="deleteUserReview(${r.id})" title="Admin delete">🗑</button>` : ''}
+        </div>
+        <p class="ur-text">${escapeHtml(r.review_text)}</p>
+        <button class="ur-like ${liked.includes(r.id) ? 'liked' : ''}" onclick="toggleLike(this, ${r.id})">
+          <span class="ur-heart">${liked.includes(r.id) ? '❤️' : '🤍'}</span>
+          <span class="ur-like-count">${r.like_count || 0}</span>
+        </button>
+      </div>`).join('');
+  } catch (e) {
+    list.innerHTML = '<div class="ur-empty">⚠️ Reviews load nahi hui — thodi der baad try karo</div>';
+  }
+}
+
+// ── Like toggle (optimistic UI + server sync) ──
+async function toggleLike(btn, reviewId) {
+  const liked = getLikedIds();
+  const isLiked = liked.includes(reviewId);
+  const delta = isLiked ? -1 : 1;
+
+  // Optimistic update — turant UI
+  const heart = btn.querySelector('.ur-heart');
+  const cnt = btn.querySelector('.ur-like-count');
+  if (cnt) cnt.textContent = Math.max(0, (parseInt(cnt.textContent) || 0) + delta);
+  if (heart) heart.textContent = isLiked ? '🤍' : '❤️';
+  btn.classList.toggle('liked', !isLiked);
+
+  // Save dedup
+  if (isLiked) setLikedIds(liked.filter(id => id !== reviewId));
+  else setLikedIds([...liked, reviewId]);
+
+  try {
+    const res = await fetch('/api/reviews/like', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reviewId, delta })
+    });
+    const result = await res.json();
+    if (result.success && cnt) cnt.textContent = result.likeCount; // server-truth
+  } catch (e) {
+    console.error('Like sync fail:', e);
+  }
+}
+
+// ── Nayi review post ──
+async function postUserReview() {
+  if (!currentMovieData) return;
+  const nameEl = document.getElementById('urNameInput');
+  const textEl = document.getElementById('urTextInput');
+  const text = textEl.value.trim();
+  if (!text) { showToast('✍️ Pehle review kuch likho bhai!'); return; }
+
+  const btn = document.getElementById('urPostBtn');
+  btn.disabled = true; btn.textContent = '⏳ POSTING...';
+  try {
+    const res = await fetch('/api/reviews/add', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        movieId: currentMovieData.id,
+        movieTitle: currentMovieData.title,
+        userName: nameEl.value.trim(),
+        reviewText: text
+      })
+    });
+    const result = await res.json();
+    if (result.success) {
+      textEl.value = '';
+      await loadUserReviews(currentMovieData.id);
+      showToast('✅ Review post ho gayi — logo ko pasand aaye toh ❤️ milenge!');
+    } else {
+      showToast('❌ ' + (result.error || 'Post fail'));
+    }
+  } catch (e) {
+    showToast('❌ Server se connect nahi hua');
+  }
+  btn.disabled = false; btn.textContent = '⚡ POST REVIEW';
+}
+
+// ── Admin: user review delete ──
+async function deleteUserReview(reviewId) {
+  if (!currentMovieData || !isAdmin) return;
+  if (!confirm('Ye user review delete karni hai?')) return;
+  try {
+    const res = await fetch('/api/reviews/delete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: adminPasswordState, reviewId })
+    });
+    const result = await res.json();
+    if (result.success) { loadUserReviews(currentMovieData.id); showToast('🗑 Review delete ho gayi'); }
+    else showToast('❌ ' + result.error);
+  } catch (e) { showToast('❌ Delete fail'); }
+}
+
+// ── Admin stats load ──
+async function loadAdminStats() {
+  try {
+    const res = await fetch('/api/admin/stats');
+    const d = await res.json();
+    document.getElementById('astAdmin').textContent = d.adminReviews ?? '—';
+    document.getElementById('astUser').textContent = d.userReviews ?? '—';
+    document.getElementById('astAI').textContent = '🤖';
+  } catch (e) { console.error('Stats fail', e); }
+}
+
+// ── SUPPORT & DONATE (same UPI logic — default ₹50) ──
+const SUPPORT_UPI = 'pmharsh@fam';
+const supAmtEl = document.getElementById('supAmt');
+const supBtnEl = document.getElementById('supBtn');
+const supQrEl = document.getElementById('supQr');
+
+function getSupportAmount() {
+  const v = parseFloat(supAmtEl.value);
+  return (v && v > 0) ? v : 50;
+}
+function buildSupportUpiUrl() {
+  // RAW deeplink (components un-encoded) — QR me single-encode hota hai, UPI app khud decode karti hai
+  return `upi://pay?pa=${SUPPORT_UPI}&pn=Harsh Dev&am=${getSupportAmount().toFixed(2)}&cu=INR&tn=Support CINE-MOOD AI`;
+}
+function refreshSupportUI() {
+  const amt = getSupportAmount();
+  supBtnEl.textContent = `❤️ SUPPORT ₹${amt % 1 === 0 ? amt : amt.toFixed(2)} VIA UPI`;
+  document.querySelectorAll('.sup-chip').forEach(c => c.classList.toggle('sel', parseFloat(c.dataset.amt) === amt));
+  supQrEl.src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=10&data=${encodeURIComponent(buildSupportUpiUrl())}`;
+}
+document.querySelectorAll('.sup-chip').forEach(chip => chip.addEventListener('click', () => {
+  supAmtEl.value = chip.dataset.amt;
+  refreshSupportUI();
+}));
+supAmtEl.addEventListener('input', refreshSupportUI);
+supBtnEl.addEventListener('click', () => {
+  showToast('💛 UPI app khul raha hai... (₹' + getSupportAmount() + ')');
+  window.location.href = buildSupportUpiUrl();
+});
+document.getElementById('supCopy').addEventListener('click', () => {
+  const done = () => showToast('✅ UPI ID Copied!');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(SUPPORT_UPI).then(done).catch(() => alert('UPI ID: ' + SUPPORT_UPI));
+  } else alert('UPI ID: ' + SUPPORT_UPI);
+});
+refreshSupportUI();
 
 loadMovies();
 </script>
