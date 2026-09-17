@@ -1444,6 +1444,8 @@ function buildExpertReviewHTML(raw, movie) {
   let body = [], rating = 0, platform = null, parental = null;
 
   lines.forEach(l => {
+    // Admin ke manually likhe title-header ko skip karo (auto-header se duplicate hoga)
+    if (/^🎬\s*.+\s*[-–—:]\s*REVIEW\s*$/i.test(l)) { return; }
     const rm = l.match(/My Rating\s*✨?\s*:\s*(\d+(?:\.\d+)?)\s*\/\s*10/i);
     if(rm && !rating) { rating = parseFloat(rm[1]); return; }
     if(/^📺\s*Platform\s*:/i.test(l)) { platform = l.replace(/^📺\s*Platform\s*:\s*/i, '').trim(); return; }
