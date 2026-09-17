@@ -23,7 +23,8 @@ export default function AdminReview({ movieId, fallback, isLoggedIn, onLogin }) 
   const [text, setText] = useState(''); const [sort, setSort] = useState('top'); const [notice, setNotice] = useState('');
   const load = () => api(`/api/admin-reviews/${movieId}/community?sort=${sort}`).then(setData).catch(() => setData({ review:null, comments:[] }));
   useEffect(() => { load(); }, [movieId, sort]);
-  const act = async (path, body={}) => { if(!isLoggedIn){setNotice('Like ya comment karne ke liye Google login karo.');return} setBusy(true); setNotice(''); try { await api(path,{method:'POST',body:JSON.stringify(body)},true); await load(); } catch(e){setNotice(e.message)} finally{setBusy(false)} };
+  const act = async (path, body={}) => { if(!isLoggedIn){setNotice('Like ya comment karne ke liye Google login karo.');return false} setBusy(true); setNotice(''); try { await api(path,{method:'POST',body:JSON.stringify(body)},true); await load(); return true } catch(e){setNotice(e.message);return false} finally{setBusy(false)} };
+  const postComment=async e=>{e.preventDefault();if(!text.trim())return;const ok=await act(`/api/admin-reviews/${data.review.id}/comments`,{text});if(ok){setText('');setNotice('Comment posted ✓')}};
   const review = data?.review;
   const formatted = review ? parseReview(review.review_text, review) : null;
   if (!data) return <section className="expert-card skeleton-block" aria-label="Loading expert review"/>;
@@ -39,17 +40,17 @@ export default function AdminReview({ movieId, fallback, isLoggedIn, onLogin }) 
     </div>
     <div className="verdict-row">{review.verdict&&<span>{review.verdict}</span>}</div>
     <div className="engagement">
-      <button className={data.viewerLiked ? 'liked':''} disabled={busy} onClick={()=>act(`/api/admin-reviews/${review.id}/like`)}>♥ <b>{data.likeCount}</b> Helpful</button>
+      <button className={data.viewerLiked ? 'liked':''} disabled={busy} onClick={()=>act(`/api/admin-reviews/${review.id}/like`)}><span className="heart">{data.viewerLiked?'♥':'♡'}</span> <b>{data.likeCount}</b> {data.viewerLiked?'Liked':'Like review'}</button>
       <span>◌ <b>{data.comments.length}</b> Comments</span>
       <small>Updated {ago(review.updated_at)}</small>
     </div>
     <div className="comment-head"><h4>Community discussion</h4><div><button className={sort==='top'?'on':''} onClick={()=>setSort('top')}>Top</button><button className={sort==='new'?'on':''} onClick={()=>setSort('new')}>Newest</button></div></div>
-    {isLoggedIn ? <form className="comment-form" onSubmit={e=>{e.preventDefault();if(text.trim()){act(`/api/admin-reviews/${review.id}/comments`,{text});setText('')}}}>
+    {isLoggedIn ? <form className="comment-form" onSubmit={postComment}>
       <span className="mini-avatar">U</span><input value={text} maxLength="500" onChange={e=>setText(e.target.value)} placeholder="Add your take…"/><button disabled={busy||!text.trim()}>Post</button>
     </form> : <div className="login-wall"><div><b>Join the discussion</b><small>Reviews padh sakte ho. Like aur comment ke liye login required hai.</small></div><button onClick={onLogin}>Continue with Google</button></div>}
     {notice && <p className="notice">{notice} {!isLoggedIn&&<button className="inline-login" onClick={onLogin}>Login</button>}</p>}
     <div className="comments">{data.comments.map(c=><article className={c.is_pinned?'pinned':''} key={c.id}>
-      <span className="mini-avatar">{(c.display_name||'G')[0].toUpperCase()}</span><div><header><b>{c.display_name||'Guest'}</b>{!c.is_guest&&<i>✓</i>}<small>{ago(c.created_at)}</small>{c.is_pinned&&<em>PINNED</em>}</header><p>{c.comment_text}</p><button className={c.viewer_liked?'liked':''} onClick={()=>act(`/api/comments/${c.id}/like`)}>♥ {c.like_count||0}</button></div>
+      <span className="mini-avatar">{(c.display_name||'G')[0].toUpperCase()}</span><div><header><b>{c.display_name||'Guest'}</b>{!c.is_guest&&<i>✓</i>}<small>{ago(c.created_at)}</small>{c.is_pinned&&<em>PINNED</em>}</header><p>{c.comment_text}</p><button disabled={busy} className={c.viewer_liked?'liked':''} onClick={()=>act(`/api/comments/${c.id}/like`)}>{c.viewer_liked?'♥':'♡'} {c.like_count||0} Like</button></div>
     </article>)}</div>
   </section>;
 }
