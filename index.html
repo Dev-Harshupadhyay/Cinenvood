@@ -591,6 +591,166 @@ body::after{
 .card img{transition:transform .35s ease;}
 .card:hover img{transform:scale(1.06);}
 @media(hover:none){.card:hover{transform:none;}}
+
+/* ═══════════════════════════════════════════════════════
+   🎬 NETFLIX-PLUS PREMIUM v2 — expert cards, mega menu,
+   enhanced trailer, desktop polish
+   ═══════════════════════════════════════════════════════ */
+
+/* ── 1. TOPNAV v2 ── */
+#topNav{background:linear-gradient(180deg,rgba(0,0,0,.94),rgba(0,0,0,.74));}
+.logo{text-shadow:0 0 24px rgba(229,9,20,.5);}
+.logo b{animation:logoPulse 2.8s ease infinite;}
+@keyframes logoPulse{0%,100%{text-shadow:0 0 8px rgba(229,9,20,.55);}50%{text-shadow:0 0 26px rgba(229,9,20,1);}}
+#hamburgerBtn{border-radius:11px;}
+
+/* ── 2. HERO v2 ── */
+#hero h1 em{background:linear-gradient(90deg,var(--red),#ff7b7b,var(--red));background-size:200% 100%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:heroShimmer 3.2s linear infinite;}
+@keyframes heroShimmer{to{background-position:-200% 0;}}
+#surpriseBtn{background:linear-gradient(135deg,#e50914,#ff4b2b);border-radius:12px;position:relative;overflow:hidden;padding:13px 30px;}
+#surpriseBtn::before{content:'';position:absolute;top:0;left:-70%;width:45%;height:100%;background:linear-gradient(105deg,transparent,rgba(255,255,255,.35),transparent);animation:btnShine 3.4s ease infinite;}
+@keyframes btnShine{0%{left:-70%;}55%,100%{left:135%;}}
+#surpriseBtn:hover{box-shadow:0 0 62px var(--red-glow),0 8px 26px rgba(229,9,20,.4);}
+
+/* ── 3. CARDS v2 ── */
+.card{position:relative;}
+.card::after{content:'';position:absolute;left:14%;right:14%;bottom:-1px;height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,var(--red),transparent);opacity:0;transition:opacity .25s;z-index:2;}
+@media(hover:hover){
+  .card:hover{transform:translateY(-8px) scale(1.02);border-color:rgba(229,9,20,.55);box-shadow:0 20px 48px rgba(229,9,20,.22),0 10px 22px rgba(0,0,0,.55);}
+  .card:hover::after{opacity:1;}
+  .card:hover img{filter:brightness(1.07) saturate(1.1);}
+}
+
+/* ── 4. VIBE BOX v2 (expert/AI/fan header row) ── */
+.vibe-head-row{display:flex;align-items:center;gap:9px;margin-bottom:9px;}
+.vibe-ico{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:16px;background:linear-gradient(135deg,#262626,#141414);border:1px solid var(--glass-b);flex-shrink:0;transition:all .3s;}
+.vibe-chip{margin-left:auto;font-size:8.5px;font-weight:900;letter-spacing:1.2px;padding:4px 9px;border-radius:99px;border:1px solid var(--glass-b);color:var(--silver-l);}
+.vibe-chip.chip-expert{color:#ffd166;border-color:rgba(255,209,102,.45);background:rgba(255,209,102,.08);}
+.vibe-chip.chip-ai{color:#7dd3fc;border-color:rgba(125,211,252,.4);background:rgba(125,211,252,.07);}
+.vibe-chip.chip-fan{color:#f9a8d4;border-color:rgba(249,168,212,.4);background:rgba(249,168,212,.07);}
+
+/* ── EXPERT CARD (admin) — gold cinematic ── */
+.vibe-box.admin-premium-box{
+  background:linear-gradient(165deg,rgba(229,9,20,.10),rgba(255,209,102,.04) 45%,rgba(0,0,0,.35)),#0d0d0d!important;
+  border:1px solid rgba(255,209,102,.38)!important;
+  box-shadow:0 12px 38px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.05);
+  position:relative;overflow:hidden;border-radius:14px!important;
+}
+.vibe-box.admin-premium-box::before{content:'';position:absolute;top:0;left:-70%;width:50%;height:100%;background:linear-gradient(105deg,transparent,rgba(255,209,102,.10),transparent);animation:cardShine 5.5s ease infinite;pointer-events:none;}
+@keyframes cardShine{0%{left:-70%;}55%,100%{left:135%;}}
+.vibe-box.admin-premium-box .vibe-ico{background:linear-gradient(135deg,#e50914,#ff4b2b);border-color:rgba(255,107,107,.5);box-shadow:0 6px 16px var(--red-glow);}
+.vibe-box.admin-premium-box .vibe-desc{white-space:normal!important;}
+
+/* ── EXPERT REVIEW structured content ── */
+.rv-title{font-family:'Sora',sans-serif;font-size:14px;font-weight:800;color:#fff;letter-spacing:.3px;margin:2px 0 9px;line-height:1.45;}
+.rv-body p{font-size:12.5px;line-height:1.78;color:var(--silver-l);margin:0 0 9px;font-weight:300;}
+.rv-body p:last-child{margin-bottom:0;}
+.rv-rating{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:13px 0 4px;padding:11px 13px;border-radius:12px;background:rgba(255,209,102,.06);border:1px solid rgba(255,209,102,.25);}
+.rv-stars{display:flex;gap:2px;font-size:12.5px;}
+.rv-score{font-family:'Bebas Neue',sans-serif;font-size:22px;color:#ffd166;letter-spacing:1.5px;line-height:1;}
+.rv-verdict{margin-left:auto;font-size:8.5px;font-weight:900;letter-spacing:1px;color:#0d0d0d;background:linear-gradient(90deg,#ffd166,#ffb347);padding:5px 11px;border-radius:99px;white-space:nowrap;}
+.rv-row{display:flex;gap:9px;align-items:flex-start;margin:9px 0 0;padding:10px 12px;border-radius:11px;background:rgba(255,255,255,.03);border:1px solid var(--glass-b);font-size:11.5px;color:var(--silver-l);line-height:1.65;}
+.rv-row b{color:#fff;font-weight:700;}
+.rv-row .rv-ico{font-size:14px;line-height:1.35;}
+.rv-row.rv-warn{background:rgba(229,9,20,.07);border-color:rgba(229,9,20,.32);}
+
+/* ── AI / FAN variants ── */
+.vibe-box.ai-box{background:linear-gradient(165deg,rgba(125,211,252,.07),rgba(0,0,0,.35)),#0d0d0d!important;border-color:rgba(125,211,252,.28)!important;border-radius:14px!important;}
+.vibe-box.ai-box .vibe-ico{background:linear-gradient(135deg,#312e81,#0c4a6e);border-color:rgba(125,211,252,.4);}
+.vibe-box.fan-box{border-radius:14px!important;}
+.vibe-box.fan-box .vibe-ico{background:linear-gradient(135deg,#9d174d,#be185d);border-color:rgba(249,168,212,.4);}
+
+/* ── 5. TRAILER v2 ── */
+.trailer-btn{background:linear-gradient(135deg,#e50914,#ff4b2b);border-radius:12px;padding:11px 20px;position:relative;overflow:hidden;box-shadow:0 6px 24px var(--red-glow);font-size:13px;}
+.trailer-btn::before{content:'';position:absolute;top:0;left:-70%;width:45%;height:100%;background:linear-gradient(105deg,transparent,rgba(255,255,255,.3),transparent);animation:btnShine 3.8s ease infinite;}
+.trailer-btn:hover{transform:scale(1.04);box-shadow:0 8px 34px var(--red-glow);}
+.trailer-btn .tb-play{width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,.2);display:grid;place-items:center;font-size:9px;flex-shrink:0;}
+.trailer-btn .tb-hd{font-size:8px;font-weight:900;background:rgba(0,0,0,.35);padding:3px 7px;border-radius:6px;letter-spacing:1.2px;}
+.trailer-frame-wrap{aspect-ratio:auto;border-radius:16px;border:1px solid rgba(229,9,20,.35);box-shadow:0 16px 48px rgba(0,0,0,.6),0 0 34px rgba(229,9,20,.14);overflow:hidden;}
+.tf-bar{display:flex;align-items:center;justify-content:space-between;padding:9px 13px;background:linear-gradient(90deg,#181818,#0d0d0d);border-bottom:1px solid var(--glass-b);}
+.tf-live{font-size:9.5px;font-weight:800;letter-spacing:1.8px;color:#fff;display:flex;align-items:center;gap:7px;font-family:'Sora',sans-serif;}
+.tf-live i{width:7px;height:7px;border-radius:50%;background:var(--red);box-shadow:0 0 10px var(--red);animation:tfBlink 1.4s infinite;}
+@keyframes tfBlink{50%{opacity:.3;}}
+.tf-close{background:var(--red);border:0;color:#fff;font-size:10px;font-weight:800;letter-spacing:1px;padding:6px 13px;border-radius:8px;cursor:pointer;font-family:'Sora',sans-serif;transition:transform .15s;}
+.tf-close:active{transform:scale(.92);}
+.tf-frame{position:relative;width:100%;aspect-ratio:16/9;background:#000;}
+.tf-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block;}
+
+/* ── 6. USER REVIEWS v2 ── */
+.ur-item{border-radius:14px;transition:border-color .2s,transform .2s;}
+.ur-item:hover{border-color:rgba(229,9,20,.3);}
+.ur-like .ur-heart{transition:transform .18s cubic-bezier(.32,1,.46,1);display:inline-block;}
+.ur-like.pop .ur-heart{animation:heartPop .4s ease;}
+@keyframes heartPop{0%{transform:scale(1);}45%{transform:scale(1.6);}100%{transform:scale(1);}}
+
+/* ── 7. MEGA MENU v2 ── */
+#navDropdown{padding:16px 16px 12px;gap:11px;background:rgba(5,5,5,.97);}
+.dd-head{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2.5px;color:#fff;display:flex;align-items:center;gap:10px;padding:0 2px;}
+.dd-head span{font-family:'Sora',sans-serif;font-size:9px;letter-spacing:2px;color:var(--red);border:1px solid rgba(229,9,20,.45);padding:4px 10px;border-radius:99px;font-weight:800;}
+.dd-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.dd-card{display:flex;flex-direction:column;gap:2px;padding:13px 13px 12px;background:var(--glass);border:1px solid var(--glass-b);border-radius:14px;cursor:pointer;transition:all .22s;position:relative;overflow:hidden;text-align:left;}
+.dd-card b{font-size:12.5px;color:#fff;font-family:'Sora',sans-serif;font-weight:700;}
+.dd-card small{font-size:9.5px;color:var(--silver);line-height:1.5;}
+.dd-card .dd-ico{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:16px;background:linear-gradient(135deg,#242424,#131313);border:1px solid var(--glass-b);margin-bottom:6px;transition:all .22s;}
+.dd-card:hover{border-color:var(--red);background:var(--red-dim);transform:translateY(-2px);}
+.dd-card:hover .dd-ico{background:linear-gradient(135deg,#e50914,#ff4b2b);border-color:transparent;box-shadow:0 6px 16px var(--red-glow);}
+.dd-card.dd-admin{border-color:rgba(229,9,20,.4);}
+.dd-card.dd-admin.unlocked{border-color:rgba(0,255,170,.5);background:rgba(0,255,170,.05);}
+.dd-card.dd-admin.unlocked .dd-ico{background:linear-gradient(135deg,#059669,#10b981);border-color:transparent;}
+.dd-mini{font-size:8.5px;color:var(--silver);text-align:center;letter-spacing:1.8px;padding-top:3px;opacity:.75;}
+#navDropdown .nav-ico{display:none!important;}
+#navDropdown .dd-close{position:absolute;top:12px;right:14px;margin:0;width:28px;height:28px;}
+@media(min-width:1024px){
+  .dd-grid{grid-template-columns:repeat(4,1fr);}
+  #navDropdown{border-radius:0 0 18px 18px;box-shadow:0 30px 70px rgba(0,0,0,.6);}
+}
+
+/* ── 8. OVERLAYS desktop: centered dialog ── */
+@media(min-width:700px){
+  .overlay{align-items:center;justify-content:center;padding:30px 18px;}
+  .overlay-sheet{max-width:640px;margin:0 auto;border-radius:20px;border:1px solid var(--glass-b);transform:translateY(26px) scale(.97);opacity:0;box-shadow:0 40px 100px rgba(0,0,0,.7);transition:transform .35s cubic-bezier(.32,1,.46,1),opacity .28s;}
+  .overlay.open .overlay-sheet{transform:none;opacity:1;}
+  .overlay-handle{display:none;}
+}
+/* Contact: 2-column desktop (dev + support side-by-side, telegram full) */
+@media(min-width:900px){
+  #overlay-contact .overlay-sheet{max-width:760px;}
+  #overlay-contact .overlay-body{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start;}
+  #overlay-contact .tg-hub-cine{grid-column:1/-1;}
+}
+/* Admin stats desktop */
+@media(min-width:700px){
+  #overlay-admin .admin-stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;}
+  #overlay-admin .astat{padding:15px 8px;border-radius:14px;}
+  #overlay-admin .astat b{font-size:24px;}
+}
+
+/* ── 9. ADMIN EXPERT FORM v2 (rating chips) ── */
+.admin-review-form{border-radius:16px!important;}
+.af-title{font-size:9.5px;letter-spacing:2.2px;font-weight:900;color:var(--red);margin-bottom:9px;font-family:'Sora',sans-serif;}
+.af-label{font-size:9px;letter-spacing:1.8px;font-weight:800;color:var(--silver);margin:11px 0 7px;font-family:'Sora',sans-serif;}
+.af-stars{display:flex;flex-wrap:wrap;gap:5px;}
+.af-star{width:36px;height:36px;border-radius:10px;border:1px solid var(--glass-b);background:var(--glass);color:var(--silver-l);font-size:12.5px;font-weight:800;cursor:pointer;transition:all .15s;font-family:'Sora',sans-serif;}
+.af-star:hover{border-color:var(--red-b);color:#fff;transform:translateY(-2px);}
+.af-star.sel{background:linear-gradient(135deg,#e50914,#ff4b2b);border-color:transparent;color:#fff;box-shadow:0 5px 15px var(--red-glow);}
+.af-inp{width:100%;box-sizing:border-box;background:var(--glass);border:1px solid var(--glass-b);border-radius:11px;color:#fff;font-family:'Sora',sans-serif;font-size:12px;padding:10px 13px;outline:none;margin-top:9px;transition:border-color .2s;}
+.af-inp::placeholder{color:var(--silver);}
+.af-inp:focus{border-color:var(--red);}
+.admin-save-btn{width:100%;margin-top:13px;background:linear-gradient(135deg,#e50914,#ff4b2b)!important;border:none;color:#fff;padding:13px!important;border-radius:12px!important;font-weight:800;letter-spacing:1.2px;font-size:12.5px!important;cursor:pointer;box-shadow:0 6px 22px var(--red-glow);transition:transform .18s;}
+.admin-save-btn:hover{transform:scale(1.02);}
+.admin-save-btn:active{transform:scale(.97);}
+
+/* ── 10. MODAL desktop wider + pill polish ── */
+@media(min-width:1024px){.modal-sheet{max-width:840px;}}
+.pill{border-radius:12px;}
+.sec-head h2{text-shadow:0 0 18px rgba(229,9,20,.25);}
+
+/* ── 11. Small mobile polish ── */
+@media(max-width:380px){
+  .dd-grid{grid-template-columns:1fr;}
+  .af-star{width:32px;height:32px;}
+}
+
 </style>
 </head>
 <body>
@@ -607,10 +767,22 @@ body::after{
 
 <div id="navDropdown">
   <button class="dd-close" onclick="closeHamburger()">✕</button>
-  <div class="nav-ico" data-panel="navAbout" onclick="toggleNavPanel('navAbout')">ℹ️ About</div>
-  <div class="nav-ico" data-panel="navServices" onclick="toggleNavPanel('navServices')">✦ Services</div>
-  <div class="nav-ico" onclick="openOverlay('contact');closeHamburger()">📡 Contact</div>
-  <div class="nav-ico admin-ico" id="adminNavIco" onclick="openOverlay('admin');closeHamburger()">🔐 Admin</div>
+  <div class="dd-head">CINE<b style="color:var(--red);">·</b>MOOD <span>MENU</span></div>
+  <div class="dd-grid">
+    <div class="dd-card" data-panel="navAbout" onclick="toggleNavPanel('navAbout')">
+      <div class="dd-ico">ℹ️</div><b>About</b><small>Story behind Cine·Mood engine</small>
+    </div>
+    <div class="dd-card" data-panel="navServices" onclick="toggleNavPanel('navServices')">
+      <div class="dd-ico">✦</div><b>Services</b><small>AI vibe matching kya karta hai</small>
+    </div>
+    <div class="dd-card" onclick="openOverlay('contact');closeHamburger()">
+      <div class="dd-ico">📡</div><b>Contact</b><small>Developer + support &amp; donate</small>
+    </div>
+    <div class="dd-card dd-admin" id="adminNavIco" onclick="openOverlay('admin');closeHamburger()">
+      <div class="dd-ico">🔐</div><b>Admin</b><small>Expert review panel</small>
+    </div>
+  </div>
+  <div class="dd-mini">🍿 MADE IN INDIA · PREMIUM MOVIE INTELLIGENCE</div>
 </div>
 
 <div class="nav-info-panel">
@@ -831,18 +1003,30 @@ body::after{
       </div>
       <p id="mOverview" class="modal-overview"></p>
 
-      <button class="trailer-btn" id="trailerBtn" onclick="playTrailer()">▶ Watch Trailer</button>
+      <button class="trailer-btn" id="trailerBtn" onclick="playTrailer()">
+        <span class="tb-play">▶</span> WATCH TRAILER <span class="tb-hd">HD</span>
+      </button>
       <div class="trailer-frame-wrap" id="trailerFrameWrap">
-        <iframe id="trailerFrame" src="" title="Trailer" frameborder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowfullscreen></iframe>
+        <div class="tf-bar">
+          <span class="tf-live"><i></i> OFFICIAL TRAILER · HD</span>
+          <button class="tf-close" onclick="closeTrailer()" type="button">✕ CLOSE</button>
+        </div>
+        <div class="tf-frame">
+          <iframe id="trailerFrame" src="" title="Trailer" frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+            allowfullscreen></iframe>
+        </div>
       </div>
       <p class="trailer-empty" id="trailerEmpty" style="display:none;">Is movie ka trailer abhi available nahi hai bhai.</p>
       
       <div class="vibe-box" id="mReviewBox">
-        <div class="vibe-lbl" id="vibeSource">CINE-VIBE ENGINE</div>
-        <div class="vibe-head">🔥 HINGLISH REVIEW</div>
-        <p id="vibeText" class="vibe-desc">Fetching latest review...</p>
+        <div class="vibe-head-row">
+          <div class="vibe-ico" id="vibeIco">🤖</div>
+          <div class="vibe-lbl" id="vibeSource">CINE-VIBE ENGINE</div>
+          <span class="vibe-chip" id="vibeChip">AI</span>
+        </div>
+        <div class="vibe-head" id="vibeHead">🔥 HINGLISH REVIEW</div>
+        <div id="vibeText" class="vibe-desc">Fetching latest review...</div>
       </div>
 
       <!-- USER REVIEWS + LIKES (Motcale-style) -->
@@ -860,11 +1044,16 @@ body::after{
       </div>
 
       <div id="adminForm" class="admin-review-form">
+        <div class="af-title">👑 EXPERT REVIEW EDITOR</div>
         <div class="admin-input-wrap" style="margin-bottom: 8px;">
           <input type="text" id="adminNameInput" placeholder="Apna Admin Name likho (e.g. HARSH)..." style="font-size: 13px; padding: 8px 12px;"/>
         </div>
         <textarea id="adminTextInput" placeholder="Bhai apna premium review likho yahan... AI review bypass ho jayega!"></textarea>
-        <button class="admin-save-btn" onclick="saveAdminReview()">Save Custom Review</button>
+        <div class="af-label">⭐ MY RATING (OUT OF 10)</div>
+        <div class="af-stars" id="afStars"></div>
+        <input type="text" id="adminPlatformInput" class="af-inp" placeholder="📺 Platform — e.g. Prime Video, English (Hindi Dub Available) — optional"/>
+        <input type="text" id="adminParentalInput" class="af-inp" placeholder="⚠️ Parental Guidance — e.g. 18+ Strong violence, language — optional"/>
+        <button class="admin-save-btn" onclick="saveAdminReview()">💾 SAVE EXPERT REVIEW</button>
       </div>
     </div>
   </div>
@@ -1001,6 +1190,19 @@ document.getElementById('spClose').onclick = function() {
 };
 
 // ── OPEN MODAL & BACKEND ROUTER CALL ──
+let lastReviewData = null; // admin login ke baad editor pre-fill ke liye
+
+function fillAdminEditorFromReview(data) {
+  if(!data || !data.custom || !isAdmin) return;
+  document.getElementById('adminTextInput').value = data.review;
+  const rm = String(data.review).match(/My Rating\s*✨?\s*:\s*(\d+(?:\.\d+)?)\s*\/\s*10/);
+  setAdminRating(rm ? parseFloat(rm[1]) : 0);
+  const pm = String(data.review).match(/📺\s*Platform\s*:\s*(.+)/i);
+  document.getElementById('adminPlatformInput').value = pm ? pm[1].trim() : '';
+  const wm = String(data.review).match(/⚠️\s*Parental\s*Guidance\s*:\s*(.+)/i);
+  document.getElementById('adminParentalInput').value = wm ? wm[1].trim() : '';
+}
+
 async function openMovieModal(movie) {
   currentMovieData = movie;
   document.getElementById('mTitle').textContent = movie.title;
@@ -1018,6 +1220,8 @@ async function openMovieModal(movie) {
   const textEl = document.getElementById('vibeText');
   
   boxEl.classList.remove('admin-premium-box');
+  boxEl.classList.remove('ai-box');
+  boxEl.classList.remove('fan-box');
   labelEl.classList.remove('admin-glow');
   textEl.classList.remove('admin-bold');
   labelEl.textContent = "CHECKING DATABASE...";
@@ -1036,17 +1240,41 @@ async function openMovieModal(movie) {
   try {
     let res = await fetch(`/api/review/${movie.id}`);
     let data = await res.json();
-    
+
+    lastReviewData = data;
+    const icoEl = document.getElementById('vibeIco');
+    const chipEl = document.getElementById('vibeChip');
+    const headEl = document.getElementById('vibeHead');
+
     labelEl.textContent = data.source;
-    textEl.textContent = data.review;
-    
+
     if(data.custom) {
+       // 👑 EXPERT CARD — structured premium render
        boxEl.classList.add('admin-premium-box');
        labelEl.classList.add('admin-glow');
        textEl.classList.add('admin-bold');
-       if(isAdmin) {
-          document.getElementById('adminTextInput').value = data.review;
-       }
+       icoEl.textContent = '👑';
+       chipEl.textContent = 'EXPERT';
+       chipEl.className = 'vibe-chip chip-expert';
+       headEl.textContent = '👑 EXPERT REVIEW';
+       textEl.innerHTML = buildExpertReviewHTML(data.review, movie);
+       fillAdminEditorFromReview(data);
+    } else if(String(data.source).includes('FAN')) {
+       // ⭐ TOP FAN REVIEW
+       boxEl.classList.add('fan-box');
+       icoEl.textContent = '💬';
+       chipEl.textContent = 'FAN PICK';
+       chipEl.className = 'vibe-chip chip-fan';
+       headEl.textContent = '⭐ TOP FAN REVIEW';
+       textEl.textContent = data.review;
+    } else {
+       // 🤖 GEMINI AI
+       boxEl.classList.add('ai-box');
+       icoEl.textContent = '🤖';
+       chipEl.textContent = 'GEMINI AI';
+       chipEl.className = 'vibe-chip chip-ai';
+       headEl.textContent = '🤖 AI HINGLISH REVIEW';
+       textEl.textContent = data.review;
     }
   } catch(err) {
     console.error("Error connecting to server backend router");
@@ -1110,10 +1338,20 @@ function playTrailer() {
   const wrap = document.getElementById('trailerFrameWrap');
   const btn = document.getElementById('trailerBtn');
 
-  // native inline embed — YouTube pe redirect nahi hota, sab kuch andar hi chalta hai
-  frame.src = `https://www.youtube.com/embed/${currentTrailerKey}?autoplay=1&rel=0&modestbranding=1`;
+  // Enhanced premium player — nocookie + clean UI + inline mobile playback
+  frame.src = `https://www.youtube-nocookie.com/embed/${currentTrailerKey}?autoplay=1&rel=0&modestbranding=1&playsinline=1&color=white`;
   wrap.classList.add('show');
   btn.classList.remove('show');
+  wrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function closeTrailer() {
+  const frame = document.getElementById('trailerFrame');
+  const wrap = document.getElementById('trailerFrameWrap');
+  const btn = document.getElementById('trailerBtn');
+  frame.src = '';
+  wrap.classList.remove('show');
+  if (currentTrailerKey) btn.classList.add('show');
 }
 
 // ── SAVE HANDLER ──
@@ -1121,11 +1359,22 @@ async function saveAdminReview() {
   if(!currentMovieData) return;
   const reviewText = document.getElementById('adminTextInput').value.trim();
   const adminName = document.getElementById('adminNameInput').value.trim() || 'Admin';
+  const platform = document.getElementById('adminPlatformInput').value.trim();
+  const parental = document.getElementById('adminParentalInput').value.trim();
   
   if(!reviewText) {
-    alert("Review field khali hai bhai!");
+    showToast("✍️ Review field khali hai bhai!");
     return;
   }
+
+  // Structured expert review compose (Reacher-style)
+  let full = reviewText;
+  if(selectedAdminRating > 0) full += `\n\nMy Rating ✨: ${selectedAdminRating}/10 ⭐`;
+  if(platform) full += `\n📺 Platform: ${platform}`;
+  if(parental) full += `\n⚠️ Parental Guidance: ${parental}`;
+
+  const btn = document.querySelector('.admin-save-btn');
+  btn.disabled = true; const oldTxt = btn.textContent; btn.textContent = '⏳ SAVING...';
 
   let response = await fetch('/api/review/save', {
     method: 'POST',
@@ -1134,14 +1383,14 @@ async function saveAdminReview() {
       password: adminPasswordState,
       movieId: currentMovieData.id,
       movieTitle: currentMovieData.title,
-      reviewText: reviewText,
+      reviewText: full,
       adminName: adminName
     })
   });
 
   let result = await response.json();
   if(result.success) {
-    showToast("✅ Review save ho gayi database mein! 🔥");
+    showToast("✅ Expert review live ho gayi! 👑🔥");
     const boxEl = document.getElementById('mReviewBox');
     const labelEl = document.getElementById('vibeSource');
     const textEl = document.getElementById('vibeText');
@@ -1150,10 +1399,79 @@ async function saveAdminReview() {
     labelEl.classList.add('admin-glow');
     textEl.classList.add('admin-bold');
     labelEl.textContent = `👑 EXPERT CHOICE BY ${adminName.toUpperCase()}`;
-    textEl.textContent = reviewText;
+    document.getElementById('vibeIco').textContent = '👑';
+    const chipEl = document.getElementById('vibeChip');
+    chipEl.textContent = 'EXPERT'; chipEl.className = 'vibe-chip chip-expert';
+    document.getElementById('vibeHead').textContent = '👑 EXPERT REVIEW';
+    textEl.innerHTML = buildExpertReviewHTML(full, currentMovieData);
   } else {
     showToast("❌ Error: " + result.error);
   }
+  btn.disabled = false; btn.textContent = oldTxt;
+}
+
+// ── ADMIN RATING CHIPS (1-10) ──
+let selectedAdminRating = 0;
+function setAdminRating(v) {
+  selectedAdminRating = v;
+  document.querySelectorAll('.af-star').forEach(b => b.classList.toggle('sel', parseFloat(b.dataset.r) === v));
+}
+(function initAdminStars(){
+  const host = document.getElementById('afStars');
+  if(!host) return;
+  for(let i = 1; i <= 10; i++) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'af-star';
+    b.dataset.r = i;
+    b.textContent = i + '★';
+    b.onclick = () => setAdminRating(selectedAdminRating === i ? 0 : i);
+    host.appendChild(b);
+  }
+})();
+
+// ── EXPERT REVIEW RENDERER (structured premium card) ──
+function verdictFor(r) {
+  if(r >= 9) return 'PERFECTION · HIGHLY RECOMMENDED 🔥';
+  if(r >= 8) return 'BLOCKBUSTER · MUST WATCH ⚡';
+  if(r >= 7) return 'WORTH WATCHING 👌';
+  if(r >= 5) return 'ONE TIME WATCH 🍿';
+  if(r > 0)  return 'SKIP IT ❌';
+  return '';
+}
+function buildExpertReviewHTML(raw, movie) {
+  const lines = String(raw).split(/\n+/).map(l => l.trim()).filter(Boolean);
+  let body = [], rating = 0, platform = null, parental = null;
+
+  lines.forEach(l => {
+    const rm = l.match(/My Rating\s*✨?\s*:\s*(\d+(?:\.\d+)?)\s*\/\s*10/i);
+    if(rm && !rating) { rating = parseFloat(rm[1]); return; }
+    if(/^📺\s*Platform\s*:/i.test(l)) { platform = l.replace(/^📺\s*Platform\s*:\s*/i, '').trim(); return; }
+    if(/^⚠️\s*Parental\s*Guidance\s*:/i.test(l)) { parental = l.replace(/^⚠️\s*Parental\s*Guidance\s*:\s*/i, '').trim(); return; }
+    body.push(l);
+  });
+
+  const year = movie && movie.release_date ? ` (${movie.release_date.substring(0,4)})` : '';
+  let html = '';
+
+  // Header: 🎬 title — REVIEW
+  html += `<div class="rv-title">🎬 ${(movie && movie.title ? escapeHtml(movie.title) : 'EXPERT')}${year} — REVIEW</div>`;
+
+  // Body paragraphs
+  if(body.length) html += `<div class="rv-body">` + body.map(p => `<p>${escapeHtml(p)}</p>`).join('') + `</div>`;
+
+  // Rating block
+  if(rating > 0) {
+    const full = Math.round(rating);
+    const stars = '⭐'.repeat(full) + '<span style="opacity:.22;">' + '⭐'.repeat(Math.max(0, 10 - full)) + '</span>';
+    html += `<div class="rv-rating"><span class="rv-stars">${stars}</span><span class="rv-score">${rating}/10</span><span class="rv-verdict">${verdictFor(rating)}</span></div>`;
+  }
+
+  // Platform + parental rows
+  if(platform) html += `<div class="rv-row"><span class="rv-ico">📺</span><span><b>Platform:</b> ${escapeHtml(platform)}</span></div>`;
+  if(parental) html += `<div class="rv-row rv-warn"><span class="rv-ico">⚠️</span><span><b>Parental Guidance:</b> ${escapeHtml(parental)}</span></div>`;
+
+  return html || `<div class="rv-body"><p>${escapeHtml(raw)}</p></div>`;
 }
 
 function closeModal() {
@@ -1235,13 +1553,16 @@ async function attemptLogin() {
       document.getElementById('adminLoginSection').style.display = 'none';
       document.getElementById('adminLoggedSection').style.display = 'block';
       document.getElementById('adminOverlayTitle').textContent = '🛠️ Admin Dashboard Unlocked';
-      document.getElementById('adminNavIco').classList.add('unlocked');
-      document.getElementById('adminNavIco').textContent = '🔓';
+      const ani = document.getElementById('adminNavIco');
+      ani.classList.add('unlocked');
+      if(ani.querySelector('.dd-ico')) ani.querySelector('.dd-ico').textContent = '🔓';
+      if(ani.querySelector('b')) ani.querySelector('b').textContent = 'Admin ✓';
       loadAdminStats();
       if(currentMovieData) {
         loadUserReviews(currentMovieData.id); // delete buttons dikhao
         const af = document.getElementById('adminForm');
         if(af) af.classList.add('show'); // admin review form bhi dikha do
+        fillAdminEditorFromReview(lastReviewData); // rating/platform pre-fill
       }
       closeOverlay('admin');
     } else {
@@ -1259,8 +1580,10 @@ function adminLogout() {
   document.getElementById('adminLoginSection').style.display = 'block';
   document.getElementById('adminLoggedSection').style.display = 'none';
   document.getElementById('adminOverlayTitle').textContent = '🔐 Admin Login';
-  document.getElementById('adminNavIco').classList.remove('unlocked');
-  document.getElementById('adminNavIco').textContent = '🔐';
+  const ani = document.getElementById('adminNavIco');
+  ani.classList.remove('unlocked');
+  if(ani.querySelector('.dd-ico')) ani.querySelector('.dd-ico').textContent = '🔐';
+  if(ani.querySelector('b')) ani.querySelector('b').textContent = 'Admin';
   if(currentMovieData) loadUserReviews(currentMovieData.id); // delete buttons hatao
   closeOverlay('admin');
 }
@@ -1397,6 +1720,7 @@ async function toggleLike(btn, reviewId) {
   if (cnt) cnt.textContent = Math.max(0, (parseInt(cnt.textContent) || 0) + delta);
   if (heart) heart.textContent = isLiked ? '🤍' : '❤️';
   btn.classList.toggle('liked', !isLiked);
+  btn.classList.remove('pop'); void btn.offsetWidth; btn.classList.add('pop');
 
   // Save dedup
   if (isLiked) setLikedIds(liked.filter(id => id !== reviewId));
