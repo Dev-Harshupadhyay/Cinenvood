@@ -64,6 +64,12 @@ That is a deliberate product decision — it keeps the site legal, advertiser-sa
 ### Member dashboard
 ![Dashboard](./docs/screenshots/04-dashboard.jpg)
 
+### About — the site and the developer
+![About page](./docs/screenshots/07-about.jpg)
+
+### Language switcher — English / हिंदी / Hinglish
+![Hinglish UI](./docs/screenshots/08-hinglish.jpg)
+
 ### Mobile (390px)
 <img src="./docs/screenshots/06-mobile.jpg" alt="Mobile view" width="300" />
 
@@ -101,7 +107,7 @@ npm run dev                 # http://localhost:3000
 
 ```env
 # Supabase — pooled (6543) for runtime, direct (5432) for migrations
-DATABASE_URL="postgresql://postgres.<ref>:<pass>@aws-0-<region>.pooler.supabase.com:6543/postgres?schema=cinemood&pgbouncer=true&connection_limit=1&sslmode=require"
+DATABASE_URL="postgresql://postgres.<ref>:<pass>@aws-0-<region>.pooler.supabase.com:6543/postgres?schema=cinemood&pgbouncer=true&connection_limit=10&sslmode=require"
 DIRECT_URL="postgresql://postgres.<ref>:<pass>@aws-0-<region>.pooler.supabase.com:5432/postgres?schema=cinemood&sslmode=require"
 
 AUTH_SECRET="openssl rand -base64 32"

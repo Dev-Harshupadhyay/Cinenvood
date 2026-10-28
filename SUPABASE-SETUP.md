@@ -16,14 +16,14 @@ CineMood ko **alag schema `cinemood`** mein rakha gaya hai, isliye purana data b
 `.env` (gitignored — repo mein kabhi nahi jayega):
 
 ```env
-DATABASE_URL="postgresql://postgres.janmyjspktvqdoeatpxo:***@aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres?schema=cinemood&pgbouncer=true&connection_limit=1&sslmode=require"
+DATABASE_URL="postgresql://postgres.janmyjspktvqdoeatpxo:***@aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres?schema=cinemood&pgbouncer=true&connection_limit=10&sslmode=require"
 DIRECT_URL="postgresql://postgres.janmyjspktvqdoeatpxo:***@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres?schema=cinemood&sslmode=require"
 ```
 
 **Vercel env vars** (same values, password bharke):
 
 ```
-DATABASE_URL   = ...6543/postgres?schema=cinemood&pgbouncer=true&connection_limit=1&sslmode=require
+DATABASE_URL   = ...6543/postgres?schema=cinemood&pgbouncer=true&connection_limit=10&sslmode=require
 DIRECT_URL     = ...5432/postgres?schema=cinemood&sslmode=require
 AUTH_SECRET, AUTH_TRUST_HOST, NEXT_PUBLIC_SITE_URL, ADMIN_EMAIL
 AUTH_GOOGLE_ID, AUTH_GOOGLE_SECRET, TMDB_API_KEY, OMDB_API_KEY
@@ -61,7 +61,7 @@ Supabase = managed Postgres, isliye Prisma ke saath direct chalta hai. **NextAut
 Pooled URL ke end mein ye add karo:
 
 ```
-?pgbouncer=true&connection_limit=1&sslmode=require
+?pgbouncer=true&connection_limit=10&sslmode=require
 ```
 
 Direct URL ke end mein:
@@ -73,7 +73,7 @@ Direct URL ke end mein:
 ### .env (local + Vercel dono mein same keys)
 
 ```env
-DATABASE_URL="postgresql://postgres.<ref>:<password>@aws-0-ap-south-1.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1&sslmode=require"
+DATABASE_URL="postgresql://postgres.<ref>:<password>@aws-0-ap-south-1.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=10&sslmode=require"
 DIRECT_URL="postgresql://postgres.<ref>:<password>@aws-0-ap-south-1.pooler.supabase.com:5432/postgres?sslmode=require"
 ```
 
@@ -159,7 +159,7 @@ Production traffic badhe to Supabase ka **Pro ($25/mo)** ya **Neon** (branching,
 Sirf ye do lines (dashboard → Settings → Database se copy):
 
 ```
-DATABASE_URL = postgresql://...:6543/postgres?pgbouncer=true&connection_limit=1&sslmode=require
+DATABASE_URL = postgresql://...:6543/postgres?pgbouncer=true&connection_limit=10&sslmode=require
 DIRECT_URL   = postgresql://...:5432/postgres?sslmode=require
 ```
 
