@@ -1,147 +1,233 @@
 <div align="center">
 
-# 🎬 <span style="background: linear-gradient(to right, #ff416c, #ff4b2b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800;">CINE-MOOD AI</span>
-### ✨ *The Ultimate Mood-Driven Cinematic Intelligence Platform* ✨
+<img src="./docs/logo.png" alt="CINE·MOOD" width="420" />
 
-<br>
+### Community verdicts on cinema — reviews, not downloads.
 
-<table align="center" border="0">
-  <tr>
-    <td align="center">
-      <a href="https://cinenvood.onrender.com/">
-        <img src="https://img.shields.io/badge/🚀_LIVE_APP-CINE_MOOD_AI-red?style=for-the-badge&logo=render&logoColor=white" alt="Live Demo" />
-      </a>
-    </td>
-    <td align="center">
-      <a href="https://glittery-brisket-528.notion.site/Cine-Mood-Website-Notes-API-DB-1cc259fb6c744e20855c2b47ad8b9ac0">
-        <img src="https://img.shields.io/badge/📑_ARCH_DOCS-NOTION_NOTES-blueviolet?style=for-the-badge&logo=notion&logoColor=white" alt="Technical Notes" />
-      </a>
-    </td>
-    <td align="center">
-      <a href="https://supabase.com/">
-        <img src="https://img.shields.io/badge/⚡_DATABASE-SUPABASE_CLOUD-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase" />
-      </a>
-    </td>
-  </tr>
-</table>
+[![Next.js](https://img.shields.io/badge/Next.js-15-000000?logo=nextdotjs&logoColor=white)](https://nextjs.org)
+[![React](https://img.shields.io/badge/React-19-149ECA?logo=react&logoColor=white)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://typescriptlang.org)
+[![Prisma](https://img.shields.io/badge/Prisma-6-2D3748?logo=prisma&logoColor=white)](https://prisma.io)
+[![Supabase](https://img.shields.io/badge/Supabase-Postgres-3ECF8E?logo=supabase&logoColor=white)](https://supabase.com)
+[![Auth.js](https://img.shields.io/badge/Auth.js-v5-000000?logo=auth0&logoColor=white)](https://authjs.dev)
+[![TMDB](https://img.shields.io/badge/TMDB-API-01B4E4?logo=themoviedatabase&logoColor=white)](https://themoviedb.org)
 
-<br>
-
-> *A premium, high-end movie analysis panel that curates elite recommendations tailored precisely to your mood and vibe, powered by robust API architecture and real-time cloud sync.*
+**[Live demo](https://cinemood.vercel.app)** · [Features](#-features) · [Screenshots](#-screenshots) · [Quick start](#-quick-start) · [Deploy](#-deploy)
 
 </div>
 
 ---
 
-## 🔥 Key Features
+## ⚡ What this is
 
-- **⚡ Full-Domain ISP Block Bypass:** Seamlessly resolves TMDB poster loading issues across major networks (Jio, Airtel, and local broadband) using a custom backend engine and mirror image-proxy routing.
-- **🎲 Smart Surprise Me (Vibe Control):** Intelligent randomizer that respects your active genre filters (Action, Sci-Fi, Anime, etc.) to spotlight top hits, falling back to the trending collection by default.
-- **🧠 Hybrid Review Engine:** Powered by automated intelligent AI reviews, which dynamically switch to hand-picked admin reviews instantly whenever a custom entry is pushed to the database.
-- **👑 Premium Admin Dashboard:** Features striking neon animations and real-time controls. Admin-curated reviews shine with bold text formatting and dynamic **Neon Rainbow Glow** graphics on custom card panels.
-- **📱 Fully Mobile-Responsive UI:** Crafted with a modern Netflix-Red × Obsidian glassmorphism interface, ensuring seamless layouts and fixed header-footer mapping across mobile and desktop devices.
+A premium, dark-cinematic **film review platform**. Look and feel of a modern streaming site, but the product
+is editorial + community: 10-point ratings, spoiler-safe reviews, likes, comment threads, watchlists, a member
+dashboard and a real admin panel.
 
----
-
-## 🛠️ Tech Stack & Architecture
-
-| Layer | Technologies & Tools Integration |
-| :--- | :--- |
-| **Frontend** | <img src="https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=html5&logoColor=white" /> <img src="https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white" /> <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black" /> *(Custom Glassmorphism & Neon Keyframes)* |
-| **Backend** | <img src="https://img.shields.io/badge/Node.js-339933?style=flat-square&logo=nodedotjs&logoColor=white" /> <img src="https://img.shields.io/badge/Express.js-000000?style=flat-square&logo=express&logoColor=white" /> *(High-Performance API Proxy Routing)* |
-| **Database** | <img src="https://img.shields.io/badge/Supabase-3ECF8E?style=flat-square&logo=supabase&logoColor=white" /> *(Real-time custom entries & secure state synchronization)* |
-| **APIs & Tools** | <img src="https://img.shields.io/badge/TMDB-01B4E4?style=flat-square&logo=themoviedatabase&logoColor=white" /> <img src="https://img.shields.io/badge/Axios-5A29E4?style=flat-square&logo=axios&logoColor=white" /> |
+**No files. No mirrors. No download buttons.** Metadata comes from TMDB, the verdict comes from people.
+That is a deliberate product decision — it keeps the site legal, advertiser-safe, and deployable on free tiers.
 
 ---
 
-## 🚀 Quick Start / Local Setup
+## ✨ Features
 
-Agar aap is project ko apne local machine par run karna chahte hain, toh in steps ko follow karein:
-
-1. **Clone the Repository:**
-   ```bash
-   git clone [https://github.com/Dev-Harshupadhyay/Cinenwood.git](https://github.com/Dev-Harshupadhyay/Cinenwood.git)
-   cd Cinenwood
-   ```
-
----
-
-## 🗄️ Supabase Setup (User Reviews ke liye — EK BAAR)
-
-**Motcale-style user reviews + ❤️ likes** ke liye Supabase dashboard mein ye table banao:
-
-1. [supabase.com](https://supabase.com) → apna project kholo
-2. **SQL Editor** → **New query** → neeche wala SQL paste karo → **Run**
-
-```sql
-CREATE TABLE IF NOT EXISTS user_reviews (
-  id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-  movie_id text NOT NULL,
-  movie_title text,
-  user_name text NOT NULL DEFAULT 'Guest',
-  review_text text NOT NULL,
-  like_count integer NOT NULL DEFAULT 0,
-  created_at timestamptz NOT NULL DEFAULT now()
-);
-
--- Index: movie ke hisaab se fast lookup
-CREATE INDEX IF NOT EXISTS idx_user_reviews_movie ON user_reviews(movie_id);
-
--- RLS policies (public read/write — server-side creds se use hota hai)
-ALTER TABLE user_reviews ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Public read user reviews" ON user_reviews
-  FOR SELECT USING (true);
-
-CREATE POLICY "Public insert user reviews" ON user_reviews
-  FOR INSERT WITH CHECK (true);
-
-CREATE POLICY "Public update likes" ON user_reviews
-  FOR UPDATE USING (true) WITH CHECK (true);
-
--- Admin delete ke liye (ADMIN_PASSWORD server pe check hota hai)
-CREATE POLICY "Public delete user reviews" ON user_reviews
-  FOR DELETE USING (true);
-
--- Security: anonymous update sirf like_count column tak limit karo
--- (review_text / user_name koi bhi edit nahi kar sakta)
-REVOKE UPDATE ON user_reviews FROM anon, authenticated;
-GRANT UPDATE (like_count) ON user_reviews TO anon, authenticated;
-```
-
-3. Done! 🎉 Ab har movie ke neeche **USER REVIEWS** section dikhega — review likho, ❤️ like karo.
-
-> **Admin delete** server-side `ADMIN_PASSWORD` se protected hai — koi policy ki zaroorat nahi.
+| Area | What you get |
+| --- | --- |
+| **Discovery** | Hero with featured poster + community score ring, genre chips, trending rail, top-rated / community-pulse / top-reviewer sidebars, new arrivals |
+| **Catalogue** | Instant search (title, synopsis, director — case-insensitive), genre filter, sort by trending / rating / newest / title |
+| **Film page** | Score ring, 10→6 rating distribution, cast, LIKE + WATCHLIST, review composer, review list, similar titles, JSON-LD |
+| **Reviews** | 10-star picker, headline, body, spoiler blur-reveal, one review per user per film (upsert), likes, threaded comments |
+| **Admin verdict** | Any review by an ADMIN gets a premium animated card — conic gradient border, Instrument Serif headline, drop cap, PINNED badge, signature |
+| **Dashboard** | Stats (reviews, likes received, comments, watchlist), my reviews, watchlist, editable profile |
+| **Admin panel** | KPIs, moderation (publish / hide / pin / delete), catalogue (feature / hide), members (role / delete), comments, TMDB import |
+| **Auth** | Google OAuth + passwordless demo login, JWT sessions, role gating, **login required to like, comment and review** |
+| **i18n** | One-click **English / हिंदी / Hinglish** switcher in the header (cookie-persisted) |
+| **Design** | 5 accent themes (emerald, cyan, rose, violet, amber), real light mode, Instrument Serif display type, mobile-first at 390px |
+| **SEO/PWA** | Sitemap, robots, OG image, manifest, per-film JSON-LD |
 
 ---
 
-## 🎬 Local Preview Mode (bina TMDB/Supabase keys)
+## 📸 Screenshots
+
+### Home — hero, rails and community feed
+![Home page](./docs/screenshots/01-home.jpg)
+
+### Admin verdict — the premium pinned review card
+![Admin verdict](./docs/screenshots/02-admin-verdict.jpg)
+
+### Film detail — score ring, rating distribution, actions
+![Movie detail](./docs/screenshots/05-movie-detail.jpg)
+
+### Admin panel — moderation, pinning, top reviews by likes
+![Admin panel](./docs/screenshots/03-admin-panel.jpg)
+
+### Member dashboard
+![Dashboard](./docs/screenshots/04-dashboard.jpg)
+
+### Mobile (390px)
+<img src="./docs/screenshots/06-mobile.jpg" alt="Mobile view" width="300" />
+
+---
+
+## 🧱 Stack
+
+| Layer | Choice | Cost |
+| --- | --- | --- |
+| Framework | Next.js 15 App Router + React 19 + TypeScript | free |
+| Styling | Hand-written design system (`app/globals.css`) — no UI kit, no Tailwind | free |
+| Auth | Auth.js v5 — Google OAuth + demo email, JWT, role-based admin | free |
+| Database | **Supabase Postgres** (dedicated `cinemood` schema) | free tier |
+| ORM | Prisma 6 (`db push`, seed script included) | free |
+| Metadata | **TMDB API** via server-side proxy (ISP-block safe) | free |
+| Ratings | **OMDb** (IMDb / Rotten Tomatoes / Metacritic) — optional | free tier |
+| Hosting | Vercel Hobby + Supabase + Cloudflare Worker (optional relay) | ₹0 |
+
+---
+
+## 🚀 Quick start
 
 ```bash
-PREVIEW_MODE=1 node server.js
+git clone https://github.com/Dev-Harshupadhyay/Cinenvood.git
+cd Cinenvood
+npm install
+cp .env.example .env        # then fill the values below
+npx prisma generate
+npx prisma db push          # creates tables in the Postgres schema
+node prisma/seed.mjs        # 7 users · 14 films · 24 reviews (1 pinned verdict)
+npm run dev                 # http://localhost:3000
 ```
-- Movies + images **live site se proxy** hongi (TMDB key ki zaroorat nahi)
-- **Real Gemini AI reviews** chalenge (unique har movie ke liye)
-- User reviews in-memory chalenge (test karne ke liye)
-- Admin panel: password **test123**
+
+### Environment
+
+```env
+# Supabase — pooled (6543) for runtime, direct (5432) for migrations
+DATABASE_URL="postgresql://postgres.<ref>:<pass>@aws-0-<region>.pooler.supabase.com:6543/postgres?schema=cinemood&pgbouncer=true&connection_limit=1&sslmode=require"
+DIRECT_URL="postgresql://postgres.<ref>:<pass>@aws-0-<region>.pooler.supabase.com:5432/postgres?schema=cinemood&sslmode=require"
+
+AUTH_SECRET="openssl rand -base64 32"
+AUTH_TRUST_HOST="true"
+NEXT_PUBLIC_SITE_URL="http://localhost:3000"
+ADMIN_EMAIL="you@example.com"        # first login with this email becomes ADMIN
+
+AUTH_GOOGLE_ID=""
+AUTH_GOOGLE_SECRET=""
+TMDB_API_KEY=""                      # v3 key or v4 read token — both auto-detected
+OMDB_API_KEY=""                      # optional: IMDb / RT / Metacritic scores
+```
+
+### Demo logins (no password)
+
+| Email | Role |
+| --- | --- |
+| `admin@cinemood.app` | **ADMIN** — admin panel, pinning, moderation |
+| any other email | **MEMBER** — review, like, comment, watchlist |
 
 ---
+
+## 🎬 TMDB: fetch real movies (and survive ISP blocks)
+
+Posters, cast, synopsis and search all come from TMDB. Add `TMDB_API_KEY` and the admin panel's
+**TMDB import** can pull any film into your database in one click.
+
+**Problem:** in India, many ISPs block `api.themoviedb.org` / `image.tmdb.org`, so the site looks broken.
+
+**Solution (built in):**
+
+1. **Server-side only** — the browser never calls TMDB, and the key never reaches the client.
+2. **Image relay** — posters are served through `/api/img?p=w500/abc.jpg`, which fetches upstream on the server.
+3. **Optional relay** — if your server can't reach TMDB either, deploy a 15-line Cloudflare Worker and set:
+
+```env
+TMDB_PROXY_URL="https://your-worker.workers.dev"   # API relay
+TMDB_IMG_PROXY="https://your-worker.workers.dev"   # image relay
+```
+
+```js
+// Cloudflare Worker — paste & deploy (free plan is enough)
+export default {
+  async fetch(req) {
+    const url = new URL(req.url);
+    const target = url.searchParams.get('url')
+      ? url.searchParams.get('url')
+      : 'https://image.tmdb.org/t/p/' + decodeURIComponent(url.pathname.replace(/^\/img\//, ''));
+    const r = await fetch(target, { headers: { accept: req.headers.get('accept') || '*/*' } });
+    return new Response(r.body, { status: r.status, headers: { 'content-type': r.headers.get('content-type') || 'application/json', 'cache-control': 'public, max-age=86400' } });
+  }
+};
+```
+
+> Nothing to change in the app — set the env vars and restart.
+
+---
+
+## 🌐 Languages
+
+Header switcher: **English · हिंदी · Hinglish** (cookie `cm-lang`, server-rendered, no flash).
+Copy strings live in `lib/i18n.ts` — add a key there and it works everywhere.
+
+---
+
+## 🔐 Auth rules
+
+- **Like, comment, review, watchlist → login required.** Anonymous visitors get a "Sign in with Google" CTA and are
+  redirected back to the exact page after login (`/login?next=…`).
+- Google button appears automatically once `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` exist; demo email login stays as a fallback.
+- Admin actions are re-checked server-side on every request (`requireAdmin()`), never trusted from the UI.
+
+---
+
+## 🗄 Database
+
+Supabase Postgres, isolated in its own **`cinemood`** schema (so an existing `public` schema is never touched).
+
+```
+User ──< Review ──< Comment
+  │        │  └──< ReviewLike
+  └──< TitleLike (LIKE | WATCHLIST)
+Title ──< Review
+```
+
+`Review.featured` powers the pinned admin verdict. `Title.imdbId / rtRating / metascore / imdbVotes` are filled by
+**Admin → Titles → Enrich** (needs `OMDB_API_KEY`).
+
+---
+
+## ☁️ Deploy (free)
+
+1. **Supabase** → new project → copy pooled + direct connection strings (`schema=cinemood`).
+2. **Vercel** → import this repo → add the env vars above → deploy. Build command is already
+   `prisma generate && next build`.
+3. Run `npx prisma db push && node prisma/seed.mjs` **once** against the production database (not in the build step).
+4. Add your domain and update `NEXT_PUBLIC_SITE_URL` + the Google OAuth redirect URI:
+   `https://your-domain/api/auth/callback/google`.
+
+---
+
+## 📁 Project structure
+
+```
+app/                pages + API routes (App Router)
+  api/              9 route handlers: reviews, likes, comments, search, profile, admin, tmdb, img relay
+components/         client components (header, search, composer, comments, admin bits)
+lib/               prisma client, session helpers, queries, i18n, TMDB + OMDb clients
+prisma/            schema, seed script, seed data
+docs/              logo + screenshots used in this README
+legacy-vite/       original Vite + Express version (kept for reference)
+```
+
+---
+
+## ⚖️ Legal
+
+Metadata and artwork belong to their owners (TMDB attribution). This product uses the TMDB API but is not
+endorsed or certified by TMDB. User content is moderated. DMCA process and privacy notes: [`/legal`](./app/legal/page.tsx).
+
+**No copyrighted media is hosted, streamed or linked here — by design.**
+
+---
+
 <div align="center">
 
-  <p><b>Connect with the Developer</b></p>
-  
-  <a href="https://github.com/Dev-Harshupadhyay">
-    <img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" />
-  </a>
-  <a href="https://cinenvood.onrender.com/">
-    <img src="https://img.shields.io/badge/Website-FF4B2B?style=for-the-badge&logo=google-chrome&logoColor=white" alt="Website" />
-  </a>
-
-  <br><br>
-  
-  <p style="font-size: 14px; color: #8b949e;">
-    Crafted with 🖤 and Code by <b style="color: #ff416c;">Harsh</b>
-  </p>
-  <p style="font-size: 12px; color: #6e7681;">© 2026 Cine-Mood AI. All Rights Reserved.</p>
+Built by **[Harsh Upadhyay](https://github.com/Dev-Harshupadhyay)** · Reviews, not downloads.
 
 </div>

@@ -1,4 +1,14 @@
-node_modules/
-dist/
+node_modules
+.next
 .env
+.env.*
+!.env.example
+prisma/dev.db
+prisma/dev.db-journal
+prisma/dev.db.sqlite-backup
 *.log
+shots
+tsconfig.tsbuildinfo
+
+# archived vite app keeps its own lockfile
+!legacy-vite/package-lock.json

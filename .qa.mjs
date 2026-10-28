@@ -1,0 +1,21 @@
+import { chromium } from '/home/user/node_modules/playwright/index.mjs';
+const B='http://localhost:3000';
+const b=await chromium.launch();
+const c=await b.newContext({viewport:{width:1440,height:1000},colorScheme:'dark'});
+const p=await c.newPage();
+const clean=async()=>{await p.addStyleTag({content:'nextjs-portal{display:none!important}'}).catch(()=>{});};
+await p.goto(B+'/login',{waitUntil:'networkidle'}); await clean();
+await p.fill('#email','admin@cinemood.app'); await p.fill('#name','Harsh Upadhyay');
+await p.click('form:nth-of-type(2) button[type=submit]'); await p.waitForTimeout(3500);
+console.log('login ->', p.url());
+await p.goto(B+'/admin?tab=overview',{waitUntil:'networkidle'}); await clean(); await p.waitForTimeout(800);
+const txt=await p.locator('body').innerText();
+console.log('admin ok:', txt.includes('Harsh Upadhyay'), '| pinned visible:', txt.includes('PINNED'));
+// write test: watchlist toggle (DB write through pooled connection)
+await p.goto(B+'/movies/parasite',{waitUntil:'networkidle'}); await clean();
+const wl=p.getByRole('button',{name:/watchlist/i}).first();
+const before=(await wl.innerText()).replace(/\s+/g,' ').trim();
+await wl.click(); await p.waitForTimeout(1800);
+const after=(await wl.innerText()).replace(/\s+/g,' ').trim();
+console.log('DB write test:', before, '->', after);
+await b.close();

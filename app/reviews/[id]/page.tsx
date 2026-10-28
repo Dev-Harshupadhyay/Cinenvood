@@ -1,0 +1,134 @@
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
+import Comments from '@/components/Comments';
+import LikeButton from '@/components/LikeButton';
+import SpoilerText from '@/components/SpoilerText';
+import { getSessionUser } from '@/lib/session';
+import { getReview, getLatestReviews, withViewerLikes } from '@/lib/queries';
+import { avatarGradient, initials, timeAgo } from '@/lib/format';
+import { prisma } from '@/lib/prisma';
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const review = await getReview(id);
+  if (!review) return { title: 'Review not found' };
+  return { title: `${review.title.title} — ${review.rating}/10`, description: review.body.slice(0, 150) };
+}
+
+export default async function ReviewPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const [review, sessionUser] = await Promise.all([getReview(id), getSessionUser()]);
+  if (!review || review.status === 'HIDDEN') notFound();
+
+  const [liked, more] = await Promise.all([
+    sessionUser
+      ? prisma.reviewLike.findUnique({ where: { userId_reviewId: { userId: sessionUser.id, reviewId: review.id } } })
+      : null,
+    getLatestReviews(4, { excludeTitleId: review.titleId })
+  ]);
+  const moreWithLikes = await withViewerLikes(more, sessionUser?.id);
+
+  return (
+    <div className="container" style={{ paddingTop: 34, paddingBottom: 40 }}>
+      <div className="split">
+        <article>
+          <Link href={`/movies/${review.title.slug}`} className="link-more" style={{ marginBottom: 14, display: 'inline-flex' }}>
+            ← {review.title.title} ({review.title.year})
+          </Link>
+
+          <div className="review-card" style={{ padding: 24 }}>
+            <div className="rv-head">
+              <span className="avatar" style={{ background: avatarGradient(review.user.email) }}>
+                {review.user.image ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={review.user.image} alt="" />
+                ) : (
+                  initials(review.user.name ?? review.user.email)
+                )}
+              </span>
+              <div className="rv-id">
+                <div className="rv-name">{review.user.name ?? 'Member'}</div>
+                <div className="rv-time">
+                  {timeAgo(review.createdAt)} · {review.status.toLowerCase()}
+                </div>
+              </div>
+              <span className="rv-rating" style={{ fontSize: 22 }}>
+                {review.rating}
+                <small>/10</small>
+              </span>
+            </div>
+
+            {review.headline ? <h1 style={{ fontSize: 'clamp(22px,3vw,32px)', margin: '4px 0 14px' }}>{review.headline}</h1> : null}
+
+            {review.spoiler ? <SpoilerText text={review.body} className="rv-body-full" /> : <p className="rv-body-full">{review.body}</p>}
+
+            <div className="rv-foot">
+              <LikeButton
+                reviewId={review.id}
+                initialCount={review._count.likes}
+                initialLiked={Boolean(liked)}
+                authed={Boolean(sessionUser)}
+              />
+              <span className="chip" style={{ cursor: 'default' }}>
+                {review.comments.length} {review.comments.length === 1 ? 'comment' : 'comments'}
+              </span>
+              <Link href={`/movies/${review.title.slug}`} className="btn btn-sm btn-ghost" style={{ marginLeft: 'auto' }}>
+                Rate this film
+              </Link>
+            </div>
+          </div>
+
+          <div className="panel" style={{ marginTop: 16 }}>
+            <Comments
+              reviewId={review.id}
+              initial={review.comments as any}
+              authed={Boolean(sessionUser)}
+              me={sessionUser ? { name: sessionUser.name ?? null, email: sessionUser.email! } : null}
+            />
+          </div>
+        </article>
+
+        <aside style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div className="panel">
+            <div className="panel-title">
+              <span>About the film</span>
+            </div>
+            <Link href={`/movies/${review.title.slug}`} style={{ display: 'flex', gap: 12 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={review.title.poster} alt="" style={{ width: 78, borderRadius: 10, border: '1px solid var(--border)' }} />
+              <span>
+                <span style={{ display: 'block', fontWeight: 650 }}>{review.title.title}</span>
+                <span className="faint mono" style={{ fontSize: 11 }}>
+                  {review.title.year}
+                </span>
+              </span>
+            </Link>
+          </div>
+
+          <div className="panel">
+            <div className="panel-title">
+              <span>More reviews</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {moreWithLikes.map((r) => (
+                <Link key={r.id} href={`/reviews/${r.id}`} style={{ display: 'flex', gap: 10 }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={r.title.poster} alt="" className="rank-poster" style={{ width: 36, height: 52 }} />
+                  <span style={{ minWidth: 0 }}>
+                    <span style={{ display: 'block', fontSize: 13, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {r.headline ?? r.title.title}
+                    </span>
+                    <span className="faint mono" style={{ fontSize: 10.5 }}>
+                      {r.rating}/10 · {r._count.likes} likes
+                    </span>
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,12 @@
+import { chromium } from '/home/user/node_modules/playwright/index.mjs';
+const b=await chromium.launch();
+const c=await b.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true,colorScheme:'dark'});
+const p=await c.newPage();
+await p.goto('http://localhost:3000/movies/dune-part-two',{waitUntil:'networkidle'});
+await p.addStyleTag({content:'nextjs-portal{display:none!important}'}).catch(()=>{});
+await p.waitForTimeout(900);
+const el=p.locator('.admin-verdict').first();
+await el.scrollIntoViewIfNeeded(); await p.waitForTimeout(500);
+await el.screenshot({path:'/home/user/cine/shots/v2-mobile-card.png'});
+console.log('ok');
+await b.close();

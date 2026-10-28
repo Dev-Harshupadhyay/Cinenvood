@@ -1,31 +1,29 @@
 {
-  "name": "cinenvood",
+  "name": "cinemood",
   "version": "1.0.0",
-  "description": "Cine-Mood Premium AI Movie Panel",
-  "main": "server.js",
+  "private": true,
   "scripts": {
-    "dev": "vite --host 0.0.0.0",
-    "server": "node server.js",
-    "build": "vite build",
-    "start": "npm run build && node server.js",
-    "postinstall": "vite build"
+    "dev": "next dev -p 3000 -H 0.0.0.0",
+    "build": "prisma generate && next build",
+    "start": "next start -p 3000 -H 0.0.0.0",
+    "db:push": "prisma db push",
+    "db:seed": "node prisma/seed.mjs",
+    "db:studio": "prisma studio",
+    "setup": "prisma db push && node prisma/seed.mjs"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.57.4",
-    "axios": "^1.6.0",
-    "cors": "^2.8.5",
-    "dotenv": "^16.3.1",
-    "express": "^4.18.2",
-    "pg": "^8.13.1",
-    "qrcode": "^1.5.4",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "ws": "^8.21.3"
+    "@prisma/client": "^6.2.1",
+    "next": "15.5.28",
+    "next-auth": "^5.0.0-beta.29",
+    "react": "19.1.1",
+    "react-dom": "19.1.1",
+    "zod": "^3.24.1"
   },
-  "author": "HARSH",
-  "license": "ISC",
   "devDependencies": {
-    "@vitejs/plugin-react": "^4.3.4",
-    "vite": "^6.1.0"
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "prisma": "^6.2.1",
+    "typescript": "^5.7.2"
   }
 }

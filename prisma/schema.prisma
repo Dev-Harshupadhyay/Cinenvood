@@ -1,0 +1,136 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Supabase Postgres (production + local demo dono).
+// DATABASE_URL  = Transaction pooler (6543) — app runtime
+// DIRECT_URL    = Session/Direct (5432)     — prisma db push / migrate
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum ReviewStatus {
+  PUBLISHED
+  PENDING
+  HIDDEN
+}
+
+enum TitleStatus {
+  PUBLISHED
+  HIDDEN
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String?
+  email     String   @unique
+  image     String?
+  role      Role     @default(USER)
+  bio       String?
+  createdAt DateTime @default(now())
+
+  reviews     Review[]
+  comments    Comment[]
+  reviewLikes ReviewLike[]
+  titleLikes  TitleLike[]
+
+  @@index([createdAt])
+}
+
+model Title {
+  id         String      @id @default(cuid())
+  slug       String      @unique
+  tmdbId     Int?        @unique
+  title      String
+  year       Int
+  runtime    Int
+  overview   String
+  poster     String
+  backdrop   String
+  genres     String // JSON array of strings
+  director   String?
+  cast       String? // JSON array of { name, role }
+  imdbRating Float?
+  imdbId     String?
+  rtRating   Float?
+  metascore  Int?
+  imdbVotes  Int?
+  featured   Boolean     @default(false)
+  status     TitleStatus @default(PUBLISHED)
+  createdAt  DateTime    @default(now())
+
+  reviews Review[]
+  likes   TitleLike[]
+
+  @@index([featured])
+  @@index([year])
+}
+
+model Review {
+  id        String       @id @default(cuid())
+  rating    Int // 1-10
+  headline  String?
+  body      String
+  spoiler   Boolean      @default(false)
+  featured  Boolean      @default(false) // admin-pinned "Admin verdict"
+  status    ReviewStatus @default(PUBLISHED)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  userId  String
+  titleId String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title   Title  @relation(fields: [titleId], references: [id], onDelete: Cascade)
+
+  likes    ReviewLike[]
+  comments Comment[]
+
+  @@unique([userId, titleId])
+  @@index([titleId, createdAt])
+  @@index([status])
+  @@index([featured])
+}
+
+model ReviewLike {
+  id        String   @id @default(cuid())
+  userId    String
+  reviewId  String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, reviewId])
+}
+
+model Comment {
+  id        String       @id @default(cuid())
+  body      String
+  status    ReviewStatus @default(PUBLISHED)
+  createdAt DateTime     @default(now())
+  userId    String
+  reviewId  String
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  review    Review       @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@index([reviewId, createdAt])
+}
+
+model TitleLike {
+  id        String   @id @default(cuid())
+  kind      String   @default("LIKE") // LIKE | WATCHLIST
+  userId    String
+  titleId   String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     Title    @relation(fields: [titleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, titleId, kind])
+  @@index([titleId, kind])
+}
