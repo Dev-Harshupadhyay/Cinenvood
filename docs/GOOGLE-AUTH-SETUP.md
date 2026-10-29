@@ -3,8 +3,18 @@
 CINE·MOOD uses **Google OAuth only** in production. There is no password, no seeded account and no
 "type this email to become admin" shortcut. This guide is the whole setup.
 
-> **Current status:** client ID `226385564397-jgmmu9tni1bu8s2lr14rqlm8ocsobd94.apps.googleusercontent.com`
-> is already wired in (`.env` + `.env.vercel-copy.txt`). Only the **client secret** is still missing.
+> **Current status:** a fresh OAuth client was created in the Google project `cinveood`:
+>
+> ```
+> client id     : 226385564397-3j1jj8drrq3inqgb004trrfvuqvtmutj.apps.googleusercontent.com
+> client secret : stored only in `.env` / `.env.vercel-copy.txt` (never commit it)
+> redirect uri  : https://cinenvood.vercel.app/api/auth/callback/google
+> js origin     : https://cinenvood.vercel.app
+> ```
+>
+> Credentials were verified against Google's token endpoint — a dummy code returns `invalid_grant`
+> (client accepted, code rejected), which proves the id+secret pair is valid. `invalid_client` would
+> mean a mismatch.
 
 ---
 
