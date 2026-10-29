@@ -26,6 +26,8 @@ export default function EditorialEditor({ titles, rows }: { titles: TitleOption[
   const [editing, setEditing] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [query, setQuery] = useState('');
+  const [notes, setNotes] = useState('');
+  const [drafting, setDrafting] = useState(false);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -70,6 +72,36 @@ export default function EditorialEditor({ titles, rows }: { titles: TitleOption[
     if (res.ok) start(() => router.refresh());
   }
 
+  /** Gemini drafts the review in the house voice — Hinglish + English in one go. */
+  async function aiDraft() {
+    if (!form.titleId) return setMessage('Pehle title chuno');
+    setDrafting(true);
+    setMessage(null);
+    try {
+      const res = await fetch('/api/admin/ghostwrite', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ titleId: form.titleId, notes, rating: Number(form.rating) || undefined })
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error ?? 'Draft failed');
+      const d = json.draft;
+      setForm((f) => ({
+        ...f,
+        rating: d.rating,
+        headline: d.headlineHi ?? '',
+        body: d.bodyHi ?? '',
+        headlineEn: d.headlineEn ?? '',
+        bodyEn: d.bodyEn ?? ''
+      }));
+      setMessage('Draft ready — padho, edit karo, phir Publish dabao');
+    } catch (e) {
+      setMessage(e instanceof Error ? e.message : 'Draft failed');
+    } finally {
+      setDrafting(false);
+    }
+  }
+
   function edit(row: EditorialRow) {
     setEditing(row.id);
     setForm({
@@ -101,6 +133,27 @@ export default function EditorialEditor({ titles, rows }: { titles: TitleOption[
                 <option key={t.id} value={t.id}>{t.title} ({t.year})</option>
               ))}
             </select>
+
+            <div className="field" style={{ margin: 0 }}>
+              <label>Notes for the AI draft (optional)</label>
+              <input
+                className="input"
+                value={notes}
+                maxLength={400}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="e.g. theatre mein dekhi, 3D show — villain weak tha"
+              />
+            </div>
+
+            <button
+              type="button"
+              className="btn btn-ghost"
+              onClick={aiDraft}
+              disabled={drafting || !form.titleId}
+              style={{ justifySelf: 'start' }}
+            >
+              {drafting ? 'Drafting…' : '✍︎ AI draft — Hinglish + English'}
+            </button>
           </div>
         ) : null}
 

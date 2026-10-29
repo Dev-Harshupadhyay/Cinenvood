@@ -13,7 +13,9 @@
 
 export type ReviewLang = 'hinglish' | 'hindi' | 'en';
 
-const MODEL = process.env.GEMINI_MODEL ?? 'gemini-2.0-flash';
+const MODELS = (process.env.GEMINI_MODEL ?? 'gemini-3.5-flash,gemini-flash-lite-latest,gemini-2.5-flash')
+  .split(',')
+  .map((m) => m.trim())
 const ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models';
 
 /** Rough language of a review — Devanagari is obvious, Hinglish needs markers. */
@@ -35,34 +37,49 @@ export function detectLang(text: string): ReviewLang {
   return hits >= 2 ? 'hinglish' : 'en';
 }
 
-async function callGemini(prompt: string): Promise<string | null> {
+/**
+ * One call, with a small model chain so a single retired/quota-limited model
+ * never takes the feature down.
+ */
+export async function callGemini(
+  prompt: string,
+  opts: { temperature?: number; maxTokens?: number; json?: boolean } = {}
+): Promise<string | null> {
   const key = (process.env.GEMINI_API_KEY ?? '').trim();
   if (!key) return null;
 
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 12_000);
-  try {
-    const res = await fetch(`${ENDPOINT}/${MODEL}:generateContent?key=${encodeURIComponent(key)}`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      signal: controller.signal,
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.25, maxOutputTokens: 1200, topP: 0.9 }
-      })
-    });
-    if (!res.ok) return null;
-    const data = (await res.json()) as {
-      candidates?: { content?: { parts?: { text?: string }[] } }[];
-    };
-    let out = data.candidates?.[0]?.content?.parts?.map((p) => p.text ?? '').join('') ?? '';
-    out = out.trim().replace(/^```[a-z]*\s*/i, '').replace(/```$/, '').trim();
-    return out || null;
-  } catch {
-    return null;
-  } finally {
-    clearTimeout(timer);
+  for (const model of MODELS) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 45_000);
+    try {
+      const res = await fetch(`${ENDPOINT}/${model}:generateContent`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-goog-api-key': key },
+        signal: controller.signal,
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature: opts.temperature ?? 0.35,
+            maxOutputTokens: opts.maxTokens ?? 1400,
+            topP: 0.95,
+            ...(opts.json ? { responseMimeType: 'application/json' } : {})
+          }
+        })
+      });
+      if (!res.ok) continue;
+      const data = (await res.json()) as {
+        candidates?: { content?: { parts?: { text?: string }[] } }[];
+      };
+      let out = data.candidates?.[0]?.content?.parts?.map((p) => p.text ?? '').join('') ?? '';
+      out = out.trim().replace(/^```(?:json|[a-z]*)\s*/i, '').replace(/```$/, '').trim();
+      if (out) return out;
+    } catch {
+      /* try the next model */
+    } finally {
+      clearTimeout(timer);
+    }
   }
+  return null;
 }
 
 const EN_PROMPT = (text: string) => `You translate Indian film reviews into English.

@@ -57,3 +57,32 @@ Gemini       → "It was decent, but nowhere near Train to Busan."  ← correct
 
 `lib/verdict.ts` keeps both voices — `line` (Hinglish, the site's home voice) and
 `lineEn` (English edition). `components/VerdictBlock.tsx` picks one per edition.
+
+
+---
+
+## 5. House ghostwriter (AI drafts in the author's voice)
+
+`lib/ghostwrite.ts` + `prisma/ghostwrite.mjs` read the last three editorial reviews as
+few-shot examples and produce **one review in both editions at once**, so the English
+and Hinglish versions carry the same opinions and paragraph order.
+
+Style rules baked into the prompt:
+
+* opens with an honest verdict, often compared to a genre-mate
+* what worked → what didn't → "Overall, agar tum … pasand karte ho to …"
+* English film vocabulary inside Hinglish, 4 short paragraphs, 320–480 words
+* no invented director/cast/plot facts — only what the FILM block contains
+* headlines are complete thoughts, never a "…"
+
+Usage:
+
+```bash
+node prisma/ghostwrite.mjs --title colony-2026                      # print only
+node prisma/ghostwrite.mjs --title colony-2026 --notes "3D show"    # steer it
+node prisma/ghostwrite.mjs --title colony-2026 --save               # publish as editorial
+```
+
+In the product: **/admin → Editorial verdicts → ✍︎ AI draft — Hinglish + English**
+(`POST /api/admin/ghostwrite`, ADMIN only, 8 drafts / 10 min). The draft fills the form;
+nothing is published until the admin presses Publish.
