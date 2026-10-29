@@ -3,6 +3,20 @@
 CINE·MOOD uses **Google OAuth only** in production. There is no password, no seeded account and no
 "type this email to become admin" shortcut. This guide is the whole setup.
 
+> **Current status:** client ID `226385564397-jgmmu9tni1bu8s2lr14rqlm8ocsobd94.apps.googleusercontent.com`
+> is already wired in (`.env` + `.env.vercel-copy.txt`). Only the **client secret** is still missing.
+
+---
+
+## 0. Where to paste what (two places, both required)
+
+| # | Where | What |
+| --- | --- | --- |
+| 1 | **Google Cloud Console** -> APIs & Services -> Credentials -> *CineMood web* (OAuth client) | Authorized JavaScript origins + Authorized redirect URIs (section 2) |
+| 2 | **Vercel** -> Project -> Settings -> Environment Variables -> Production | `AUTH_GOOGLE_ID` + `AUTH_GOOGLE_SECRET` (section 3) |
+
+Live check: `https://cinenvood.vercel.app/status` — the "Google sign-in" panel must say `LIVE`.
+
 ---
 
 ## 1. Create the OAuth client
@@ -22,6 +36,7 @@ CINE·MOOD uses **Google OAuth only** in production. There is no password, no se
 **Authorised JavaScript origins**
 
 ```
+https://cinenvood.vercel.app
 https://cinemood.vercel.app
 http://localhost:3000
 ```
@@ -95,3 +110,28 @@ Google → signIn() callback → prisma.user.upsert({ email, name, image, role: 
 - Sign-in traffic is rate-limited per IP (30 attempts / 10 minutes). Admin pages: 120 req/min. Admin actions: 60/min and
   600/hour. All limits are DB-backed, so a second serverless instance cannot bypass them.
 - `AUTH_SECRET` must be a fresh random value: `openssl rand -base64 32`.
+
+---
+
+## 3. Vercel environment variables (exact)
+
+```
+AUTH_GOOGLE_ID=226385564397-jgmmu9tni1bu8s2lr14rqlm8ocsobd94.apps.googleusercontent.com
+AUTH_GOOGLE_SECRET=<copy from the Google console>
+```
+
+Same rules as before: **no quotes, no commas, no trailing spaces**. Save, then **Redeploy** — env changes
+only apply to a new deployment.
+
+## 4. Who becomes admin
+
+`ADMIN_EMAIL` must be the same Gmail you sign in with. Nothing else can become admin, and no user row is
+ever created by hand.
+
+## 5. Test (2 minutes)
+
+1. `/status` -> **Google sign-in: LIVE**, and the redirect URLs listed there match the console exactly.
+2. `/login` -> the **Continue with Google** button appears (today it still says "secret missing").
+3. Sign in -> `/dashboard` opens with the review composer.
+4. If Google says `redirect_uri_mismatch`, copy the exact URI from `/status`:
+   `https://cinenvood.vercel.app/api/auth/callback/google`.

@@ -1,4 +1,5 @@
 import { runHealth } from '@/lib/health';
+import { callbackUrls, googleEnabled, googleState, jsOrigins, maskedId } from '@/lib/auth-config';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Diagnostics', robots: { index: false, follow: false } };
@@ -49,6 +50,44 @@ export default async function StatusPage() {
               ))}
             </tbody>
           </table>
+        </div>
+      </div>
+
+      <div className="panel" style={{ marginBottom: 18 }}>
+        <div className="panel-title">
+          <span>Google sign-in</span>
+          <span className="faint mono" style={{ fontSize: 10 }}>
+            {googleState === 'ready' ? 'LIVE' : googleState === 'half' ? 'ID SET · SECRET MISSING' : 'OFF'}
+          </span>
+        </div>
+        <div style={{ display: 'grid', gap: 10, fontSize: 13 }}>
+          <div className="mono">client id: {maskedId()}</div>
+          {!googleEnabled ? (
+            <p className="form-note" style={{ margin: 0 }}>
+              Client ID set hai{googleState === 'half' ? '' : ' nahi'}; <code className="mono">AUTH_GOOGLE_SECRET</code>{' '}
+              Vercel → Settings → Environment Variables mein daalo, phir Redeploy.
+            </p>
+          ) : null}
+          <div>
+            <div className="faint mono" style={{ fontSize: 10, letterSpacing: '0.14em', marginBottom: 6 }}>
+              GOOGLE CLOUD → AUTHORIZED REDIRECT URI
+            </div>
+            {callbackUrls().map((u) => (
+              <div key={u} className="mono" style={{ fontSize: 12, padding: '3px 0', overflowWrap: 'anywhere' }}>
+                {u}
+              </div>
+            ))}
+          </div>
+          <div>
+            <div className="faint mono" style={{ fontSize: 10, letterSpacing: '0.14em', marginBottom: 6 }}>
+              AUTHORIZED JAVASCRIPT ORIGIN
+            </div>
+            {jsOrigins().map((u) => (
+              <div key={u} className="mono" style={{ fontSize: 12, padding: '3px 0', overflowWrap: 'anywhere' }}>
+                {u}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 

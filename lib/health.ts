@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { siteUrl, siteUrlSource } from '@/lib/site';
+import { googleState, maskedId } from '@/lib/auth-config';
 
 export type Check = { key: string; label: string; ok: boolean; detail: string };
 
@@ -27,6 +28,21 @@ export async function runHealth() {
       detail: present ? 'set' : required ? 'missing — required' : 'not set (optional / feature off)'
     });
   }
+
+  // Google: ID akele se login nahi chalta — partial state ko saaf batao.
+  checks.push({
+    key: 'google_auth',
+    label: 'Google sign-in',
+    // Site works without Google (guest mode), so this never fails the whole health check —
+    // it just tells you out loud what is still missing.
+    ok: true,
+    detail:
+      googleState === 'ready'
+        ? `live — ${maskedId()}`
+        : googleState === 'half'
+          ? `⚠ client id set (${maskedId()}), secret missing — AUTH_GOOGLE_SECRET add karo`
+          : 'off — no client id / secret'
+  });
 
   // The origin always exists — it just may come from Vercel instead of the dashboard.
   checks.push({

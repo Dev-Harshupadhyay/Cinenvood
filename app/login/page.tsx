@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { auth, isGoogleEnabled, signIn } from '@/auth';
+import { googleState } from '@/lib/auth-config';
 
 export const metadata = { title: 'Sign in', robots: { index: false, follow: false } };
 
@@ -50,9 +51,19 @@ export default async function LoginPage({
           </form>
         ) : (
           <div className="notice notice-warn">
-            <b>Google sign-in setup pending.</b> Owner ko <code className="mono">AUTH_GOOGLE_ID</code> aur{' '}
-            <code className="mono">AUTH_GOOGLE_SECRET</code> Vercel par add karne hain — uske baad ye button live ho jayega.
-            Tab tak site guest mode mein chal rahi hai.
+            {googleState === 'half' ? (
+              <>
+                <b>Client ID mil gaya, secret baaki hai.</b> Google Cloud Console → Credentials → OAuth client se{' '}
+                <code className="mono">Client secret</code> copy karke Vercel mein <code className="mono">AUTH_GOOGLE_SECRET</code> daal do —
+                uske baad ye button live ho jayega. Tab tak site guest mode mein hai.
+              </>
+            ) : (
+              <>
+                <b>Google sign-in setup pending.</b> Owner ko <code className="mono">AUTH_GOOGLE_ID</code> aur{' '}
+                <code className="mono">AUTH_GOOGLE_SECRET</code> Vercel par add karne hain — uske baad ye button live ho jayega.
+                Tab tak site guest mode mein chal rahi hai.
+              </>
+            )}
           </div>
         )}
 
