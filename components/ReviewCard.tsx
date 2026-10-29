@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { avatarGradient, avatarSrc, hasOwnName, initials, reviewByline, timeAgo } from '@/lib/format';
+import { avatarGradient, avatarSrc, cleanHeadline, hasOwnName, initials, reviewByline, timeAgo } from '@/lib/format';
 import { editionOf, type Edition } from '@/lib/edition';
 import LikeButton from './LikeButton';
 import FeatureButton from './FeatureButton';
@@ -119,7 +119,11 @@ export default function ReviewCard({
         ) : null}
       </Link>
 
-      {text.headline ? <h3 className="rv-headline rv-headline--serif">{text.headline}</h3> : null}
+      {(cleanHeadline(text.headline) || cleanHeadline(review.headlineEn)) ? (
+        <h3 className="rv-headline rv-headline--serif">
+          {cleanHeadline(text.headline) || cleanHeadline(review.headlineEn)}
+        </h3>
+      ) : null}
 
       {review.spoiler ? (
         <SpoilerText text={text.body} />

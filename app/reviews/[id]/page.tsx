@@ -8,7 +8,7 @@ import SpoilerText from '@/components/SpoilerText';
 import VerdictBlock from '@/components/VerdictBlock';
 import { getSessionUser } from '@/lib/session';
 import { getReview, getLatestReviews, withViewerLikes } from '@/lib/queries';
-import { avatarGradient, initials, timeAgo, reviewByline } from '@/lib/format';
+import { avatarGradient, initials, timeAgo, reviewByline, cleanHeadline } from '@/lib/format';
 import { prisma } from '@/lib/prisma';
 import { getEdition, editionOf } from '@/lib/edition';
 import EditionSwitch from '@/components/EditionSwitch';
@@ -53,7 +53,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
         '@type': 'Review',
         itemReviewed: { '@type': 'Movie', name: review.title.title, datePublished: String(review.title.year), image: review.title.poster },
         reviewRating: { '@type': 'Rating', ratingValue: review.rating, bestRating: 10, worstRating: 1 },
-        name: review.headline ?? `${review.title.title} review`,
+        name: cleanHeadline(review.headline) || `${review.title.title} review`,
         reviewBody: text.body.slice(0, 500),
         author: { '@type': review.editorial ? 'Organization' : 'Person', name: reviewByline(review) },
         datePublished: new Date(review.createdAt).toISOString(),
@@ -104,7 +104,11 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
               </div>
             </div>
 
-            {text.headline ? <h1 className="rv-detail-headline">{text.headline}</h1> : null}
+            {(cleanHeadline(text.headline) || cleanHeadline(review.headlineEn)) ? (
+              <h1 className="rv-detail-headline">
+                {cleanHeadline(text.headline) || cleanHeadline(review.headlineEn)}
+              </h1>
+            ) : null}
             {text.translated ? (
               <div className="rv-detail-langs">
                 <span className="rv-trans">EN edition</span>

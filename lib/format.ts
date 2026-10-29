@@ -118,3 +118,34 @@ export function avatarSrc(url?: string | null): string | null {
   if (url.includes('googleusercontent.com')) return url.replace(/=s\d+(-c)?$/, '=s256-c');
   return url;
 }
+
+/**
+ * Legacy imports saved the score as the headline ("7/10 (Go For It)", "9/10 (Must Watch) 🔥").
+ * The site now shows scores in the verdict band, so a headline should only ever be words.
+ */
+const VERDICT_WORDS =
+  /(skip|time\s*-?\s*pass|go\s*for\s*it|must\s*watch|masterpiece|perfection|highly\s*recommended|one\s*time\s*watch)/i;
+
+export function cleanHeadline(headline?: string | null): string {
+  let h = (headline ?? '').trim();
+  if (!h) return '';
+
+  // leading "7/10", "8.5/10", "3/10(SKIP)" + any separator
+  h = h.replace(/^\s*\d+(?:\.\d+)?\s*\/\s*10\s*[—–:·\-]?\s*/i, '').trim();
+
+  // what is left is the verdict restated in brackets, e.g. "(Timepass 🍿)"
+  const bracketed = h.match(/^\(([^)]*)\)$/);
+  if (bracketed && VERDICT_WORDS.test(bracketed[1])) return '';
+
+  // strip emoji + dangling separators
+  h = h
+    .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}\u{2B00}-\u{2BFF}]/gu, '')
+    .replace(/^[—–:·\-()\s]+/, '')
+    .replace(/[—–:·\-()\s]+$/, '')
+    .trim();
+
+  // if all that survives is a verdict word, there is no real headline
+  if (!h || VERDICT_WORDS.test(h) && h.split(/\s+/).length <= 4) return '';
+
+  return h;
+}

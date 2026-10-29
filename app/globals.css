@@ -1421,6 +1421,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   overflow: visible;
 }
 .admin-verdict .rv-body::first-letter {
+  text-transform: uppercase;
   font-family: var(--font-serif), Georgia, serif;
   font-size: 2.9em;
   line-height: 0.86;
@@ -1883,6 +1884,7 @@ html, body { max-width: 100%; overflow-x: clip; }
   white-space: pre-line;
 }
 .rv-body--editorial::first-letter {
+  text-transform: uppercase;
   float: left;
   font-family: var(--font-serif), Georgia, serif;
   font-size: 46px;
