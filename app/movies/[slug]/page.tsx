@@ -10,6 +10,7 @@ import { getSessionUser } from '@/lib/session';
 import { getCatalogue, getTitleBySlug, withViewerLikes } from '@/lib/queries';
 import { getEdition } from '@/lib/edition';
 import DataBanner from '@/components/DataBanner';
+import RatingScene from '@/components/RatingScene';
 import EditionSwitch from '@/components/EditionSwitch';
 import { avatarGradient, formatRuntime, initials } from '@/lib/format';
 import { prisma } from '@/lib/prisma';
@@ -107,30 +108,16 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
         </div>
 
         <div className="detail-body">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap', marginBottom: 16 }}>
-            <div className="score-ring" style={{ ['--val' as string]: score * 10, ['--size' as string]: '78px' }}>
-              <div>
-                <b style={{ fontSize: 21 }}>{score ? score.toFixed(1) : '—'}</b>
-                <span>mood</span>
-              </div>
-            </div>
-            <div style={{ minWidth: 190 }}>
-              <div className="dist">
-                {title.ratingBuckets.slice(0, 5).map((b) => {
-                  const max = Math.max(1, ...title.ratingBuckets.map((x) => x.count));
-                  return (
-                    <div key={b.rating} className="dist-row">
-                      <span className="dr-label">{b.rating}</span>
-                      <span className="dist-bar">
-                        <i style={{ width: `${(b.count / max) * 100}%` }} />
-                      </span>
-                      <span className="dr-count">{b.count}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
+          <RatingScene
+            score={score}
+            communityVotes={title._count.likes}
+            reviewCount={title.reviews.length}
+            tmdbScore={title.tmdbScore}
+            myRating={myReview?.rating ?? null}
+            buckets={title.ratingBuckets}
+            genres={title.genres}
+            runtime={title.runtime}
+          />
 
           <p className="detail-overview">{title.overview}</p>
 

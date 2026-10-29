@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { verdictFor } from '@/lib/verdict';
 import { avatarGradient, initials, timeAgo } from '@/lib/format';
 import { editionOf, type Edition } from '@/lib/edition';
 import LikeButton from './LikeButton';
@@ -34,6 +35,7 @@ export default function ReviewCard({
   const isAdmin = review.user.role === 'ADMIN';
   const text = editionOf(review, edition);
   const isEditorial = Boolean(review.editorial);
+  const band = verdictFor(review.rating);
   const byline = isEditorial ? review.authorName || review.user.name || 'Harsh' : review.user.name ?? 'Member';
 
   return (
@@ -78,8 +80,13 @@ export default function ReviewCard({
         </div>
 
         <span className={`rv-rating rv-rating--big${isAdmin ? ' rv-rating--admin' : ''}`}>
-          {review.rating}
-          <small>/10</small>
+          <span className="rv-num">
+            {review.rating}
+            <small>/10</small>
+          </span>
+          <em className="rv-band" data-tone={band.tone}>
+            {band.short}
+          </em>
         </span>
       </div>
 
