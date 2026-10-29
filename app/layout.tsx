@@ -13,7 +13,7 @@ const outfit = Outfit({ subsets: ['latin'], weight: ['500', '600', '700'], varia
 const mono = IBM_Plex_Mono({ subsets: ['latin'], weight: ['400', '500'], variable: '--font-mono-plex', display: 'swap' });
 const serif = Instrument_Serif({ subsets: ['latin'], weight: ['400'], variable: '--font-serif', display: 'swap' });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+import { siteUrl } from '@/lib/site';
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

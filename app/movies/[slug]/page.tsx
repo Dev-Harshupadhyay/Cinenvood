@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { siteUrl } from '@/lib/site';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import PosterCard from '@/components/PosterCard';
@@ -73,9 +74,9 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
             '@context': 'https://schema.org',
             '@type': 'BreadcrumbList',
             itemListElement: [
-              { '@type': 'ListItem', position: 1, name: 'Home', item: process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000' },
-              { '@type': 'ListItem', position: 2, name: 'Movies', item: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'}/movies` },
-              { '@type': 'ListItem', position: 3, name: title.title, item: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'}/movies/${title.slug}` }
+              { '@type': 'ListItem', position: 1, name: 'Home', item: siteUrl },
+              { '@type': 'ListItem', position: 2, name: 'Movies', item: `${siteUrl}/movies` },
+              { '@type': 'ListItem', position: 3, name: title.title, item: `${siteUrl}/movies/${title.slug}` }
             ]
           })
         }}

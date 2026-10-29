@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import { siteUrl, siteUrlSource } from '@/lib/site';
 
 export type Check = { key: string; label: string; ok: boolean; detail: string };
 
@@ -7,7 +8,7 @@ const ENV_KEYS: [string, string, boolean][] = [
   ['DIRECT_URL', 'Direct DB URL (migrations)', true],
   ['AUTH_SECRET', 'Auth secret', true],
   ['AUTH_TRUST_HOST', 'Auth trust host', true],
-  ['NEXT_PUBLIC_SITE_URL', 'Public site URL', true],
+  ['NEXT_PUBLIC_SITE_URL', 'Public site URL', false],
   ['ADMIN_EMAIL', 'Admin email', true],
   ['AUTH_GOOGLE_ID', 'Google client id', false],
   ['AUTH_GOOGLE_SECRET', 'Google client secret', false],
@@ -26,6 +27,14 @@ export async function runHealth() {
       detail: present ? 'set' : required ? 'missing — required' : 'not set (optional / feature off)'
     });
   }
+
+  // The origin always exists — it just may come from Vercel instead of the dashboard.
+  checks.push({
+    key: 'site_url',
+    label: 'Public origin',
+    ok: true,
+    detail: `${siteUrl} (from ${siteUrlSource})`
+  });
 
   let dbOk = false;
   let detail = 'not attempted';

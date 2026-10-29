@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { siteUrl } from '@/lib/site';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import Comments from '@/components/Comments';
@@ -60,9 +61,9 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
       {
         '@type': 'BreadcrumbList',
         itemListElement: [
-          { '@type': 'ListItem', position: 1, name: 'Home', item: process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000' },
-          { '@type': 'ListItem', position: 2, name: 'Reviews', item: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'}/reviews` },
-          { '@type': 'ListItem', position: 3, name: review.title.title, item: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'}/movies/${review.title.slug}` }
+          { '@type': 'ListItem', position: 1, name: 'Home', item: siteUrl },
+          { '@type': 'ListItem', position: 2, name: 'Reviews', item: `${siteUrl}/reviews` },
+          { '@type': 'ListItem', position: 3, name: review.title.title, item: `${siteUrl}/movies/${review.title.slug}` }
         ]
       }
     ]
