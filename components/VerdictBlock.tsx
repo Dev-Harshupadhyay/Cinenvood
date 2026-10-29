@@ -10,13 +10,17 @@ import { verdictFor } from '@/lib/verdict';
 export default function VerdictBlock({
   rating,
   size = 'card',
+  edition = 'hi',
   className = ''
 }: {
   rating: number;
   size?: 'card' | 'full';
+  /** the one-liner follows the review edition: Hinglish at home, English abroad */
+  edition?: 'en' | 'hi';
   className?: string;
 }) {
   const band = verdictFor(rating);
+  const line = edition === 'en' ? band.lineEn : band.line;
 
   return (
     <div className={`rv-verdict rv-verdict--${size} ${className}`.trim()} data-tone={band.tone}>
@@ -37,7 +41,7 @@ export default function VerdictBlock({
           ))}
         </div>
 
-        {size === 'full' ? <p className="rvv-line">{band.line}</p> : null}
+        {size === 'full' ? <p className="rvv-line">{line}</p> : null}
       </div>
 
       <span className="sr-only">{`Rated ${rating} out of 10 — ${band.label}`}</span>

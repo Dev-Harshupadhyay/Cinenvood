@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/session';
 import { rateLimit, tooMany, LIMITS } from '@/lib/rate-limit';
+import { detectLang, translateReview, translationEnabled } from '@/lib/translate';
 
 const schema = z.object({
   titleId: z.string().min(1),
@@ -28,11 +29,40 @@ export async function POST(req: Request) {
   const title = await prisma.title.findUnique({ where: { id: titleId } });
   if (!title) return NextResponse.json({ error: 'Title not found' }, { status: 404 });
 
+  const sourceLang = detectLang(`${headline ?? ''} ${body}`);
+
   const review = await prisma.review.upsert({
     where: { userId_titleId: { userId: user.id, titleId } },
-    update: { rating, headline, body, spoiler },
-    create: { userId: user.id, titleId, rating, headline, body, spoiler }
+    update: { rating, headline, body, spoiler, sourceLang },
+    create: { userId: user.id, titleId, rating, headline, body, spoiler, sourceLang }
   });
 
-  return NextResponse.json({ review });
+  /**
+   * The other edition is written here, once, at save time.
+   * Hinglish review → English copy for visitors outside India.
+   * English review  → Hinglish copy for readers in India.
+   * If GEMINI_API_KEY is missing (or the call fails) the review simply keeps
+   * showing the original text in both editions.
+   */
+  let translated = false;
+  if (translationEnabled && body.trim().length > 24) {
+    try {
+      const target = sourceLang === 'en' ? 'hinglish' : 'en';
+      const out = await translateReview({ headline, body, target });
+      if (out) {
+        await prisma.review.update({
+          where: { id: review.id },
+          data:
+            target === 'en'
+              ? { bodyEn: out.body, headlineEn: out.headline ?? undefined, bodyHi: null, headlineHi: null }
+              : { bodyHi: out.body, headlineHi: out.headline ?? undefined, bodyEn: null, headlineEn: null }
+        });
+        translated = true;
+      }
+    } catch {
+      /* translation is a bonus — never fail the save because of it */
+    }
+  }
+
+  return NextResponse.json({ review, sourceLang, translated });
 }

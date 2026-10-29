@@ -82,6 +82,9 @@ model Review {
   body       String
   headlineEn String? // English edition — shown to non-Indian visitors by default
   bodyEn     String?
+  headlineHi String? // Hinglish edition — generated when the author wrote in English
+  bodyHi     String?
+  sourceLang String? // 'hinglish' | 'hindi' | 'en' — language the author actually used
   spoiler    Boolean      @default(false)
   featured   Boolean      @default(false) // admin-pinned "Admin verdict"
   homeSpot   Boolean      @default(false) // picked by the admin for the main-page slot

@@ -111,8 +111,10 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
             ) : null}
             {text.translated ? (
               <div className="rv-detail-langs">
-                <span className="rv-trans">EN edition</span>
-                <span className="faint mono" style={{ fontSize: 10 }}>original in Hinglish</span>
+                <span className="rv-trans">{text.shown === 'en' ? 'EN edition' : 'Hinglish edition'}</span>
+                <span className="faint mono" style={{ fontSize: 10 }}>
+                  translated · original in {text.original === 'en' ? 'English' : 'Hinglish'}
+                </span>
               </div>
             ) : null}
 
@@ -122,7 +124,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
               <p className={`rv-body-full${review.editorial ? ' rv-body--editorial' : ''}`}>{text.body}</p>
             )}
 
-            <VerdictBlock rating={review.rating} size="full" />
+            <VerdictBlock rating={review.rating} size="full" edition={edition} />
 
             <div className="rv-foot">
               <LikeButton

@@ -94,8 +94,11 @@ export default function ReviewCard({
             <span className="rv-dot" aria-hidden="true">·</span>
             <span className="rv-time">{timeAgo(review.createdAt)}</span>
             {text.translated ? (
-              <span className="rv-trans" title="Original written in Hinglish">
-                EN edition
+              <span
+                className="rv-trans"
+                title={`Translated — original written in ${text.original === 'en' ? 'English' : 'Hinglish'}`}
+              >
+                {text.shown === 'en' ? 'EN edition' : 'Hinglish edition'}
               </span>
             ) : null}
           </div>
@@ -132,7 +135,7 @@ export default function ReviewCard({
       )}
 
       {/* score comes AFTER the review so the words get read first */}
-      <VerdictBlock rating={review.rating} size="card" />
+      <VerdictBlock rating={review.rating} size="card" edition={edition} />
 
       <div className="rv-foot">
         <LikeButton

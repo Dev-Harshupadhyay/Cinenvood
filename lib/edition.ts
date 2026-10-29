@@ -1,4 +1,5 @@
 import { cookies, headers } from 'next/headers';
+import { detectLang, type ReviewLang } from '@/lib/translate';
 
 /**
  * Review edition (language of the review itself, not the UI).
@@ -10,6 +11,15 @@ import { cookies, headers } from 'next/headers';
  *
  * International visitors therefore read the English edition by default,
  * Indian visitors read the original Hinglish, and anyone can flip it with one tap.
+ *
+ * Text resolution (this is what makes a Hinglish review readable by a visitor in
+ * London, and an English review readable in Jaipur):
+ *
+ *   author wrote Hinglish → `body` holds it, `bodyEn` holds the translation
+ *   author wrote English  → `body` holds it, `bodyHi` holds the Hinglish version
+ *
+ * If a translation is missing we fall back to the original rather than showing
+ * nothing — a review is never hidden because of its language.
  */
 export type Edition = 'en' | 'hi';
 export const EDITION_COOKIE = 'cm-edition';
@@ -45,33 +55,74 @@ type ReviewLike = {
   body?: string | null;
   headlineEn?: string | null;
   bodyEn?: string | null;
+  headlineHi?: string | null;
+  bodyHi?: string | null;
+  sourceLang?: string | null;
   editorial?: boolean | null;
 };
 
 export type EditionedReview = {
   headline: string | null;
   body: string;
-  /** true when we are showing a translation of the original */
+  /** true when what you are reading is a translation, not the author's words */
   translated: boolean;
+  /** the language the author actually wrote in */
+  original: ReviewLang;
   hasEn: boolean;
   hasHi: boolean;
-  original: Edition;
+  /** language of the text being shown */
+  shown: ReviewLang;
 };
 
-/** Pick the right text for this visitor. Community reviews stay as written. */
 export function editionOf(review: ReviewLike, edition: Edition): EditionedReview {
-  const hiHeadline = review.headline ?? null;
-  const hiBody = review.body ?? '';
-  const enHeadline = review.headlineEn?.trim() || null;
+  const body = review.body ?? '';
   const enBody = review.bodyEn?.trim() || null;
-  const hasEn = Boolean(enBody);
+  const hiBody = review.bodyHi?.trim() || (body ? body : null);
+
+  const original: ReviewLang =
+    (review.sourceLang as ReviewLang | undefined) ?? detectLang(body);
+
+  const hasEn = Boolean(enBody) || original === 'en';
   const hasHi = Boolean(hiBody);
 
-  if (edition === 'en' && hasEn) {
-    return { headline: enHeadline ?? hiHeadline, body: enBody!, translated: true, hasEn, hasHi, original: 'hi' };
+  if (edition === 'en' && original !== 'en') {
+    if (enBody) {
+      return {
+        headline: review.headlineEn?.trim() || review.headline || null,
+        body: enBody,
+        translated: true,
+        original,
+        hasEn,
+        hasHi,
+        shown: 'en'
+      };
+    }
+    return { headline: review.headline ?? null, body, translated: false, original, hasEn, hasHi, shown: original };
   }
-  if (edition === 'hi' && hasEn) {
-    return { headline: hiHeadline, body: hiBody, translated: false, hasEn, hasHi, original: 'hi' };
+
+  if (edition === 'hi' && original === 'en') {
+    if (review.bodyHi?.trim()) {
+      return {
+        headline: review.headlineHi?.trim() || review.headline || null,
+        body: review.bodyHi.trim(),
+        translated: true,
+        original,
+        hasEn,
+        hasHi,
+        shown: 'hinglish'
+      };
+    }
+    return { headline: review.headline ?? null, body, translated: false, original, hasEn, hasHi, shown: 'en' };
   }
-  return { headline: hiHeadline, body: hiBody, translated: false, hasEn, hasHi, original: hasEn ? 'hi' : 'hi' };
+
+  // same-language edition (or no translation yet) → the author's own words
+  return {
+    headline: review.headline ?? null,
+    body: hiBody ?? body,
+    translated: false,
+    original,
+    hasEn,
+    hasHi,
+    shown: original
+  };
 }
