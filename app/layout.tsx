@@ -114,6 +114,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <div>
                 <h4>About</h4>
                 <Link href="/about">How it works</Link>
+                <Link href="/about#who">Who it&apos;s for</Link>
+                <Link href="/faq">FAQ</Link>
+                <Link href="/support">Support the dev</Link>
                 <Link href="/legal">Legal &amp; DMCA</Link>
                 <Link href="/admin">Admin</Link>
               </div>

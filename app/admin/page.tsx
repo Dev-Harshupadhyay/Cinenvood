@@ -87,6 +87,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
           headlineEn: r.headlineEn,
           bodyEn: r.bodyEn,
           featured: r.featured,
+          authorName: r.authorName,
           titleId: r.titleId,
           titleName: r.title.title,
           year: r.title.year
@@ -158,6 +159,29 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
             <Link href="/admin?tab=moderation" className="link-more">
               Clear queue →
             </Link>
+          </div>
+        </div>
+
+        <div className="panel" style={{ padding: 14 }}>
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+            <span className="avatar" style={{ width: 38, height: 38, background: '#0a0c0c', border: '1px solid var(--border)', display: 'grid', placeItems: 'center' }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/icon.svg" alt="" width={24} height={24} style={{ display: 'block' }} />
+            </span>
+            <span>
+              <span style={{ display: 'block', fontSize: 13, fontWeight: 700 }}>Harsh Upadhyay</span>
+              <span className="faint mono" style={{ fontSize: 9, letterSpacing: '0.12em' }}>DEVELOPER · ADMIN</span>
+            </span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 12 }}>
+            <a href="https://new-profotilo-flame.vercel.app" target="_blank" rel="noreferrer" className="link-more">Portfolio ↗</a>
+            <a href="https://verceel-timepass.vercel.app" target="_blank" rel="noreferrer" className="link-more">Timepass ↗</a>
+            <a href="https://t.me/+DvSgQwffeiwxMzg1" target="_blank" rel="noreferrer" className="link-more" style={{ color: '#2aabee' }}>Telegram channel ↗</a>
+            <a href="https://github.com/Dev-Harshupadhyay/Cinenvood" target="_blank" rel="noreferrer" className="link-more">GitHub repo ↗</a>
+          </div>
+          <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid var(--line)', display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <a href="/support" className="btn btn-sm btn-primary" style={{ flex: 1, justifyContent: 'center' }}>Support</a>
+            <a href="/faq" className="btn btn-sm btn-ghost" style={{ flex: 1, justifyContent: 'center' }}>FAQ</a>
           </div>
         </div>
       </aside>

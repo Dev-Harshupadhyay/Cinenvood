@@ -44,6 +44,8 @@ export default function ReviewCard({
   const byline = reviewByline(review);
   const kind = isEditorial || review.user.role === 'ADMIN' ? 'editorial' : 'member';
   const verified = isEditorial || isAdmin;
+  // Jarvis = the house AI. Uska apna chip aur glyph, taaki AI-written review dikh jaaye.
+  const isJarvis = isEditorial && byline.trim().toLowerCase() === 'jarvis';
   const supporters = review._count.likes;
 
   return (
@@ -53,12 +55,18 @@ export default function ReviewCard({
       data-pinned={review.featured ? 'true' : undefined}
       data-home={review.homeSpot ? 'true' : undefined}
       data-editorial={isEditorial ? 'true' : undefined}
+      data-jarvis={isJarvis ? 'true' : undefined}
     >
       {verified ? <span className="av-quote" aria-hidden="true">“</span> : null}
 
       <div className="rv-head rv-head--premium">
-        <span className={`avatar rv-avatar${verified ? ' avatar--admin' : ''}`} style={{ background: avatarGradient(review.user.email) }}>
-          {review.user.image ? (
+        <span
+          className={`avatar rv-avatar${verified ? ' avatar--admin' : ''}${isJarvis ? ' avatar--jarvis' : ''}`}
+          style={isJarvis ? undefined : { background: avatarGradient(review.user.email) }}
+        >
+          {isJarvis ? (
+            <span aria-hidden="true">✦</span>
+          ) : review.user.image ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={avatarSrc(review.user.image) ?? ''} alt="" />
           ) : (
@@ -83,7 +91,9 @@ export default function ReviewCard({
             {!verified && !hasOwnName(review.user.name) ? <span className="rv-name-hint">name not set</span> : null}
           </div>
           <div className="rv-role">
-            {isEditorial ? (
+            {isJarvis ? (
+              <span className="rv-role-chip rv-role-chip--ai">JARVIS · AI GHOSTWRITER</span>
+            ) : isEditorial ? (
               <span className="rv-role-chip rv-role-chip--gold">FOUNDER · EDITOR-IN-CHIEF</span>
             ) : review.user.role === 'ADMIN' ? (
               <span className="rv-role-chip rv-role-chip--gold">ADMIN VERDICT</span>

@@ -45,6 +45,8 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
   const moreWithLikes = await withViewerLikes(more, sessionUser?.id);
 
   const text = editionOf(review, edition);
+  const byline = reviewByline(review);
+  const isJarvis = Boolean(review.editorial) && byline.trim().toLowerCase() === 'jarvis';
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -82,24 +84,30 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
             {review.bodyEn ? <EditionSwitch current={edition} compact /> : null}
           </div>
 
-          <div className="review-card" style={{ padding: 24 }}>
+          <div className="review-card" data-jarvis={isJarvis ? 'true' : undefined} style={{ padding: 24 }}>
             <div className="rv-head">
-              <span className="avatar" style={{ background: avatarGradient(review.user.email) }}>
-                {review.user.image ? (
+              <span className={`avatar${isJarvis ? ' avatar--jarvis' : ''}`} style={isJarvis ? undefined : { background: avatarGradient(review.user.email) }}>
+                {isJarvis ? (
+                  <span aria-hidden="true">✦</span>
+                ) : review.user.image ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={review.user.image} alt="" />
                 ) : (
-                  initials(reviewByline(review))
+                  initials(byline)
                 )}
               </span>
               <div className="rv-id">
                 <div className="rv-name">
-                  {reviewByline(review)}
-                  {review.editorial ? <span className="mini-badge" style={{ marginLeft: 8 }}>EDITORIAL</span> : null}
+                  {byline}
+                  {isJarvis ? (
+                    <span className="rv-role-chip rv-role-chip--ai" style={{ marginLeft: 8 }}>JARVIS · AI GHOSTWRITER</span>
+                  ) : review.editorial ? (
+                    <span className="mini-badge" style={{ marginLeft: 8 }}>EDITORIAL</span>
+                  ) : null}
                 </div>
                 <div className="rv-time">
                   {timeAgo(review.createdAt)} · {review.status.toLowerCase()}
-                  {review.editorial ? ' · written by the site' : ''}
+                  {review.editorial ? (isJarvis ? ' · AI draft, checked by the site' : ' · written by the site') : ''}
                 </div>
               </div>
             </div>

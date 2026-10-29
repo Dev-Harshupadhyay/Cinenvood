@@ -7,6 +7,7 @@ type TitleOption = { id: string; title: string; year: number };
 type EditorialRow = {
   id: string;
   rating: number;
+  authorName: string | null;
   headline: string | null;
   body: string;
   headlineEn: string | null;
@@ -17,7 +18,7 @@ type EditorialRow = {
   year: number;
 };
 
-const empty = { headline: '', body: '', headlineEn: '', bodyEn: '', rating: 7, titleId: '', featured: false };
+const empty = { headline: '', body: '', headlineEn: '', bodyEn: '', rating: 7, titleId: '', featured: false, jarvis: false };
 
 export default function EditorialEditor({ titles, rows }: { titles: TitleOption[]; rows: EditorialRow[] }) {
   const router = useRouter();
@@ -44,7 +45,8 @@ export default function EditorialEditor({ titles, rows }: { titles: TitleOption[
       body: form.body,
       headlineEn: form.headlineEn,
       bodyEn: form.bodyEn,
-      featured: form.featured
+      featured: form.featured,
+      authorName: form.jarvis ? 'Jarvis' : 'CiNEMAsFLiX'
     };
     if (action === 'update') payload.id = editing;
     else payload.titleId = form.titleId;
@@ -92,7 +94,8 @@ export default function EditorialEditor({ titles, rows }: { titles: TitleOption[
         headline: d.headlineHi ?? '',
         body: d.bodyHi ?? '',
         headlineEn: d.headlineEn ?? '',
-        bodyEn: d.bodyEn ?? ''
+        bodyEn: d.bodyEn ?? '',
+        jarvis: true
       }));
       setMessage('Draft ready — padho, edit karo, phir Publish dabao');
     } catch (e) {
@@ -111,7 +114,8 @@ export default function EditorialEditor({ titles, rows }: { titles: TitleOption[
       body: row.body,
       headlineEn: row.headlineEn ?? '',
       bodyEn: row.bodyEn ?? '',
-      featured: row.featured
+      featured: row.featured,
+      jarvis: (row.authorName ?? '').toLowerCase() === 'jarvis'
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -152,7 +156,7 @@ export default function EditorialEditor({ titles, rows }: { titles: TitleOption[
               disabled={drafting || !form.titleId}
               style={{ justifySelf: 'start' }}
             >
-              {drafting ? 'Drafting…' : '✍︎ AI draft — Hinglish + English'}
+              {drafting ? 'Jarvis likh raha hai…' : '✦ Jarvis draft — Hinglish + English'}
             </button>
           </div>
         ) : null}
@@ -183,10 +187,16 @@ export default function EditorialEditor({ titles, rows }: { titles: TitleOption[
           <textarea className="input" rows={6} value={form.bodyEn} onChange={(e) => setForm({ ...form, bodyEn: e.target.value })} />
         </div>
 
-        <label className="check">
-          <input type="checkbox" checked={form.featured} onChange={(e) => setForm({ ...form, featured: e.target.checked })} />
-          Pin as verdict
-        </label>
+        <div style={{ display: 'flex', gap: 18, flexWrap: 'wrap' }}>
+          <label className="check">
+            <input type="checkbox" checked={form.featured} onChange={(e) => setForm({ ...form, featured: e.target.checked })} />
+            Pin as verdict
+          </label>
+          <label className="check" title="Byline 'Review by Jarvis' dikhegi — AI-written drafts ke liye">
+            <input type="checkbox" checked={form.jarvis} onChange={(e) => setForm({ ...form, jarvis: e.target.checked })} />
+            Jarvis (AI) ne likha
+          </label>
+        </div>
 
         <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
           <button type="button" className="btn btn-primary" disabled={pending} onClick={() => submit(editing ? 'update' : 'create')}>
@@ -209,7 +219,14 @@ export default function EditorialEditor({ titles, rows }: { titles: TitleOption[
             <tbody>
               {rows.map((r) => (
                 <tr key={r.id}>
-                  <td><span className="t-title">{r.titleName}</span><div className="t-sub">{r.year}{r.featured ? ' · pinned' : ''}</div></td>
+                  <td>
+                    <span className="t-title">{r.titleName}</span>
+                    <div className="t-sub">
+                      {r.year}
+                      {r.featured ? ' · pinned' : ''}
+                      {(r.authorName ?? '').toLowerCase() === 'jarvis' ? ' · ✦ Jarvis' : ''}
+                    </div>
+                  </td>
                   <td className="mono">{r.rating}/10</td>
                   <td className="t-sub">{r.body.slice(0, 46)}…</td>
                   <td className="t-sub">{r.bodyEn ? 'yes' : <span style={{ color: '#c9a24a' }}>missing</span>}</td>

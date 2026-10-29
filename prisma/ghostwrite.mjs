@@ -152,6 +152,7 @@ if (wantSave) {
     bodyEn: draft.bodyEn,
     sourceLang: 'hinglish',
     editorial: true,
+    authorName: 'Jarvis',
     status: 'PUBLISHED'
   };
   const row = existing

@@ -16,6 +16,7 @@ import {
 import { avatarGradient, formatRuntime, initials } from '@/lib/format';
 import { settleAll } from '@/lib/safe';
 import DataBanner from '@/components/DataBanner';
+import TelegramButton from '@/components/TelegramButton';
 import { getEdition } from '@/lib/edition';
 
 export default async function HomePage() {
@@ -238,6 +239,26 @@ export default async function HomePage() {
                 ))}
               </div>
             </aside>
+          </div>
+        </div>
+      </section>
+
+
+      <section className="section" style={{ paddingTop: 0 }}>
+        <div className="container">
+          <div className="panel home-band">
+            <div>
+              <div className="eyebrow">Community</div>
+              <h3 className="home-band-title">Reviews, updates aur site ke andar ki baatein — Telegram par</h3>
+              <p className="sub" style={{ margin: '6px 0 0' }}>
+                Naya verdict publish hote hi channel par chala jaata hai. Site free hai aur free rahegi — chaho to
+                developer ko chai ka paisa bhej sakte ho.
+              </p>
+            </div>
+            <div className="tg-row">
+              <TelegramButton label="Join the channel" sub="updates · new reviews" small />
+              <Link href="/support" className="btn btn-sm btn-ghost">Support the dev</Link>
+            </div>
           </div>
         </div>
       </section>

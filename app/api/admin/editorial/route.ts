@@ -15,7 +15,9 @@ const schema = z.object({
   body: z.string().max(12000).optional(),
   headlineEn: z.string().max(200).optional(),
   bodyEn: z.string().max(12000).optional(),
-  featured: z.boolean().optional()
+  featured: z.boolean().optional(),
+  /** 'Jarvis' when an AI draft was published — byline reads "Review by Jarvis" */
+  authorName: z.string().max(40).optional()
 });
 
 /** Editorial panel — the site's own verdicts, no user account involved. */
@@ -29,7 +31,7 @@ export async function POST(req: Request) {
 
   const parsed = schema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0]?.message ?? 'Invalid data' }, { status: 400 });
-  const { action, id, titleId, rating, headline, body, headlineEn, bodyEn, featured } = parsed.data;
+  const { action, id, titleId, rating, headline, body, headlineEn, bodyEn, featured, authorName } = parsed.data;
 
   try {
     if (action === 'delete') {
@@ -49,7 +51,7 @@ export async function POST(req: Request) {
       headlineEn: headlineEn?.trim() || null,
       bodyEn: bodyEn?.trim() || null,
       editorial: true,
-      authorName: 'CiNEMAsFLiX',
+      authorName: (authorName ?? '').trim() || 'CiNEMAsFLiX',
       status: 'PUBLISHED' as const,
       spoiler: false,
       ...(typeof featured === 'boolean' ? { featured } : {})
