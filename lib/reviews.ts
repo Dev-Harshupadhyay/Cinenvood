@@ -33,7 +33,7 @@ export function withAuthor<T extends { id: string }>(review: T & AuthorFields): 
       user: { ...existing, role: (existing.role ?? 'USER') as ReviewAuthor['role'] }
     } as Authored<T>;
   }
-  const name = review.authorName?.trim() || 'CINE·MOOD Editorial';
+  const name = review.authorName?.trim() || null;
   return {
     ...review,
     editorial,

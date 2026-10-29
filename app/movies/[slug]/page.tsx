@@ -190,7 +190,13 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
           ) : (
             <div className="review-list">
               {reviewsForCards.map((r) => (
-                <ReviewCard key={r.id} review={r as any} authed={Boolean(sessionUser)} edition={edition} />
+                <ReviewCard
+                  key={r.id}
+                  review={r as any}
+                  authed={Boolean(sessionUser)}
+                  edition={edition}
+                  canFeature={sessionUser?.role === 'ADMIN'}
+                />
               ))}
             </div>
           )}

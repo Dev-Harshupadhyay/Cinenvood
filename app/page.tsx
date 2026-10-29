@@ -142,7 +142,13 @@ export default async function HomePage() {
               </div>
               <div className="review-list">
                 {latest.map((r: any) => (
-                  <ReviewCard key={r.id} review={r as any} authed={Boolean(sessionUser)} edition={edition} />
+                  <ReviewCard
+                    key={r.id}
+                    review={r as any}
+                    authed={Boolean(sessionUser)}
+                    edition={edition}
+                    canFeature={sessionUser?.role === 'ADMIN'}
+                  />
                 ))}
               </div>
             </div>

@@ -7,7 +7,7 @@ import LikeButton from '@/components/LikeButton';
 import SpoilerText from '@/components/SpoilerText';
 import { getSessionUser } from '@/lib/session';
 import { getReview, getLatestReviews, withViewerLikes } from '@/lib/queries';
-import { avatarGradient, initials, timeAgo } from '@/lib/format';
+import { avatarGradient, initials, timeAgo, reviewByline } from '@/lib/format';
 import { prisma } from '@/lib/prisma';
 import { getEdition, editionOf } from '@/lib/edition';
 import EditionSwitch from '@/components/EditionSwitch';
@@ -54,7 +54,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
         reviewRating: { '@type': 'Rating', ratingValue: review.rating, bestRating: 10, worstRating: 1 },
         name: review.headline ?? `${review.title.title} review`,
         reviewBody: text.body.slice(0, 500),
-        author: { '@type': review.editorial ? 'Organization' : 'Person', name: review.user.name ?? 'CINE·MOOD' },
+        author: { '@type': review.editorial ? 'Organization' : 'Person', name: reviewByline(review) },
         datePublished: new Date(review.createdAt).toISOString(),
         publisher: { '@type': 'Organization', name: 'CINE·MOOD' }
       },
@@ -88,12 +88,12 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={review.user.image} alt="" />
                 ) : (
-                  initials(review.user.name ?? review.user.email)
+                  initials(reviewByline(review))
                 )}
               </span>
               <div className="rv-id">
                 <div className="rv-name">
-                  {review.user.name ?? 'Member'}
+                  {reviewByline(review)}
                   {review.editorial ? <span className="mini-badge" style={{ marginLeft: 8 }}>EDITORIAL</span> : null}
                 </div>
                 <div className="rv-time">

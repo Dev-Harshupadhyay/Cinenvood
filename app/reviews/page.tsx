@@ -32,7 +32,9 @@ export default async function ReviewsFeed({ searchParams }: { searchParams: Prom
 
   const withLikes = await withViewerLikes(rowsRaw, sessionUser?.id).catch(() => rowsRaw);
   // The site's own verdicts always sit on top — community votes/rank chaahe jo ho.
-  const pinnedRows = withLikes.filter((r) => (r as { editorial?: boolean }).editorial || (r as { featured?: boolean }).featured);
+  const pinnedRows = withLikes.filter(
+    (r) => (r as { homeSpot?: boolean }).homeSpot || (r as { editorial?: boolean }).editorial || (r as { featured?: boolean }).featured
+  );
   const restRows = withLikes.filter((r) => !pinnedRows.includes(r));
   if (sort === 'top') restRows.sort((a, b) => b._count.likes - a._count.likes);
   const list = [...pinnedRows, ...restRows];
@@ -74,7 +76,13 @@ export default async function ReviewsFeed({ searchParams }: { searchParams: Prom
         <div className="feed-layout" style={{ marginTop: 18 }}>
           <div className="review-list review-list--wide">
             {list.map((r) => (
-              <ReviewCard key={r.id} review={r as any} authed={Boolean(sessionUser)} edition={edition} />
+              <ReviewCard
+                key={r.id}
+                review={r as any}
+                authed={Boolean(sessionUser)}
+                edition={edition}
+                canFeature={sessionUser?.role === 'ADMIN'}
+              />
             ))}
           </div>
 

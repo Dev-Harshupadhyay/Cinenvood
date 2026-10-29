@@ -95,3 +95,16 @@ export function displayName(name?: string | null, email?: string | null): string
 export function hasOwnName(name?: string | null): boolean {
   return Boolean((name ?? '').trim());
 }
+
+/** Byline used everywhere a review is shown. Admin/editorial kabhi khaali nahi. */
+export function reviewByline(r: {
+  editorial?: boolean | null;
+  authorName?: string | null;
+  user?: { name?: string | null; email?: string | null; role?: string | null } | null;
+}): string {
+  const role = r.user?.role ?? 'USER';
+  const isSiteVoice = Boolean(r.editorial) || role === 'ADMIN';
+  const own = (r.authorName ?? '').trim() || (r.user?.name ?? '').trim();
+  if (isSiteVoice) return own || 'Admin';
+  return displayName(r.user?.name, r.user?.email);
+}

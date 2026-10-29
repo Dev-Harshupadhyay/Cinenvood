@@ -84,7 +84,7 @@ export async function getTitleBySlug(slug: string) {
     include: {
       reviews: {
         where: { status: 'PUBLISHED' },
-        orderBy: [{ editorial: 'desc' }, { featured: 'desc' }, { createdAt: 'desc' }],
+        orderBy: [{ homeSpot: 'desc' }, { editorial: 'desc' }, { featured: 'desc' }, { createdAt: 'desc' }],
         include: {
           user: { select: { id: true, name: true, email: true, image: true, bio: true, role: true } },
           _count: { select: { likes: true, comments: true } }
@@ -122,7 +122,7 @@ export async function getLatestReviews(take = 6, opts: { excludeTitleId?: string
       ...(opts.excludeTitleId ? { titleId: { not: opts.excludeTitleId } } : {}),
       ...(opts.userId ? { userId: opts.userId } : {})
     },
-    orderBy: [{ editorial: 'desc' }, { featured: 'desc' }, { createdAt: 'desc' }],
+    orderBy: [{ homeSpot: 'desc' }, { editorial: 'desc' }, { featured: 'desc' }, { createdAt: 'desc' }],
     take,
     include: {
       user: { select: { id: true, name: true, image: true, email: true, role: true } },
@@ -136,7 +136,7 @@ export async function getLatestReviews(take = 6, opts: { excludeTitleId?: string
 export async function getTopReviews(take = 5) {
   const rows = await prisma.review.findMany({
     where: { status: 'PUBLISHED' },
-    orderBy: [{ editorial: 'desc' }, { featured: 'desc' }, { likes: { _count: 'desc' } }, { createdAt: 'desc' }],
+    orderBy: [{ homeSpot: 'desc' }, { editorial: 'desc' }, { featured: 'desc' }, { likes: { _count: 'desc' } }, { createdAt: 'desc' }],
     take,
     include: {
       user: { select: { id: true, name: true, image: true, email: true, role: true } },

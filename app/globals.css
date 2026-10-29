@@ -2363,3 +2363,46 @@ html, body { max-width: 100%; overflow-x: clip; }
   .rv-name--lg { font-size: 17px !important; }
   .rv-role-chip--gold { font-size: 7.4px; letter-spacing: 0.1em; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   Member vs editorial cards + main-page slot (admin feature action)
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Member review — alag, sada, bina gold */
+.review-card[data-kind='member'] {
+  border-color: var(--border);
+  background: linear-gradient(165deg, color-mix(in srgb, var(--surface-2) 70%, transparent), var(--surface));
+  box-shadow: none;
+}
+.review-card[data-kind='member'] .av-quote { display: none; }
+.review-card[data-kind='member'] .rv-avatar { box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--border-strong) 70%, transparent); }
+.review-card[data-kind='member'] .rv-kicker { color: color-mix(in srgb, var(--faint) 92%, transparent); }
+.review-card[data-kind='member'] .rv-kicker-line { background: linear-gradient(90deg, color-mix(in srgb, var(--text) 35%, transparent), transparent); }
+.review-card[data-kind='member'] .rv-name--lg { font-size: 19px !important; }
+
+/* main-page slot */
+.review-card[data-home='true'] {
+  border-color: color-mix(in srgb, #c9a24a 45%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, #c9a24a 20%, transparent), 0 26px 60px -46px rgba(0, 0, 0, 0.9);
+}
+.rv-home-chip {
+  font-family: var(--font-mono);
+  font-size: 8.4px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 3px 7px;
+  border-radius: 6px;
+  color: #f4dfa1;
+  border: 1px solid color-mix(in srgb, #c9a24a 55%, transparent);
+  background: color-mix(in srgb, #c9a24a 16%, transparent);
+  white-space: nowrap;
+}
+.rv-feature[data-on='true'] {
+  color: #f0d79a;
+  border-color: color-mix(in srgb, #c9a24a 50%, transparent);
+  background: color-mix(in srgb, #c9a24a 14%, transparent);
+}
+.rv-feature-err { font-size: 11px; color: #e2553f; }
+@media (max-width: 760px) {
+  .rv-feature { order: 4; }
+}

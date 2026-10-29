@@ -83,6 +83,7 @@ model Review {
   bodyEn     String?
   spoiler    Boolean      @default(false)
   featured   Boolean      @default(false) // admin-pinned "Admin verdict"
+  homeSpot   Boolean      @default(false) // picked by the admin for the main-page slot
   status     ReviewStatus @default(PUBLISHED)
   createdAt  DateTime     @default(now())
   updatedAt  DateTime     @updatedAt
@@ -101,6 +102,7 @@ model Review {
   @@index([titleId, createdAt])
   @@index([status])
   @@index([featured])
+  @@index([homeSpot])
 }
 
 model ReviewLike {

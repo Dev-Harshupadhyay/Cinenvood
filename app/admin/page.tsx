@@ -267,7 +267,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
                 {recentComments.map((c) => (
                   <div key={c.id} className="member-row" style={{ alignItems: 'flex-start' }}>
                     <span style={{ minWidth: 0 }}>
-                      <span className="mr-name" style={{ display: 'block' }}>{c.user.name ?? 'Member'}</span>
+                      <span className="mr-name" style={{ display: 'block' }}>{c.user.name ?? c.user.email ?? 'Member'}</span>
                       <span className="mr-meta" style={{ display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 210 }}>
                         {c.body.slice(0, 60)}
                       </span>

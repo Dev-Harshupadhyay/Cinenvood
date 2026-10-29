@@ -1,8 +1,9 @@
 import Link from 'next/link';
 import { verdictFor } from '@/lib/verdict';
-import { avatarGradient, displayName, hasOwnName, initials, timeAgo } from '@/lib/format';
+import { avatarGradient, hasOwnName, initials, reviewByline, timeAgo } from '@/lib/format';
 import { editionOf, type Edition } from '@/lib/edition';
 import LikeButton from './LikeButton';
+import FeatureButton from './FeatureButton';
 import SpoilerText from './SpoilerText';
 
 type Review = {
@@ -14,6 +15,7 @@ type Review = {
   bodyEn?: string | null;
   spoiler: boolean;
   featured?: boolean;
+  homeSpot?: boolean;
   editorial?: boolean;
   authorName?: string | null;
   createdAt: Date | string;
@@ -26,29 +28,34 @@ type Review = {
 export default function ReviewCard({
   review,
   authed,
-  edition = 'hi'
+  edition = 'hi',
+  canFeature = false
 }: {
   review: Review;
   authed: boolean;
   edition?: Edition;
+  /** admin hi main-page slot badal sakta hai */
+  canFeature?: boolean;
 }) {
   const isAdmin = review.user.role === 'ADMIN';
   const text = editionOf(review, edition);
   const isEditorial = Boolean(review.editorial);
   const band = verdictFor(review.rating);
-  const byline = isEditorial
-    ? review.authorName || review.user.name || 'Harsh'
-    : displayName(review.user.name, review.user.email);
+  // Naam bhool jaane par bhi byline kabhi khaali nahi: site ke verdicts "Admin" bank jaate hain.
+  const byline = reviewByline(review);
+  const kind = isEditorial || review.user.role === 'ADMIN' ? 'editorial' : 'member';
   const verified = isEditorial || isAdmin;
   const supporters = review._count.likes;
 
   return (
     <article
-      className={`review-card${isAdmin ? ' admin-verdict' : ''}`}
+      className={`review-card${verified ? ' admin-verdict' : ''}`}
+      data-kind={kind}
       data-pinned={review.featured ? 'true' : undefined}
+      data-home={review.homeSpot ? 'true' : undefined}
       data-editorial={isEditorial ? 'true' : undefined}
     >
-      {isAdmin ? <span className="av-quote" aria-hidden="true">“</span> : null}
+      {verified ? <span className="av-quote" aria-hidden="true">“</span> : null}
 
       <div className="rv-head rv-head--premium">
         <span className={`avatar rv-avatar${verified ? ' avatar--admin' : ''}`} style={{ background: avatarGradient(review.user.email) }}>
@@ -79,11 +86,12 @@ export default function ReviewCard({
           <div className="rv-role">
             {isEditorial ? (
               <span className="rv-role-chip rv-role-chip--gold">FOUNDER · EDITOR-IN-CHIEF</span>
-            ) : isAdmin ? (
-              <span className="rv-role-chip">ADMIN</span>
+            ) : review.user.role === 'ADMIN' ? (
+              <span className="rv-role-chip rv-role-chip--gold">ADMIN VERDICT</span>
             ) : (
               <span className="rv-role-plain">Member review</span>
             )}
+            {review.homeSpot ? <span className="rv-home-chip">★ On home</span> : null}
             <span className="rv-dot" aria-hidden="true">·</span>
             <span className="rv-time">{timeAgo(review.createdAt)}</span>
             {text.translated ? (
@@ -114,7 +122,11 @@ export default function ReviewCard({
             {review.title.year} · {review._count.comments} {review._count.comments === 1 ? 'comment' : 'comments'}
           </div>
         </div>
-        {isEditorial ? <span className="av-pin av-pin--gold">VERDICT</span> : review.featured ? <span className="av-pin">PINNED</span> : null}
+        {isEditorial ? (
+          <span className="av-pin av-pin--gold">VERDICT</span>
+        ) : review.featured ? (
+          <span className="av-pin">PINNED</span>
+        ) : null}
       </Link>
 
       {text.headline ? <h3 className="rv-headline rv-headline--serif">{text.headline}</h3> : null}
@@ -152,6 +164,8 @@ export default function ReviewCard({
         ) : null}
 
         {verified ? <span className="av-sign">— {byline}</span> : null}
+
+        {canFeature ? <FeatureButton reviewId={review.id} on={Boolean(review.homeSpot)} /> : null}
 
         <Link href={`/reviews/${review.id}`} className="link-more" style={{ marginLeft: 'auto' }}>
           Read full verdict
