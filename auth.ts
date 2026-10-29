@@ -1,22 +1,54 @@
+import { timingSafeEqual } from 'node:crypto';
+import { headers } from 'next/headers';
 import NextAuth from 'next-auth';
 import Google from 'next-auth/providers/google';
 import Credentials from 'next-auth/providers/credentials';
 import { prisma } from '@/lib/prisma';
+import { rateLimit, LIMITS } from '@/lib/rate-limit';
 
-const ADMIN_EMAIL = (process.env.ADMIN_EMAIL ?? 'admin@cinemood.app').trim().toLowerCase();
+const ADMIN_EMAIL = (process.env.ADMIN_EMAIL ?? '').trim().toLowerCase();
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? '';
 
-/** Google OAuth is the only production sign-in. */
+/** Google OAuth is the sign-in method for regular members. */
 export const isGoogleEnabled = Boolean(process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET);
 
 /**
- * Local-only shortcut: when Google keys are absent **and** we're not in
- * production, allow a password-less email login so the app can be tested.
- * It is compiled out of any Vercel/production runtime and can never create
- * an admin unless the email equals ADMIN_EMAIL.
+ * Local-only shortcut: when Google keys are absent and we're not in production,
+ * allow password-less member login for local testing only.
  */
 const devFallback = !isGoogleEnabled && process.env.NODE_ENV !== 'production';
 
 const providers = [
+  Credentials({
+    id: 'admin-password',
+    name: 'Admin password',
+    credentials: {
+      email: { label: 'Email', type: 'email' },
+      password: { label: 'Password', type: 'password' }
+    },
+    async authorize(raw) {
+      const email = String(raw?.email ?? '').trim().toLowerCase();
+      const password = String(raw?.password ?? '');
+      if (!ADMIN_EMAIL || !ADMIN_PASSWORD || email !== ADMIN_EMAIL || !password) return null;
+
+      // Slow down password guessing per IP + configured admin account.
+      const h = await headers();
+      const ip = h.get('x-forwarded-for')?.split(',')[0]?.trim() ?? h.get('x-real-ip') ?? 'unknown';
+      const gate = await rateLimit(`admin-login:${ip}:${email}`, 6, 15 * 60_000);
+      if (!gate.ok) return null;
+
+      const expected = Buffer.from(ADMIN_PASSWORD, 'utf8');
+      const candidate = Buffer.from(password, 'utf8');
+      if (expected.length !== candidate.length || !timingSafeEqual(expected, candidate)) return null;
+
+      const user = await prisma.user.upsert({
+        where: { email },
+        update: { role: 'ADMIN' },
+        create: { email, name: 'CINE·MOOD Admin', role: 'ADMIN' }
+      });
+      return { id: user.id, email: user.email, name: user.name, image: user.image };
+    }
+  }),
   ...(isGoogleEnabled
     ? [
         Google({
@@ -43,7 +75,7 @@ const providers = [
             const user = await prisma.user.upsert({
               where: { email },
               update: {},
-              create: { email, name, role: email === ADMIN_EMAIL ? 'ADMIN' : 'USER' }
+              create: { email, name, role: 'USER' }
             });
             return { id: user.id, email: user.email, name: user.name, image: user.image };
           }
@@ -58,20 +90,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   pages: { signIn: '/login', error: '/login' },
   providers,
   callbacks: {
-    /** Every real sign-in is mirrored into Postgres — Google profile included. */
+    /** Mirror Google accounts into Postgres; password admin account is created in authorize(). */
     async signIn({ user, account, profile }) {
       if (!user?.email) return false;
       const email = user.email.toLowerCase();
-      const image = user.image ?? (profile as { picture?: string } | undefined)?.picture ?? null;
       const provider = account?.provider ?? 'google';
 
-      // A member can override their photo/name in the dashboard — signing in again
-      // must never wipe that. Google's own picture is kept aside so it can be restored.
+      if (provider === 'admin-password') return email === ADMIN_EMAIL;
+
+      const image = user.image ?? (profile as { picture?: string } | undefined)?.picture ?? null;
       const existing = await prisma.user.findUnique({
         where: { email },
         select: { image: true, name: true }
       });
-
       const dbUser = await prisma.user.upsert({
         where: { email },
         update: {
@@ -84,11 +115,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           name: user.name ?? email.split('@')[0],
           image,
           googleImage: image,
-          role: email === ADMIN_EMAIL ? 'ADMIN' : 'USER'
+          role: 'USER'
         }
       });
 
-      // First-party analytics: how people actually arrive.
       prisma.pageView
         .create({
           data: { path: '/auth/signin', referrer: provider, device: 'desktop', guest: false, visitor: dbUser.id }
@@ -97,16 +127,21 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
       return true;
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, account }) {
+      if (account) {
+        token.adminPasswordLogin = account.provider === 'admin-password' && user?.email?.toLowerCase() === ADMIN_EMAIL;
+      }
+
       if (token.email) {
         const dbUser = await prisma.user.findUnique({ where: { email: token.email.toLowerCase() } });
         if (dbUser) {
           token.uid = dbUser.id;
-          token.role = dbUser.role;
+          token.role = token.adminPasswordLogin === true && token.email.toLowerCase() === ADMIN_EMAIL ? dbUser.role : 'USER';
           token.name = dbUser.name;
           token.picture = dbUser.image ?? token.picture;
         } else if (user) {
           token.uid = user.id;
+          token.role = 'USER';
         }
       }
       return token;
@@ -114,7 +149,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async session({ session, token }) {
       if (session.user) {
         session.user.id = (token.uid as string) ?? '';
-        session.user.role = (token.role as 'USER' | 'ADMIN') ?? 'USER';
+        session.user.adminPasswordLogin = token.adminPasswordLogin === true;
+        session.user.role = token.adminPasswordLogin === true ? (token.role as 'USER' | 'ADMIN') ?? 'USER' : 'USER';
       }
       return session;
     }

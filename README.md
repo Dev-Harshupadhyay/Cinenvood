@@ -39,8 +39,9 @@ That is a deliberate product decision — it keeps the site legal, advertiser-sa
 | **Reviews** | 10-star picker, headline, body, spoiler blur-reveal, one review per user per film (upsert), likes, threaded comments |
 | **Admin verdict** | Any review by an ADMIN gets a premium animated card — conic gradient border, Instrument Serif headline, drop cap, PINNED badge, signature |
 | **Dashboard** | Stats (reviews, likes received, comments, watchlist), my reviews, watchlist, editable profile |
-| **Admin panel** | KPIs, moderation (publish / hide / pin / delete), catalogue (feature / hide), members (role / delete), comments, TMDB import, **first-party analytics** and an **admin audit trail** |
-| **Auth** | **Google-only in production** (OAuth), JWT sessions, `ADMIN_EMAIL` role gate, **login required to like, comment and review** |
+| **Admin panel** | Redesigned responsive control room: KPIs, moderation, catalogue, members, editorial/Jarvis, TMDB import, YouTube trailer search, analytics and audit trail — password-only admin session |
+| **Trailers** | Optional English + Hindi YouTube trailers on home hero and movie pages; admin searches YouTube Data API v3, selects a result, then saves the video IDs |
+| **Auth** | Google OAuth for members; separate `ADMIN_EMAIL` + `ADMIN_PASSWORD` sign-in at `/admin/login`; a Google session alone never grants admin access |
 | **Guest mode** | Signed-out visitors get a `localStorage` guest id and **read-only** access — browse catalogue and read every review, no account created |
 | **Rate limiting** | Two-layer (instance memory + shared Postgres counter) on admin pages, admin actions, sign-in, reviews, comments, likes and analytics beacons — 429 + `Retry-After`, no bypass flag |
 | **Analytics** | Cookie-less first-party page views, 14-day chart, top pages/titles, devices, referrers, guests vs members, plus Vercel Analytics |
@@ -68,8 +69,14 @@ That is a deliberate product decision — it keeps the site legal, advertiser-sa
 ### Legacy review — imported from the old app, credited to the site
 ![Legacy editorial review](./docs/screenshots/10-legacy-review.jpg)
 
-### Admin panel — KPIs, pinned verdicts, moderation
-![Admin panel](./docs/screenshots/03-admin-panel.jpg)
+### Admin control room — KPIs, moderation, catalogue, logout
+![Redesigned admin control room](./docs/screenshots/17-admin-control-room.png)
+
+### Admin access — separate email + password; Google member login stays separate
+![Admin password sign-in](./docs/screenshots/18-admin-password-login.png)
+
+### Admin control room — mobile
+<img src="./docs/screenshots/19-admin-mobile.png" alt="Redesigned mobile admin panel" width="250" />
 
 ### Admin analytics — first-party, cookie-less traffic
 ![Admin analytics](./docs/screenshots/11-admin-analytics.jpg)
@@ -97,7 +104,7 @@ That is a deliberate product decision — it keeps the site legal, advertiser-sa
 | --- | --- | --- |
 | Framework | Next.js 15 App Router + React 19 + TypeScript | free |
 | Styling | Hand-written design system (`app/globals.css`) — no UI kit, no Tailwind | free |
-| Auth | Auth.js v5 — Google OAuth + demo email, JWT, role-based admin | free |
+| Auth | Auth.js v5 — Google OAuth for members; password-only admin credentials, JWT sessions | free |
 | Database | **Supabase Postgres** (dedicated `cinemood` schema) | free tier |
 | ORM | Prisma 6 (`db push`, seed script included) | free |
 | Metadata | **TMDB API** via server-side proxy (ISP-block safe) | free |
@@ -129,11 +136,13 @@ DIRECT_URL="postgresql://postgres.<ref>:<pass>@aws-0-<region>.pooler.supabase.co
 AUTH_SECRET="openssl rand -base64 32"
 AUTH_TRUST_HOST="true"
 NEXT_PUBLIC_SITE_URL="http://localhost:3000"
-ADMIN_EMAIL="you@example.com"        # first login with this email becomes ADMIN
+ADMIN_EMAIL="you@example.com"        # the sole admin login email
+ADMIN_PASSWORD=""                    # set a strong password; admin sign-in at /admin/login
 
-AUTH_GOOGLE_ID=""
+AUTH_GOOGLE_ID=""                    # regular members
 AUTH_GOOGLE_SECRET=""
 TMDB_API_KEY=""                      # v3 key or v4 read token — both auto-detected
+YOUTUBE_API_KEY=""                   # optional: YouTube Data API v3 trailer search
 OMDB_API_KEY=""                      # optional: IMDb / RT / Metacritic scores
 ```
 
@@ -143,17 +152,14 @@ There are **no seeded accounts** — a fresh database has zero users on purpose.
 
 | Path | Behaviour |
 | --- | --- |
-| **Google** (production) | Any Gmail signs in; the profile (name, email, photo) is upserted into `cinemood."User"`. The account whose email equals `ADMIN_EMAIL` becomes `ADMIN`. |
-| **Local dev fallback** | Only when Google keys are missing **and** `NODE_ENV !== 'production'`, `/login` shows a password-less email form. It is compiled out of production builds. |
+| **Google member login** | Any Google account signs in as a regular member; can review, like, comment and use a personal dashboard. Google login never grants admin access. |
+| **Admin password login** | `/admin/login` checks `ADMIN_EMAIL` + `ADMIN_PASSWORD`; only this credential session unlocks `/admin` and admin APIs. Password attempts are rate-limited. |
+| **Local dev fallback** | Only when Google keys are missing **and** `NODE_ENV !== 'production'`, `/login` shows a local-only member test form. It is compiled out of production builds. |
 | **Guest** | No login needed to read. A `cm-guest-id` lives in `localStorage`; like / review / comment redirect to `/login?next=…`. |
 
 See [`docs/GOOGLE-AUTH-SETUP.md`](./docs/GOOGLE-AUTH-SETUP.md) for the six-click Google Cloud walkthrough.
 
---- | --- |
-| `admin@cinemood.app` | **ADMIN** — admin panel, pinning, moderation |
-| any other email | **MEMBER** — review, like, comment, watchlist |
-
----
+See [`docs/ADMIN-SETUP.md`](./docs/ADMIN-SETUP.md) for Vercel environment setup, password-only admin access and YouTube trailer search.
 
 ## 🎬 TMDB: fetch real movies (and survive ISP blocks)
 

@@ -73,12 +73,9 @@ export default async function LoginPage({
           </p>
         ) : null}
 
-        {isGoogleEnabled && process.env.ADMIN_EMAIL ? (
-          <p className="form-note">
-            Admin access sirf <code className="mono">{process.env.ADMIN_EMAIL}</code> se milta hai — koi email daal ke admin banne ka
-            rasta nahi hai.
-          </p>
-        ) : null}
+        <p className="form-note" style={{ marginTop: 14 }}>
+          Site administrator? <Link href="/admin/login" className="link-more">Password se admin login →</Link>
+        </p>
 
         {!isGoogleEnabled && isDev ? (
           <>

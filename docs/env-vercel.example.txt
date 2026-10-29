@@ -6,12 +6,16 @@ DATABASE_URL=postgresql://postgres.<project-ref>:<db-password>@aws-1-<region>.po
 DIRECT_URL=postgresql://postgres.<project-ref>:<db-password>@aws-1-<region>.pooler.supabase.com:5432/postgres?schema=cinemood&sslmode=require
 AUTH_SECRET=<openssl rand -base64 32>
 AUTH_TRUST_HOST=true
-NEXT_PUBLIC_SITE_URL=https://cinemood.vercel.app
-ADMIN_EMAIL=your.real@gmail.com
+NEXT_PUBLIC_SITE_URL=https://cinenvood.vercel.app
+ADMIN_EMAIL=your.admin@gmail.com
+ADMIN_PASSWORD=<strong-private-password>
 
 # New in round 5 — from Google Cloud → Credentials → OAuth client ID
 AUTH_GOOGLE_ID=<xxxxx>.apps.googleusercontent.com
 AUTH_GOOGLE_SECRET=GOCSPX-<xxxxx>
+
+# Optional: server-side YouTube Data API v3 trailer search
+YOUTUBE_API_KEY=<youtube-data-api-v3-key>
 
 # Already present — do NOT overwrite
 # TMDB_API_KEY=<existing>

@@ -27,7 +27,10 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
     where: { email: session.user.email.toLowerCase() },
     select: { id: true, name: true, email: true, image: true, googleImage: true, role: true, bio: true }
   });
-  return user as CurrentUser | null;
+  if (!user) return null;
+  const adminEmail = (process.env.ADMIN_EMAIL ?? '').trim().toLowerCase();
+  const verifiedAdminSession = session.user.adminPasswordLogin === true && user.email.toLowerCase() === adminEmail;
+  return { ...user, role: verifiedAdminSession ? user.role : 'USER' } as CurrentUser;
 }
 
 export async function requireUser() {
@@ -50,15 +53,13 @@ async function currentIp() {
  */
 export async function requireAdmin() {
   const user = await getCurrentUser();
-  if (!user) redirect('/login?next=/admin');
+  if (!user) redirect('/admin/login');
+
+  if (user.role !== 'ADMIN') redirect('/admin/login?denied=1');
 
   const ip = await currentIp();
   const gate = await rateLimit(`admin:page:${ip}:${user.id}`, LIMITS.adminPage.limit, LIMITS.adminPage.windowMs);
   if (!gate.ok) redirect(`/rate-limited?retry=${gate.retryAfter}`);
 
-  if (user.role !== 'ADMIN') {
-    const adminEmail = (process.env.ADMIN_EMAIL ?? '').toLowerCase();
-    redirect(`/admin-denied?email=${encodeURIComponent(user.email)}&admin=${encodeURIComponent(adminEmail)}`);
-  }
   return user;
 }

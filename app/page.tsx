@@ -17,6 +17,7 @@ import { avatarGradient, formatRuntime, initials } from '@/lib/format';
 import { settleAll } from '@/lib/safe';
 import DataBanner from '@/components/DataBanner';
 import TelegramButton from '@/components/TelegramButton';
+import TrailerModal from '@/components/TrailerModal';
 import { getEdition } from '@/lib/edition';
 
 export default async function HomePage() {
@@ -66,6 +67,7 @@ export default async function HomePage() {
                 <Link href={`/movies/${hero.slug}#review`} className="btn">
                   Write a review
                 </Link>
+                <TrailerModal title={hero.title} trailerEn={(hero as any).trailerEn} trailerHi={(hero as any).trailerHi} poster={hero.poster} />
               </div>
             </div>
           </div>

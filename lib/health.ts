@@ -11,9 +11,11 @@ const ENV_KEYS: [string, string, boolean][] = [
   ['AUTH_TRUST_HOST', 'Auth trust host', true],
   ['NEXT_PUBLIC_SITE_URL', 'Public site URL', false],
   ['ADMIN_EMAIL', 'Admin email', true],
+  ['ADMIN_PASSWORD', 'Admin password', true],
   ['AUTH_GOOGLE_ID', 'Google client id', false],
   ['AUTH_GOOGLE_SECRET', 'Google client secret', false],
-  ['TMDB_API_KEY', 'TMDB key', false]
+  ['TMDB_API_KEY', 'TMDB key', false],
+  ['YOUTUBE_API_KEY', 'YouTube Data API v3 key', false]
 ];
 
 export async function runHealth() {
@@ -79,14 +81,19 @@ export async function runHealth() {
       schemaOk = missing.length === 0;
       schemaDetail = missing.length ? `missing: ${missing.join(', ')} — run prisma db push` : 'all tables present';
 
-      const cols = await prisma.$queryRaw<{ column_name: string }[]>`
-        SELECT column_name FROM information_schema.columns
-        WHERE table_schema = 'cinemood' AND table_name = 'Review' AND column_name IN ('bodyEn','editorial','authorName')
+      const cols = await prisma.$queryRaw<{ table_name: string; column_name: string }[]>`
+        SELECT table_name, column_name FROM information_schema.columns
+        WHERE table_schema = 'cinemood' AND (
+          (table_name = 'Review' AND column_name IN ('bodyEn','editorial','authorName')) OR
+          (table_name = 'Title' AND column_name IN ('trailerEn','trailerHi'))
+        )
       `;
-      const colSet = new Set(cols.map((c) => c.column_name));
-      if (schemaOk && (!colSet.has('bodyEn') || !colSet.has('editorial') || !colSet.has('authorName'))) {
+      const colSet = new Set(cols.map((c) => `${c.table_name}.${c.column_name}`));
+      const requiredColumns = ['Review.bodyEn', 'Review.editorial', 'Review.authorName', 'Title.trailerEn', 'Title.trailerHi'];
+      const missingColumns = requiredColumns.filter((c) => !colSet.has(c));
+      if (schemaOk && missingColumns.length) {
         schemaOk = false;
-        schemaDetail = 'Review table is on an older migration — run prisma db push';
+        schemaDetail = `missing columns: ${missingColumns.join(', ')} — run prisma db push`;
       }
 
       const [titles, reviews, users, pageViews] = await Promise.all([

@@ -12,6 +12,7 @@ import { getEdition } from '@/lib/edition';
 import DataBanner from '@/components/DataBanner';
 import RatingScene from '@/components/RatingScene';
 import EditionSwitch from '@/components/EditionSwitch';
+import TrailerModal from '@/components/TrailerModal';
 import { avatarGradient, formatRuntime, initials } from '@/lib/format';
 import { prisma } from '@/lib/prisma';
 
@@ -132,6 +133,7 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
             <Link href="#review" className="btn btn-primary">
               Write a review
             </Link>
+            <TrailerModal title={title.title} trailerEn={(title as any).trailerEn} trailerHi={(title as any).trailerHi} />
           </div>
 
           {title.cast.length > 0 ? (

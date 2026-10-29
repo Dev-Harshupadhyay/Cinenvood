@@ -8,6 +8,8 @@ import { getAnalytics } from '@/lib/queries';
 import { withAuthors } from '@/lib/reviews';
 import { tmdbConfigured } from '@/lib/tmdb';
 import { avatarGradient, initials, timeAgo } from '@/lib/format';
+import TrailerForm from '@/components/TrailerForm';
+import AdminLogoutButton from '@/components/AdminLogoutButton';
 
 export const metadata = { title: 'Admin' };
 
@@ -112,9 +114,9 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
       : [];
 
   return (
-    <div className="container dash">
-      <aside className="dash-side">
-        <div className="panel" style={{ display: 'flex', gap: 11, alignItems: 'center' }}>
+    <div className="container dash admin-shell">
+      <aside className="dash-side admin-sidebar">
+        <div className="panel admin-identity" style={{ display: 'flex', gap: 11, alignItems: 'center' }}>
           <span className="avatar" style={{ background: avatarGradient(admin.email), width: 42, height: 42 }}>
             {admin.image ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -129,7 +131,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
           </span>
         </div>
 
-        <div className="panel dash-nav">
+        <div className="panel dash-nav admin-nav">
           {TABS.map((t) => (
             <Link key={t.key} href={`/admin?tab=${t.key}`} data-active={tab === t.key}>
               {t.label}
@@ -145,7 +147,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
           </Link>
         </div>
 
-        <div className="panel">
+        <div className="panel admin-quick-links">
           <div className="panel-title">
             <span>Quick links</span>
           </div>
@@ -162,7 +164,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
           </div>
         </div>
 
-        <div className="panel" style={{ padding: 14 }}>
+        <div className="panel admin-devcard" style={{ padding: 14 }}>
           <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
             <span className="avatar" style={{ width: 38, height: 38, background: '#0a0c0c', border: '1px solid var(--border)', display: 'grid', placeItems: 'center' }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -170,7 +172,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
             </span>
             <span>
               <span style={{ display: 'block', fontSize: 13, fontWeight: 700 }}>Harsh Upadhyay</span>
-              <span className="faint mono" style={{ fontSize: 9, letterSpacing: '0.12em' }}>DEVELOPER · ADMIN</span>
+              <span className="faint mono" style={{ fontSize: 9, letterSpacing: '0.12em' }}>SITE CREATOR</span>
             </span>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 12 }}>
@@ -186,8 +188,19 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
         </div>
       </aside>
 
-      <div className="dash-main">
-        <div className="stat-grid">
+      <div className="dash-main admin-main">
+        <div className="admin-topbar">
+          <div>
+            <div className="eyebrow">Control room <span className="admin-breadcrumb">/ {tab}</span></div>
+            <h1>{TABS.find((t) => t.key === tab)?.label ?? 'Overview'}</h1>
+            <p>Catalogue, reviews, members and the full CINE·MOOD operation — all in one place.</p>
+          </div>
+          <div className="admin-top-actions">
+            <span className="admin-session-pill"><i /> Password session · Admin</span>
+            <AdminLogoutButton />
+          </div>
+        </div>
+        <div className="stat-grid admin-stats">
           <div className="stat-card">
             <div className="sl">Users</div>
             <div className="sv">{users}</div>
@@ -385,6 +398,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
                     <th>Year</th>
                     <th>Reviews</th>
                     <th>Likes</th>
+                    <th>Trailer (EN / HI)</th>
                     <th>Status</th>
                     <th style={{ textAlign: 'right' }}>Actions</th>
                   </tr>
@@ -407,6 +421,9 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
                       <td className="mono">{t.year}</td>
                       <td className="mono">{t._count.reviews}</td>
                       <td className="mono">{t._count.likes}</td>
+                      <td>
+                        <TrailerForm titleId={t.id} trailerEn={(t as any).trailerEn} trailerHi={(t as any).trailerHi} />
+                      </td>
                       <td>
                         <span className={`status status-${t.status === 'PUBLISHED' ? 'published' : 'hidden'}`}>{t.status}</span>
                       </td>

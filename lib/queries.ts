@@ -15,6 +15,8 @@ export type PosterTitle = {
   reviewCount: number;
   likes: number;
   communityScore: number | null;
+  trailerEn?: string | null;
+  trailerHi?: string | null;
 };
 
 const titleSelect = {
@@ -24,7 +26,11 @@ const titleSelect = {
   year: true,
   runtime: true,
   poster: true,
+  backdrop: true,
+  overview: true,
   genres: true,
+  trailerEn: true,
+  trailerHi: true,
   imdbRating: true,
   tmdbScore: true,
   _count: { select: { reviews: true, likes: true } },
@@ -45,7 +51,9 @@ function mapTitle(t: any): PosterTitle {
     tmdbScore: t.tmdbScore ?? null,
     reviewCount: t._count?.reviews ?? 0,
     likes: t._count?.likes ?? 0,
-    communityScore: ratings.length ? Math.round((ratings.reduce((a, b) => a + b, 0) / ratings.length) * 10) / 10 : null
+    communityScore: ratings.length ? Math.round((ratings.reduce((a, b) => a + b, 0) / ratings.length) * 10) / 10 : null,
+    trailerEn: (t as any).trailerEn ?? null,
+    trailerHi: (t as any).trailerHi ?? null
   };
 }
 

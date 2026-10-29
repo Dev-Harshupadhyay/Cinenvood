@@ -1,49 +1,10 @@
-# Google sign-in — setup (once, ~6 minutes)
+# Google sign-in — member accounts
 
-CINE·MOOD uses **Google OAuth only** in production. There is no password, no seeded account and no
-"type this email to become admin" shortcut. This guide is the whole setup.
+CINE·MOOD uses Google OAuth for regular members. Members use their own dashboard to write reviews, like, comment and maintain a watchlist. **A Google session never grants admin access**; the control room uses a separate password-only session described in [`ADMIN-SETUP.md`](./ADMIN-SETUP.md).
 
-> **Current status:** a fresh OAuth client was created in the Google project `cinveood`:
->
-> ```
-> client id     : 226385564397-3j1jj8drrq3inqgb004trrfvuqvtmutj.apps.googleusercontent.com
-> client secret : stored only in `.env` / `.env.vercel-copy.txt` (never commit it)
-> redirect uri  : https://cinenvood.vercel.app/api/auth/callback/google
-> js origin     : https://cinenvood.vercel.app
-> ```
->
-> Credentials were verified against Google's token endpoint — a dummy code returns `invalid_grant`
-> (client accepted, code rejected), which proves the id+secret pair is valid. `invalid_client` would
-> mean a mismatch.
+## Google Cloud Console
 
----
-
-## 0. Where to paste what (two places, both required)
-
-| # | Where | What |
-| --- | --- | --- |
-| 1 | **Google Cloud Console** -> APIs & Services -> Credentials -> *CineMood web* (OAuth client) | Authorized JavaScript origins + Authorized redirect URIs (section 2) |
-| 2 | **Vercel** -> Project -> Settings -> Environment Variables -> Production | `AUTH_GOOGLE_ID` + `AUTH_GOOGLE_SECRET` (section 3) |
-
-Live check: `https://cinenvood.vercel.app/status` — the "Google sign-in" panel must say `LIVE`.
-
----
-
-## 1. Create the OAuth client
-
-1. Open <https://console.cloud.google.com> → create a project named **CineMood**.
-2. **APIs & Services → OAuth consent screen**
-   - User type: **External**
-   - App name: `CINE·MOOD`, support email: your Gmail
-   - Scopes: leave the defaults (`email`, `profile`, `openid`)
-   - Test users: add your own Gmail while the app is in *Testing* (otherwise only listed accounts can sign in)
-3. **APIs & Services → Credentials → Create credentials → OAuth client ID**
-   - Application type: **Web application**
-   - Name: `CineMood web`
-
-## 2. Add the URLs
-
-**Authorised JavaScript origins**
+The OAuth client must be a **Web application**. Add these authorized JavaScript origins:
 
 ```
 https://cinenvood.vercel.app
@@ -51,97 +12,40 @@ https://cinemood.vercel.app
 http://localhost:3000
 ```
 
-**Authorised redirect URIs** (must match exactly — no trailing slash)
+Add the matching callback URLs:
 
 ```
+https://cinenvood.vercel.app/api/auth/callback/google
 https://cinemood.vercel.app/api/auth/callback/google
 http://localhost:3000/api/auth/callback/google
 ```
 
-## 3. Put the keys in Vercel
+## Vercel variables
 
-Copy the **Client ID** and **Client secret**, then in Vercel → Project → **Settings → Environment Variables**
-add them for **Production + Preview**:
-
-```
-AUTH_GOOGLE_ID=xxxxxxxx.apps.googleusercontent.com
-AUTH_GOOGLE_SECRET=GOCSPX-xxxxxxxxxxxxxxxx
-```
-
-Plain lines. No quotes, no commas, no trailing spaces.
-
-## 4. Point admin at your real Gmail
+In Vercel → Project → Settings → Environment Variables, set the OAuth client values for Production and Preview:
 
 ```
-ADMIN_EMAIL=your.real@gmail.com
+AUTH_GOOGLE_ID=your-client-id.apps.googleusercontent.com
+AUTH_GOOGLE_SECRET=your-client-secret
 ```
 
-`ADMIN_EMAIL` decides who gets `role = ADMIN` on first sign-in. If it stays on a placeholder, the admin panel will
-keep answering **403** and will tell you which email it is waiting for (`/admin-denied`).
+Also set `AUTH_SECRET`, `AUTH_TRUST_HOST=true`, and `NEXT_PUBLIC_SITE_URL=https://cinenvood.vercel.app`. Redeploy after changing environment variables.
 
-## 5. Redeploy
+## Sign in
 
-Deployments → **… → Redeploy** with **“Use existing build cache” unchecked**. Env changes only apply to new builds.
-
-## 6. Sign in
-
-Open `/login` → **Continue with Google** → approve → you land back on the page you came from.
-Your row appears in `cinemood."User"` immediately (name, email, photo, role, `createdAt`).
-
----
-
-## How the data flows
-
-```
-Google → signIn() callback → prisma.user.upsert({ email, name, image, role: email === ADMIN_EMAIL ? 'ADMIN' : 'USER' })
-                              ↓
-                        jwt() re-reads role from Postgres
-                              ↓
-                        session() exposes { id, role } to the UI
-```
-
-- Reviews, likes, comments and watchlist rows all use `user.id` (the database id, not the Google one).
-- The session is a JWT (30 days), so no session table is stored.
-- Deleting your row in Supabase signs you out at the next token refresh.
+Open `/login` → **Continue with Google**. Any real Google account becomes a normal member. The account's profile is stored in `cinemood."User"`; no fake or seeded member accounts are created.
 
 ## Troubleshooting
 
 | Symptom | Cause | Fix |
 | --- | --- | --- |
-| `redirect_uri_mismatch` | URL in Google Cloud differs from the deployment URL | Add the exact `…/api/auth/callback/google` for that domain |
-| Button missing on `/login` | `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` empty in that environment | Add both, redeploy |
-| Signed in but `/admin` says 403 | `ADMIN_EMAIL` ≠ your Gmail | Set it, redeploy, sign out and back in |
-| Still 403 after matching | Old JWT still holds the previous role | Sign out fully, or wait for the token refresh |
-| Works locally, fails on Vercel | Vercel env is per-project and per-environment | Add the vars to **Production** specifically |
+| `redirect_uri_mismatch` | Google Cloud callback differs from the site URL | Add the exact `/api/auth/callback/google` URL above |
+| Google button is missing | `AUTH_GOOGLE_ID` or `AUTH_GOOGLE_SECRET` is absent | Add both to the matching Vercel environment and redeploy |
+| Google user is sent to `/admin/login` from `/admin` | Expected: member Google sessions do not have admin rights | Use the separate password-only admin sign-in; see `ADMIN-SETUP.md` |
 
 ## Security notes
 
-- Local email sign-in only exists when `NODE_ENV !== 'production'` **and** Google keys are absent. It cannot run on Vercel.
-- Sign-in traffic is rate-limited per IP (30 attempts / 10 minutes). Admin pages: 120 req/min. Admin actions: 60/min and
-  600/hour. All limits are DB-backed, so a second serverless instance cannot bypass them.
-- `AUTH_SECRET` must be a fresh random value: `openssl rand -base64 32`.
-
----
-
-## 3. Vercel environment variables (exact)
-
-```
-AUTH_GOOGLE_ID=226385564397-jgmmu9tni1bu8s2lr14rqlm8ocsobd94.apps.googleusercontent.com
-AUTH_GOOGLE_SECRET=<copy from the Google console>
-```
-
-Same rules as before: **no quotes, no commas, no trailing spaces**. Save, then **Redeploy** — env changes
-only apply to a new deployment.
-
-## 4. Who becomes admin
-
-`ADMIN_EMAIL` must be the same Gmail you sign in with. Nothing else can become admin, and no user row is
-ever created by hand.
-
-## 5. Test (2 minutes)
-
-1. `/status` -> **Google sign-in: LIVE**, and the redirect URLs listed there match the console exactly.
-2. `/login` -> the **Continue with Google** button appears (today it still says "secret missing").
-3. Sign in -> `/dashboard` opens with the review composer.
-4. If Google says `redirect_uri_mismatch`, copy the exact URI from `/status`:
-   `https://cinenvood.vercel.app/api/auth/callback/google`.
+- Google accounts receive member access only. `ADMIN_EMAIL` by itself does **not** grant admin rights.
+- The admin credential provider is limited to the configured `ADMIN_EMAIL` and `ADMIN_PASSWORD`, and login attempts are rate-limited.
+- Reviews, likes, comments and watchlist entries use the database user's id. Sessions are JWT-based.
+- Never commit OAuth secrets or `.env` files.

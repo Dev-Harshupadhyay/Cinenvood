@@ -64,6 +64,8 @@ model Title {
   rtRating   Float?
   metascore  Int?
   imdbVotes  Int?
+  trailerEn  String? // YouTube key — e.g. dQw4w9WgXcQ
+  trailerHi  String? // Hindi dubbed / alternate language trailer
   featured   Boolean     @default(false)
   status     TitleStatus @default(PUBLISHED)
   createdAt  DateTime    @default(now())
