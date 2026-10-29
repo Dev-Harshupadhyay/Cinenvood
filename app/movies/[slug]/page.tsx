@@ -7,6 +7,9 @@ import ReviewComposer from '@/components/ReviewComposer';
 import TitleActions from '@/components/TitleActions';
 import { getSessionUser } from '@/lib/session';
 import { getCatalogue, getTitleBySlug, withViewerLikes } from '@/lib/queries';
+import { getEdition } from '@/lib/edition';
+import DataBanner from '@/components/DataBanner';
+import EditionSwitch from '@/components/EditionSwitch';
 import { avatarGradient, formatRuntime, initials } from '@/lib/format';
 import { prisma } from '@/lib/prisma';
 
@@ -25,7 +28,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function MoviePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const [title, sessionUser] = await Promise.all([getTitleBySlug(slug), getSessionUser()]);
+  const [title, sessionUser, edition] = await Promise.all([getTitleBySlug(slug), getSessionUser(), getEdition()]);
   if (!title) notFound();
 
   const viewerId = sessionUser?.id;
@@ -149,14 +152,22 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
               <div className="panel-title" style={{ marginBottom: 8 }}>
                 <span>Top cast</span>
               </div>
-              <div className="cast-row">
-                {title.cast.map((c) => (
-                  <span key={c.name} className="cast-chip">
-                    <span className="avatar" style={{ background: avatarGradient(c.name) }}>
-                      {initials(c.name)}
+              <div className="cast-grid">
+                {title.cast.map((c: { name: string; role?: string; img?: string | null }) => (
+                  <div key={c.name} className="cast-card">
+                    <span className="cast-photo">
+                      {c.img ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={c.img} alt={c.name} loading="lazy" />
+                      ) : (
+                        <span style={{ background: avatarGradient(c.name) }}>{initials(c.name)}</span>
+                      )}
                     </span>
-                    {c.name}
-                  </span>
+                    <span className="cast-info">
+                      <span className="cast-name">{c.name}</span>
+                      {c.role ? <span className="cast-role">{c.role}</span> : null}
+                    </span>
+                  </div>
                 ))}
               </div>
             </>
@@ -180,6 +191,7 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
               <div className="eyebrow">Community</div>
               <h2 style={{ fontSize: 24 }}>Reviews · {reviews.length}</h2>
             </div>
+            <EditionSwitch current={edition} compact />
           </div>
 
           {reviews.length === 0 ? (
@@ -190,7 +202,7 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
           ) : (
             <div className="review-list">
               {reviewsForCards.map((r) => (
-                <ReviewCard key={r.id} review={r as any} authed={Boolean(sessionUser)} />
+                <ReviewCard key={r.id} review={r as any} authed={Boolean(sessionUser)} edition={edition} />
               ))}
             </div>
           )}

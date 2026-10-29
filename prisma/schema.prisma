@@ -75,15 +75,17 @@ model Title {
 }
 
 model Review {
-  id        String       @id @default(cuid())
-  rating    Int // 1-10
-  headline  String?
-  body      String
-  spoiler   Boolean      @default(false)
-  featured  Boolean      @default(false) // admin-pinned "Admin verdict"
-  status    ReviewStatus @default(PUBLISHED)
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
+  id         String       @id @default(cuid())
+  rating     Int // 1-10
+  headline   String?
+  body       String
+  headlineEn String? // English edition — shown to non-Indian visitors by default
+  bodyEn     String?
+  spoiler    Boolean      @default(false)
+  featured   Boolean      @default(false) // admin-pinned "Admin verdict"
+  status     ReviewStatus @default(PUBLISHED)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
 
   userId     String?
   authorName String? // legacy / editorial byline (no account needed)

@@ -14,20 +14,19 @@ import {
   withViewerLikes
 } from '@/lib/queries';
 import { avatarGradient, formatRuntime, initials } from '@/lib/format';
+import { settleAll } from '@/lib/safe';
+import DataBanner from '@/components/DataBanner';
+import { getEdition } from '@/lib/edition';
 
 export default async function HomePage() {
-  const [featured, genres, catalogue, latestRaw, stats, members, sessionUser, lang] = await Promise.all([
-    getFeatured(),
-    getGenres(),
-    getCatalogue({ take: 30 }),
-    getLatestReviews(5),
-    getPlatformStats(),
-    getTopMembers(4),
-    getSessionUser(),
-    getLang()
-  ]);
+  const edition = await getEdition();
+  const settled = await settleAll(
+    [getFeatured(), getGenres(), getCatalogue({ take: 30 }), getLatestReviews(5), getPlatformStats(), getTopMembers(4), getSessionUser(), getLang()],
+    [null, [], [], [], { users: 0, titles: 0, reviews: 0, comments: 0, likes: 0, watchlists: 0 }, [], null, 'en']
+  );
+  const [featured, genres, catalogue, latestRaw, stats, members, sessionUser, lang] = settled.data;
 
-  const latest = await withViewerLikes(latestRaw, sessionUser?.id);
+  const latest = await withViewerLikes(latestRaw, sessionUser?.id).catch(() => latestRaw);
   const trending = [...catalogue].sort((a, b) => b.reviewCount * 3 + b.likes - (a.reviewCount * 3 + a.likes)).slice(0, 10);
   const topRated = [...catalogue].sort((a, b) => (b.communityScore ?? 0) - (a.communityScore ?? 0)).slice(0, 5);
   const fresh = [...catalogue].sort((a, b) => b.year - a.year).slice(0, 10);
@@ -36,6 +35,7 @@ export default async function HomePage() {
 
   return (
     <>
+      <DataBanner message={settled.error} />
       {hero ? (
         <section className="hero">
           <div className="hero-bg" style={{ backgroundImage: `url(${(hero as any).backdrop ?? hero.poster})` }} />
@@ -46,7 +46,7 @@ export default async function HomePage() {
               <div className="hero-meta">
                 <span className="tag">{hero.year}</span>
                 <span className="tag">{formatRuntime(hero.runtime)}</span>
-                {hero.genres.slice(0, 2).map((g) => (
+                {hero.genres.slice(0, 2).map((g: string) => (
                   <span key={g} className="tag">
                     {g}
                   </span>
@@ -86,7 +86,7 @@ export default async function HomePage() {
       <div className="container">
         <div className="section" style={{ paddingTop: 26 }}>
           <div className="chip-row">
-            {genres.slice(0, 8).map((g) => (
+            {genres.slice(0, 8).map((g: string) => (
               <Link key={g} href={`/movies?genre=${encodeURIComponent(g)}`} className="chip">
                 {g}
               </Link>
@@ -141,8 +141,8 @@ export default async function HomePage() {
                 </Link>
               </div>
               <div className="review-list">
-                {latest.map((r) => (
-                  <ReviewCard key={r.id} review={r as any} authed={Boolean(sessionUser)} />
+                {latest.map((r: any) => (
+                  <ReviewCard key={r.id} review={r as any} authed={Boolean(sessionUser)} edition={edition} />
                 ))}
               </div>
             </div>
@@ -211,7 +211,7 @@ export default async function HomePage() {
                     </div>
                   </div>
                 ) : null}
-                {members.map((m) => (
+                {members.map((m: any) => (
                   <div key={m.id} className="member-row">
                     <span className="avatar" style={{ background: avatarGradient(m.email), width: 32, height: 32, fontSize: 11 }}>
                       {m.image ? (

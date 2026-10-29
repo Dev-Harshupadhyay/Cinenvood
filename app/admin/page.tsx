@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import AdminButton from '@/components/AdminButton';
 import TmdbImport from '@/components/TmdbImport';
+import EditorialEditor from '@/components/EditorialEditor';
 import { requireAdmin } from '@/lib/session';
 import { prisma } from '@/lib/prisma';
 import { getAnalytics } from '@/lib/queries';
@@ -15,6 +16,7 @@ const TABS = [
   { key: 'moderation', label: 'Moderation' },
   { key: 'titles', label: 'Titles' },
   { key: 'users', label: 'Users' },
+  { key: 'editorial', label: 'Editorial' },
   { key: 'analytics', label: 'Analytics' },
   { key: 'activity', label: 'Activity log' },
   { key: 'import', label: 'TMDB import' }
@@ -68,6 +70,33 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
       : [];
 
   const analytics = tab === 'analytics' ? await getAnalytics() : null;
+
+  const editorialRows =
+    tab === 'editorial'
+      ? (
+          await prisma.review.findMany({
+            where: { editorial: true },
+            orderBy: { createdAt: 'desc' },
+            include: { title: { select: { id: true, title: true, year: true } } }
+          })
+        ).map((r) => ({
+          id: r.id,
+          rating: r.rating,
+          headline: r.headline,
+          body: r.body,
+          headlineEn: r.headlineEn,
+          bodyEn: r.bodyEn,
+          featured: r.featured,
+          titleId: r.titleId,
+          titleName: r.title.title,
+          year: r.title.year
+        }))
+      : [];
+
+  const titleOptions =
+    tab === 'editorial'
+      ? await prisma.title.findMany({ where: { status: 'PUBLISHED' }, select: { id: true, title: true, year: true }, orderBy: { title: 'asc' }, take: 300 })
+      : [];
 
   const adminLog =
     tab === 'activity'
@@ -571,6 +600,8 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
             )}
           </div>
         ) : null}
+
+        {tab === 'editorial' ? <EditorialEditor titles={titleOptions} rows={editorialRows} /> : null}
 
         {tab === 'import' ? <TmdbImport configured={tmdbConfigured()} /> : null}
       </div>

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { avatarGradient, initials, timeAgo } from '@/lib/format';
+import { editionOf, type Edition } from '@/lib/edition';
 import LikeButton from './LikeButton';
 import SpoilerText from './SpoilerText';
 
@@ -7,7 +8,9 @@ type Review = {
   id: string;
   rating: number;
   headline: string | null;
+  headlineEn?: string | null;
   body: string;
+  bodyEn?: string | null;
   spoiler: boolean;
   featured?: boolean;
   editorial?: boolean;
@@ -19,37 +22,62 @@ type Review = {
   likedByViewer?: boolean;
 };
 
-export default function ReviewCard({ review, authed }: { review: Review; authed: boolean }) {
+export default function ReviewCard({
+  review,
+  authed,
+  edition = 'hi'
+}: {
+  review: Review;
+  authed: boolean;
+  edition?: Edition;
+}) {
   const isAdmin = review.user.role === 'ADMIN';
+  const text = editionOf(review, edition);
+  const isEditorial = Boolean(review.editorial);
+  const byline = isEditorial ? review.authorName || review.user.name || 'Harsh' : review.user.name ?? 'Member';
 
   return (
-    <article className={`review-card${isAdmin ? ' admin-verdict' : ''}`} data-pinned={review.featured ? 'true' : undefined}>
+    <article
+      className={`review-card${isAdmin ? ' admin-verdict' : ''}`}
+      data-pinned={review.featured ? 'true' : undefined}
+      data-editorial={isEditorial ? 'true' : undefined}
+    >
       {isAdmin ? <span className="av-quote" aria-hidden="true">“</span> : null}
 
-      <div className="rv-head">
-        <span className={`avatar${isAdmin ? ' avatar--admin' : ''}`} style={{ background: avatarGradient(review.user.email) }}>
+      <div className="rv-head rv-head--premium">
+        <span className={`avatar rv-avatar${isAdmin ? ' avatar--admin' : ''}`} style={{ background: avatarGradient(review.user.email) }}>
           {review.user.image ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={review.user.image} alt="" />
           ) : (
-            initials(review.user.name ?? review.user.email)
+            initials(byline)
           )}
         </span>
+
         <div className="rv-id">
-          <div className="rv-name">
-            {review.user.name ?? 'Member'}
+          <div className="rv-name rv-name--lg">
+            {byline}
             {isAdmin ? <span className="av-crown" aria-hidden="true">✦</span> : null}
           </div>
-          {isAdmin ? (
-            <div className="av-meta">
-              <span className="av-dot" aria-hidden="true" />
-              {review.editorial ? 'EDITORIAL VERDICT · CiNEMAsFLiX' : 'ADMIN VERDICT · FOUNDER & EDITOR'}
-            </div>
-          ) : (
-            <div className="rv-time">{timeAgo(review.createdAt)}</div>
-          )}
+          <div className="rv-role">
+            {isEditorial ? (
+              <span className="rv-role-chip">EDITORIAL · CiNEMAsFLiX</span>
+            ) : isAdmin ? (
+              <span className="rv-role-chip">FOUNDER &amp; EDITOR</span>
+            ) : (
+              <span className="rv-role-plain">Member review</span>
+            )}
+            <span className="rv-dot" aria-hidden="true">·</span>
+            <span className="rv-time">{timeAgo(review.createdAt)}</span>
+            {text.translated ? (
+              <span className="rv-trans" title="Original written in Hinglish">
+                EN edition
+              </span>
+            ) : null}
+          </div>
         </div>
-        <span className={`rv-rating${isAdmin ? ' rv-rating--admin' : ''}`}>
+
+        <span className={`rv-rating rv-rating--big${isAdmin ? ' rv-rating--admin' : ''}`}>
           {review.rating}
           <small>/10</small>
         </span>
@@ -62,18 +90,17 @@ export default function ReviewCard({ review, authed }: { review: Review; authed:
           <div className="rm-title">{review.title.title}</div>
           <div className="rm-meta">
             {review.title.year} · {review._count.comments} {review._count.comments === 1 ? 'comment' : 'comments'}
-            {isAdmin ? ` · ${timeAgo(review.createdAt)}` : ''}
           </div>
         </div>
         {review.featured ? <span className="av-pin">PINNED</span> : null}
       </Link>
 
-      {review.headline ? <h3 className="rv-headline">{review.headline}</h3> : null}
+      {text.headline ? <h3 className="rv-headline rv-headline--serif">{text.headline}</h3> : null}
 
       {review.spoiler ? (
-        <SpoilerText text={review.body} />
+        <SpoilerText text={text.body} />
       ) : (
-        <p className="rv-body">{review.body}</p>
+        <p className={`rv-body${isEditorial ? ' rv-body--editorial rv-body--clamp' : ''}`}>{text.body}</p>
       )}
 
       <div className="rv-foot">
@@ -91,7 +118,7 @@ export default function ReviewCard({ review, authed }: { review: Review; authed:
         </Link>
         {isAdmin ? <span className="av-sign">— Harsh</span> : null}
         <Link href={`/reviews/${review.id}`} className="link-more" style={{ marginLeft: 'auto' }}>
-          Read
+          Read full verdict
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" aria-hidden="true">
             <path d="M5 12h14m0 0-6-6m6 6-6 6" />
           </svg>

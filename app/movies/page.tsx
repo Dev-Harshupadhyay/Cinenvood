@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import PosterCard from '@/components/PosterCard';
 import { getCatalogue, getGenres } from '@/lib/queries';
+import { settle } from '@/lib/safe';
+import DataBanner from '@/components/DataBanner';
 
 export const metadata = {
   title: 'Movies',
@@ -22,7 +24,13 @@ export default async function MoviesPage({
   searchParams: Promise<{ q?: string; genre?: string; sort?: string }>;
 }) {
   const { q = '', genre = 'All', sort = 'trending' } = await searchParams;
-  const [genres, titles] = await Promise.all([getGenres(), getCatalogue({ q, genre, sort, take: 60 })]);
+  const [genresRes, titlesRes] = await Promise.all([
+    settle(getGenres(), [] as string[]),
+    settle(getCatalogue({ q, genre, sort, take: 60 }), [])
+  ]);
+  const genres = genresRes.data;
+  const titles = titlesRes.data;
+  const dataError = genresRes.error ?? titlesRes.error;
 
   const qs = (patch: Record<string, string>) => {
     const p = new URLSearchParams();
@@ -36,6 +44,7 @@ export default async function MoviesPage({
 
   return (
     <div className="container" style={{ paddingTop: 34, paddingBottom: 20 }}>
+      <DataBanner message={dataError} />
       <div className="section-head" style={{ marginBottom: 20 }}>
         <div>
           <div className="eyebrow">Catalogue</div>

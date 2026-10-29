@@ -190,8 +190,20 @@ export default {
 
 ## 🌐 Languages
 
-Header switcher: **English · हिंदी · Hinglish** (cookie `cm-lang`, server-rendered, no flash).
-Copy strings live in `lib/i18n.ts` — add a key there and it works everywhere.
+Two independent layers:
+
+1. **UI language** — header switcher: **English · हिंदी · Hinglish** (cookie `cm-lang`, server-rendered, no flash).
+   Copy strings live in `lib/i18n.ts`.
+2. **Review edition** — every editorial verdict exists twice: Hinglish (`headline`/`body`) and English
+   (`headlineEn`/`bodyEn`). `lib/edition.ts` picks one per visitor:
+
+   ```
+   cookie cm-edition → x-vercel-ip-country → Accept-Language → default "en"
+   ```
+
+   India + neighbours (IN, NP, BD, PK, LK, AE, SG, MY) get **Hinglish**; the rest of the world gets **English**.
+   The pill switch on `/reviews` and `/movies/[slug]` overrides the guess for a year (`cm-edition` cookie).
+   Community reviews are always shown exactly as their author wrote them — no machine translation.
 
 ---
 
@@ -203,6 +215,10 @@ Copy strings live in `lib/i18n.ts` — add a key there and it works everywhere.
 - Admin access is decided by `email === ADMIN_EMAIL`, re-checked server-side on every request (`requireAdmin()`) and never trusted from the UI.
 - Admin page loads and admin mutations are rate-limited (120/min and 60/min + 600/hour). Every mutation writes an `AdminLog` row.
 - Denied admins land on `/admin-denied` which prints **their** email and the configured admin email — no guesswork.
+- **Guest mode**: signed-out visitors keep a random `cm-guest-id` in `localStorage`, browse everything read-only and get a
+  clear "sign in to react" note instead of a dead button. Never a user row, never a fake profile.
+- **Editorial panel** (`/admin?tab=editorial`): publish/update/delete the site's own verdicts in both editions — no account needed,
+  byline stays `Harsh · CiNEMAsFLiX`.
 
 ---
 
@@ -219,9 +235,25 @@ Title ──< Review
 
 `Review.featured` powers the pinned admin verdict. `Review.userId` is **nullable**: legacy reviews imported from the old
 app are `editorial = true` with an `authorName` byline, so they can be shown without inventing an account.
+`Review.headlineEn` / `Review.bodyEn` hold the English edition; `Title.tmdbScore` keeps the TMDB score separate from the
+community score; `Title.cast` is JSONB (`name`, `role`, `img`) rendered as the photo cast grid on film pages.
 `Title.imdbId / rtRating / metascore / imdbVotes` are filled by **Admin → Titles → Enrich** (needs `OMDB_API_KEY`).
 
 Support tables: `PageView` (first-party analytics), `RateLimit` (shared counters), `AdminLog` (audit trail).
+
+---
+
+## 🩺 Health & failure modes
+
+- `GET /api/health` — checks every required env var, a real `SELECT 1`, the tables/columns the app needs, plus row counts.
+  Returns **503** when anything is wrong, so uptime monitors and Vercel logs point straight at the cause.
+- `/status` — the same report as a human-readable page (region, commit, missing vars, visible vs. hidden).
+- `app/error.tsx` + `app/global-error.tsx` — a database blip renders a branded "temporary" card with a retry button instead
+  of Next.js' red "Application error / server-side exception".
+- `lib/safe.ts` — `settle()` / `settleAll()` degrade dangerous reads to empty data and show a yellow `DataBanner`
+  ("live data thodi der ke liye unavailable") — the page still paints.
+- `lib/prisma.ts` — retries once on transient pooler errors (`Connection reset by peer`, `P1001`, `P1017`) which are the
+  usual cause of Supabase-pooler 500s on serverless.
 
 ---
 
@@ -230,7 +262,8 @@ Support tables: `PageView` (first-party analytics), `RateLimit` (shared counters
 1. **Supabase** → new project → copy pooled + direct connection strings (`schema=cinemood`).
 2. **Vercel** → import this repo → add the env vars above → deploy. Build command is already
    `prisma generate && next build`.
-3. Run `npx prisma db push && node prisma/seed.mjs` **once** against the production database (not in the build step).
+3. Run `npx prisma db push && node prisma/import.mjs` **once** against the production database (not in the build step).
+   `import.mjs` also applies `legacy-en.json` (English editions) and `cast-photos.json` (cast photos) when present.
 4. Add your domain and update `NEXT_PUBLIC_SITE_URL` + the Google OAuth redirect URI:
    `https://your-domain/api/auth/callback/google`.
 

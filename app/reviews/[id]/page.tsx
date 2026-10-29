@@ -8,6 +8,8 @@ import { getSessionUser } from '@/lib/session';
 import { getReview, getLatestReviews, withViewerLikes } from '@/lib/queries';
 import { avatarGradient, initials, timeAgo } from '@/lib/format';
 import { prisma } from '@/lib/prisma';
+import { getEdition, editionOf } from '@/lib/edition';
+import EditionSwitch from '@/components/EditionSwitch';
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
@@ -29,7 +31,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function ReviewPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [review, sessionUser] = await Promise.all([getReview(id), getSessionUser()]);
+  const [review, sessionUser, edition] = await Promise.all([getReview(id), getSessionUser(), getEdition()]);
   if (!review || review.status === 'HIDDEN') notFound();
 
   const [liked, more] = await Promise.all([
@@ -40,6 +42,8 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
   ]);
   const moreWithLikes = await withViewerLikes(more, sessionUser?.id);
 
+  const text = editionOf(review, edition);
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@graph': [
@@ -48,7 +52,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
         itemReviewed: { '@type': 'Movie', name: review.title.title, datePublished: String(review.title.year), image: review.title.poster },
         reviewRating: { '@type': 'Rating', ratingValue: review.rating, bestRating: 10, worstRating: 1 },
         name: review.headline ?? `${review.title.title} review`,
-        reviewBody: review.body.slice(0, 500),
+        reviewBody: text.body.slice(0, 500),
         author: { '@type': review.editorial ? 'Organization' : 'Person', name: review.user.name ?? 'CINE·MOOD' },
         datePublished: new Date(review.createdAt).toISOString(),
         publisher: { '@type': 'Organization', name: 'CINE·MOOD' }
@@ -69,9 +73,12 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <div className="split">
         <article>
-          <Link href={`/movies/${review.title.slug}`} className="link-more" style={{ marginBottom: 14, display: 'inline-flex' }}>
-            ← {review.title.title} ({review.title.year})
-          </Link>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 14 }}>
+            <Link href={`/movies/${review.title.slug}`} className="link-more" style={{ display: 'inline-flex' }}>
+              ← {review.title.title} ({review.title.year})
+            </Link>
+            {review.bodyEn ? <EditionSwitch current={edition} compact /> : null}
+          </div>
 
           <div className="review-card" style={{ padding: 24 }}>
             <div className="rv-head">
@@ -99,9 +106,19 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
               </span>
             </div>
 
-            {review.headline ? <h1 style={{ fontSize: 'clamp(22px,3vw,32px)', margin: '4px 0 14px' }}>{review.headline}</h1> : null}
+            {text.headline ? <h1 className="rv-detail-headline">{text.headline}</h1> : null}
+            {text.translated ? (
+              <div className="rv-detail-langs">
+                <span className="rv-trans">EN edition</span>
+                <span className="faint mono" style={{ fontSize: 10 }}>original in Hinglish</span>
+              </div>
+            ) : null}
 
-            {review.spoiler ? <SpoilerText text={review.body} className="rv-body-full" /> : <p className="rv-body-full">{review.body}</p>}
+            {review.spoiler ? (
+              <SpoilerText text={text.body} className="rv-body-full" />
+            ) : (
+              <p className={`rv-body-full${review.editorial ? ' rv-body--editorial' : ''}`}>{text.body}</p>
+            )}
 
             <div className="rv-foot">
               <LikeButton
@@ -157,7 +174,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
                   <img src={r.title.poster} alt="" className="rank-poster" style={{ width: 36, height: 52 }} />
                   <span style={{ minWidth: 0 }}>
                     <span style={{ display: 'block', fontSize: 13, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {r.headline ?? r.title.title}
+                      {r.title.title}
                     </span>
                     <span className="faint mono" style={{ fontSize: 10.5 }}>
                       {r.rating}/10 · {r._count.likes} likes

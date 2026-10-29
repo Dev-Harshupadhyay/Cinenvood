@@ -167,7 +167,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
               ) : (
                 <div className="review-list">
                   {reviewsWithLikes.slice(0, 2).map((r) => (
-                    <ReviewCard key={r.id} review={r as any} authed />
+                    <ReviewCard key={r.id} review={r as any} authed edition="hi" />
                   ))}
                 </div>
               )}
@@ -204,7 +204,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             ) : (
               <div className="review-list">
                 {reviewsWithLikes.map((r) => (
-                  <ReviewCard key={r.id} review={r as any} authed />
+                  <ReviewCard key={r.id} review={r as any} authed edition="hi" />
                 ))}
               </div>
             )}

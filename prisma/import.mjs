@@ -12,6 +12,18 @@
  *   node prisma/import.mjs --keep     # import on top of existing row
  */
 import { Client } from 'pg';
+import { readFileSync as __rf, existsSync as __ex } from 'node:fs';
+// minimal .env loader — these scripts run outside next
+if (__ex('.env')) {
+  for (const line of __rf('.env', 'utf8').split('\n')) {
+    const i = line.indexOf('=');
+    if (i < 1 || line.trim().startsWith('#')) continue;
+    const k = line.slice(0, i).trim();
+    const v = line.slice(i + 1).trim().replace(/^"|"$/g, '');
+    if (!process.env[k]) process.env[k] = v;
+  }
+}
+
 import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -22,6 +34,8 @@ const read = (f) => JSON.parse(fs.readFileSync(path.join(__dirname, f), 'utf8'))
 
 const raw = fs.existsSync(path.join(__dirname, 'catalogue-raw.json')) ? read('catalogue-raw.json') : [];
 const legacy = fs.existsSync(path.join(__dirname, 'legacy-raw.json')) ? read('legacy-raw.json') : { admin: [] };
+const editions = fs.existsSync(path.join(__dirname, 'legacy-en.json')) ? read('legacy-en.json') : {};
+const castPhotos = fs.existsSync(path.join(__dirname, 'cast-photos.json')) ? read('cast-photos.json') : {};
 
 const conn =
   process.env.DIRECT_URL ||
@@ -139,16 +153,29 @@ for (const r of legacy.admin) {
     .replace(/\s+/g, ' ')
     .trim()
     .slice(0, 90) || `${rating}/10 — ${r.title}`;
-  const body = String(r.body || '').trim();
-  if (body.length < 20) continue;
+  const cleanBody = String(r.body || '')
+    .split('\n')
+    .filter((line, i) => !(i === 0 && /review\s*$/i.test(line) && line.length < 80))
+    .join('\n')
+    .trim();
+  if (cleanBody.length < 20) continue;
+  const edition = editions[String(r.tmdbId)] ?? {};
   await client.query(
-    `INSERT INTO "cinemood"."Review" (id, rating, headline, body, spoiler, featured, status, "createdAt", "updatedAt", "authorName", editorial, "titleId")
-     VALUES ($1,$2,$3,$4,false,$5,'PUBLISHED'::"cinemood"."ReviewStatus",$6,now(),$7,true,$8)`,
-    [randomUUID(), rating, headline, body, FLAGSHIP.has(String(r.tmdbId)), new Date(r.createdAt || Date.now()), 'CiNEMAsFLiX', titleId]
+    `INSERT INTO "cinemood"."Review" (id, rating, headline, body, "headlineEn", "bodyEn", spoiler, featured, status, "createdAt", "updatedAt", "authorName", editorial, "titleId")
+     VALUES ($1,$2,$3,$4,$5,$6,false,$7,'PUBLISHED'::"cinemood"."ReviewStatus",$8,now(),$9,true,$10)`,
+    [randomUUID(), rating, headline, cleanBody, edition.headlineEn ?? null, edition.bodyEn ?? null, FLAGSHIP.has(String(r.tmdbId)), new Date(r.createdAt || Date.now()), 'CiNEMAsFLiX', titleId]
   );
   imported++;
 }
-console.log(`· ${imported} legacy editorial reviews imported`);
+console.log(`· ${imported} legacy editorial reviews imported (Hinglish + English edition)`);
+
+// cast photos (optional file produced by prisma/cast-photos.mjs)
+let castUpdated = 0;
+for (const [tmdbId, people] of Object.entries(castPhotos)) {
+  const res = await client.query('UPDATE "cinemood"."Title" SET "cast" = $2::jsonb WHERE "tmdbId" = $1', [Number(tmdbId), JSON.stringify(people)]);
+  castUpdated += res.rowCount;
+}
+if (castUpdated) console.log(`· cast photos applied to ${castUpdated} titles`);
 
 const q = async (sql) => (await client.query(sql)).rows;
 const counts = (

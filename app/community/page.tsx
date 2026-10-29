@@ -2,6 +2,7 @@ import Link from 'next/link';
 import ReviewCard from '@/components/ReviewCard';
 import { getSessionUser } from '@/lib/session';
 import { getPlatformStats, getTopMembers, getTopReviews, withViewerLikes } from '@/lib/queries';
+import { getEdition } from '@/lib/edition';
 import { avatarGradient, initials } from '@/lib/format';
 
 export const metadata = {
@@ -13,6 +14,7 @@ export const metadata = {
 export default async function CommunityPage() {
   const sessionUser = await getSessionUser();
   const [stats, members, topRaw] = await Promise.all([getPlatformStats(), getTopMembers(8), getTopReviews(4)]);
+  const edition = await getEdition();
   const top = await withViewerLikes(topRaw, sessionUser?.id);
 
   return (
@@ -55,7 +57,7 @@ export default async function CommunityPage() {
           </div>
           <div className="review-list">
             {top.map((r) => (
-              <ReviewCard key={r.id} review={r as any} authed={Boolean(sessionUser)} />
+              <ReviewCard key={r.id} review={r as any} authed={Boolean(sessionUser)} edition={edition} />
             ))}
           </div>
         </div>
