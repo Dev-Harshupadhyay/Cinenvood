@@ -1984,3 +1984,28 @@ html, body { max-width: 100%; overflow-x: clip; }
   overflow: hidden !important;
 }
 .review-card .rv-body--clamp::first-letter { font-size: 44px; }
+
+/* section heads stack on phones — heading gets the full width */
+@media (max-width: 760px) {
+  .section-head { flex-wrap: wrap; align-items: flex-start; gap: 12px; }
+  .section-head > div:first-child { flex: 1 1 100%; min-width: 0; }
+  .section-head h1, .section-head h2 { font-size: clamp(26px, 8vw, 34px) !important; letter-spacing: -0.02em; }
+  .section-head .tabs { order: 3; }
+  .edition-switch { max-width: 100%; overflow-x: auto; }
+  .guest-note { font-size: 12px; }
+  .feed-layout { gap: 16px; }
+  .rv-head--premium {
+    display: grid !important;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 10px 12px;
+  }
+  .rv-head--premium .rv-id { min-width: 0; }
+  .rv-head--premium .rv-rating--big { margin: 0; }
+  .rv-role { gap: 5px; }
+  .rv-role-chip { font-size: 8.4px; padding: 3px 6px; }
+  .rv-name--lg { font-size: 19px !important; }
+}
+@media (max-width: 420px) {
+  .container { padding-left: 14px !important; padding-right: 14px !important; }
+}

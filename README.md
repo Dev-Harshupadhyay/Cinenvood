@@ -53,6 +53,9 @@ That is a deliberate product decision — it keeps the site legal, advertiser-sa
 
 ## 📸 Screenshots
 
+> Round 6 ka full handover (9 pages, Hinglish, screenshots ke saath): **`docs/CineMood-Round6.pdf`** —
+> stability fix, bilingual editions, premium review UI, cast photos, deploy reality, 7-din ka plan.
+
 ### Home — cinematic hero, genre rails, live catalogue
 ![Home page](./docs/screenshots/01-home.jpg)
 
