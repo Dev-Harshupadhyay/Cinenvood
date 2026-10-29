@@ -2,7 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { avatarGradient, displayName, initials } from '@/lib/format';
+import { avatarGradient, avatarSrc, displayName, initials } from '@/lib/format';
 
 type Props = {
   name: string;
@@ -112,7 +112,7 @@ export default function ProfileForm({ name, bio, image, googleImage, email }: Pr
         <span className="pf-avatar" style={{ background: avatarGradient(email) }}>
           {shown ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={shown} alt="" />
+            <img src={avatarSrc(shown) ?? ''} alt="" />
           ) : (
             initials(label)
           )}

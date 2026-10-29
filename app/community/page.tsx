@@ -3,7 +3,7 @@ import ReviewCard from '@/components/ReviewCard';
 import { getSessionUser } from '@/lib/session';
 import { getPlatformStats, getTopMembers, getTopReviews, withViewerLikes } from '@/lib/queries';
 import { getEdition } from '@/lib/edition';
-import { avatarGradient, initials } from '@/lib/format';
+import { avatarGradient, avatarSrc, initials } from '@/lib/format';
 
 export const metadata = {
   title: 'Community',
@@ -82,7 +82,7 @@ export default async function CommunityPage() {
                 <span className="avatar" style={{ background: avatarGradient(m.email), width: 32, height: 32, fontSize: 11 }}>
                   {m.image ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={m.image} alt="" />
+                    <img src={avatarSrc(m.image) ?? ''} alt="" />
                   ) : (
                     initials(m.name ?? m.email)
                   )}

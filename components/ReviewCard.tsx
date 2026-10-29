@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { verdictFor } from '@/lib/verdict';
-import { avatarGradient, hasOwnName, initials, reviewByline, timeAgo } from '@/lib/format';
+import { avatarGradient, avatarSrc, hasOwnName, initials, reviewByline, timeAgo } from '@/lib/format';
 import { editionOf, type Edition } from '@/lib/edition';
 import LikeButton from './LikeButton';
 import FeatureButton from './FeatureButton';
@@ -61,7 +61,7 @@ export default function ReviewCard({
         <span className={`avatar rv-avatar${verified ? ' avatar--admin' : ''}`} style={{ background: avatarGradient(review.user.email) }}>
           {review.user.image ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={review.user.image} alt="" />
+            <img src={avatarSrc(review.user.image) ?? ''} alt="" />
           ) : (
             initials(byline)
           )}

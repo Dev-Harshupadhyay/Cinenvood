@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { signOut } from 'next-auth/react';
-import { initials, avatarGradient } from '@/lib/format';
+import { initials, avatarGradient, avatarSrc } from '@/lib/format';
 import GuestChip from './GuestChip';
 
 type Props = {
@@ -39,7 +39,7 @@ export default function UserMenu({ user }: Props) {
         <span className="avatar" style={{ background: avatarGradient(user.email) }}>
           {user.image ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={user.image} alt="" />
+            <img src={avatarSrc(user.image) ?? ''} alt="" />
           ) : (
             initials(user.name ?? user.email)
           )}

@@ -108,3 +108,13 @@ export function reviewByline(r: {
   if (isSiteVoice) return own || 'Admin';
   return displayName(r.user?.name, r.user?.email);
 }
+
+/**
+ * Google serves avatars at tiny sizes (`=s96-c`). Ask for a slightly bigger one so
+ * faces stay sharp at 84px, and leave every other URL untouched.
+ */
+export function avatarSrc(url?: string | null): string | null {
+  if (!url) return null;
+  if (url.includes('googleusercontent.com')) return url.replace(/=s\d+(-c)?$/, '=s256-c');
+  return url;
+}
