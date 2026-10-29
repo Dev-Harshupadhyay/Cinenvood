@@ -412,7 +412,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
                           <img src={t.poster} alt="" style={{ width: 28, height: 42, objectFit: 'cover', borderRadius: 5 }} />
                           <span>
                             <Link href={`/movies/${t.slug}`} className="t-title">
-                              {t.title}
+                              {t.title}{t.mediaType === 'tv' ? <span className="mini-badge">SERIES</span> : null}
                             </Link>
                             <div className="t-sub">{t.slug}{t.featured ? ' · featured' : ''}</div>
                           </span>

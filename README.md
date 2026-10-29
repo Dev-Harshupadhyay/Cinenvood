@@ -33,32 +33,40 @@ That is a deliberate product decision — it keeps the site legal, advertiser-sa
 
 | Area | What you get |
 | --- | --- |
-| **Discovery** | Hero with featured poster + community score ring, genre chips, trending rail, top-rated / community-pulse / top-reviewer sidebars, new arrivals |
-| **Catalogue** | **270 films** with TMDB posters, backdrops, cast, director, runtime and TMDB scores. Instant search (title, synopsis, director — case-insensitive), genre filter, sort by trending / rating / newest / title |
-| **Film page** | Score ring, 10→6 rating distribution, cast, LIKE + WATCHLIST, review composer, review list, similar titles, JSON-LD |
+| **Discovery** | Poster-first homepage with a featured title, genre chips, movie + TV-series poster rails, and no review-feed cards |
+| **Catalogue** | 270 seeded films plus TMDB-imported films and TV series; poster, backdrops, cast, director, runtime, and TMDB scores. Filter by title type, genre, and trending / rating / newest / title |
+| **Title page** | Movie and TV-series details, score ring, rating distribution, cast, LIKE + WATCHLIST, review composer, review list, similar titles, JSON-LD |
 | **Reviews** | 10-star picker, headline, body, spoiler blur-reveal, one review per user per film (upsert), likes, threaded comments |
 | **Admin verdict** | Any review by an ADMIN gets a premium animated card — conic gradient border, Instrument Serif headline, drop cap, PINNED badge, signature |
 | **Dashboard** | Stats (reviews, likes received, comments, watchlist), my reviews, watchlist, editable profile |
 | **Admin panel** | Redesigned responsive control room: KPIs, moderation, catalogue, members, editorial/Jarvis, TMDB import, YouTube trailer search, analytics and audit trail — password-only admin session |
-| **Trailers** | Optional English + Hindi YouTube trailers on home hero and movie pages; admin searches YouTube Data API v3, selects a result, then saves the video IDs |
+| **Trailers** | English + Hindi trailer links open directly on YouTube; the official privacy-enhanced iframe player remains available. Admin can search YouTube Data API v3 and save selected video IDs |
 | **Auth** | Google OAuth for members; separate `ADMIN_EMAIL` + `ADMIN_PASSWORD` sign-in at `/admin/login`; a Google session alone never grants admin access |
 | **Guest mode** | Signed-out visitors get a `localStorage` guest id and **read-only** access — browse catalogue and read every review, no account created |
-| **Rate limiting** | Two-layer (instance memory + shared Postgres counter) on admin pages, admin actions, sign-in, reviews, comments, likes and analytics beacons — 429 + `Retry-After`, no bypass flag |
+| **Rate limiting** | Two-layer (instance memory + shared Postgres counter) on search, admin pages/actions, sign-in, reviews, comments, likes and analytics beacons — 429 + `Retry-After`, no bypass flag |
 | **Analytics** | Cookie-less first-party page views, 14-day chart, top pages/titles, devices, referrers, guests vs members, plus Vercel Analytics |
+| **Search** | Debounced animated search, keyboard navigation, calm empty/error states, local catalogue + TMDB multi-search for movies and TV series |
 | **i18n** | One-click **English / हिंदी / Hinglish** switcher in the header (cookie-persisted) |
 | **Design** | 5 accent themes (emerald, cyan, rose, violet, amber), real light mode, Instrument Serif display type, mobile-first at 390px |
-| **SEO/PWA** | Dynamic sitemap, robots, OG image, manifest, JSON-LD (WebSite, Organization, Movie, Review, BreadcrumbList), canonical URLs |
+| **SEO/PWA** | Dynamic sitemap, robots, OG image, manifest, JSON-LD (WebSite, Organization, Movie, TVSeries, Review, BreadcrumbList), canonical URLs |
 | **Responsive** | One layout for desktop and mobile: bottom tab bar ≤900px, chip rails, scroll-contained tables, 0px horizontal overflow at 390px |
 
 ---
 
 ## 📸 Screenshots
 
-> Round 6 ka full handover (9 pages, Hinglish, screenshots ke saath): **`docs/CineMood-Round6.pdf`** —
-> stability fix, bilingual editions, premium review UI, cast photos, deploy reality, 7-din ka plan.
+> Round 6 ka full handover (9 pages, Hinglish, screenshots ke saath): **`docs/CineMood-Round6.pdf`** — stability fix, bilingual editions, premium review UI, cast photos, deploy reality, 7-din ka plan.
+>
+> Current Round 17 handover (Hinglish, updated screenshots, tests + deploy status): **`docs/CineMood-Round17-Handover.pdf`**.
 
-### Home — cinematic hero, genre rails, live catalogue
-![Home page](./docs/screenshots/01-home.jpg)
+### Home — poster-first discovery, no review feed
+![Poster-first home page](./docs/screenshots/20-home-poster-first.png)
+
+### Search — animated movie + TV-series suggestions
+![Search suggestions](./docs/screenshots/21-search-suggestions.png)
+
+### Search — full results page
+![Search results](./docs/screenshots/22-search-results.png)
 
 ### Catalogue — 270 films, poster-first grid
 ![Catalogue](./docs/screenshots/09-catalogue.jpg)
@@ -93,8 +101,8 @@ That is a deliberate product decision — it keeps the site legal, advertiser-sa
 ### Sign in — Google only, guest browsing underneath
 ![Sign in](./docs/screenshots/14-login.jpg)
 
-### Mobile — app-style bottom tabs
-<img src="./docs/screenshots/06-mobile.jpg" alt="Mobile home" width="270" /> <img src="./docs/screenshots/15-mobile-movie.jpg" alt="Mobile film page" width="270" /> <img src="./docs/screenshots/16-mobile-admin.jpg" alt="Mobile admin" width="270" />
+### Mobile — app-style bottom tabs and responsive search
+<img src="./docs/screenshots/23-home-mobile.png" alt="Poster-first mobile home" width="270" /> <img src="./docs/screenshots/24-search-mobile.png" alt="Responsive mobile search" width="270" /> <img src="./docs/screenshots/15-mobile-movie.jpg" alt="Mobile film page" width="270" /> <img src="./docs/screenshots/16-mobile-admin.jpg" alt="Mobile admin" width="270" />
 
 ---
 
@@ -163,8 +171,8 @@ See [`docs/ADMIN-SETUP.md`](./docs/ADMIN-SETUP.md) for Vercel environment setup,
 
 ## 🎬 TMDB: fetch real movies (and survive ISP blocks)
 
-Posters, cast, synopsis and search all come from TMDB. Add `TMDB_API_KEY` and the admin panel's
-**TMDB import** can pull any film into your database in one click.
+Posters, cast, synopsis and broad multi-search (movies + TV series) come from TMDB. Add `TMDB_API_KEY` and the admin panel's
+**TMDB import** can pull a film or series into your database in one click.
 
 **Problem:** in India, many ISPs block `api.themoviedb.org` / `image.tmdb.org`, so the site looks broken.
 

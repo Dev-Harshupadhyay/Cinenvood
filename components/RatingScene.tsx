@@ -11,7 +11,8 @@ export default function RatingScene({
   myRating,
   buckets,
   genres,
-  runtime
+  runtime,
+  mediaType = 'movie'
 }: {
   score: number;
   communityVotes: number;
@@ -21,6 +22,7 @@ export default function RatingScene({
   buckets: Bucket[];
   genres: string[];
   runtime: number;
+  mediaType?: 'movie' | 'tv';
 }) {
   const v = verdictFor(score);
   const pct = Math.max(0, Math.min(10, score)) / 10;
@@ -119,7 +121,7 @@ export default function RatingScene({
             {genres.slice(0, 2).map((g) => (
               <em key={g}>{g}</em>
             ))}
-            <em>{formatRuntime(runtime)}</em>
+            <em>{mediaType === 'tv' ? `${formatRuntime(runtime)} / ep` : formatRuntime(runtime)}</em>
           </span>
         </div>
       </div>

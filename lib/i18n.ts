@@ -12,15 +12,15 @@ type Dict = Record<string, { en: string; hi: string; hinglish: string }>;
 
 const D: Dict = {
   home: { en: 'Home', hi: 'होम', hinglish: 'Home' },
-  movies: { en: 'Movies', hi: 'फ़िल्में', hinglish: 'Movies' },
+  movies: { en: 'Films & series', hi: 'फ़िल्में और सीरीज़', hinglish: 'Movies & webseries' },
   reviews: { en: 'Reviews', hi: 'रिव्यू', hinglish: 'Reviews' },
   community: { en: 'Community', hi: 'कम्युनिटी', hinglish: 'Community' },
   signIn: { en: 'Sign in', hi: 'साइन इन', hinglish: 'Sign in' },
   join: { en: 'Join', hi: 'जुड़ें', hinglish: 'Join karo' },
   search: {
-    en: 'Search movies, people, moods…',
-    hi: 'फ़िल्म, लोग, मूड खोजें…',
-    hinglish: 'Movie, banda, mood — kuch bhi search karo…'
+    en: 'Search films and TV series…',
+    hi: 'फ़िल्में और वेब सीरीज़ खोजें…',
+    hinglish: 'Movie ya webseries search karo…'
   },
   aboutSite: { en: 'About site', hi: 'साइट के बारे में', hinglish: 'Site ke baare mein' },
   aboutDev: { en: 'About dev', hi: 'डेवलपर के बारे में', hinglish: 'Dev ke baare mein' },
@@ -35,7 +35,7 @@ const D: Dict = {
   },
   latest: { en: 'Latest reviews', hi: 'नए रिव्यू', hinglish: 'Latest reviews' },
   topRated: { en: 'Top rated', hi: 'टॉप रेटेड', hinglish: 'Top rated' },
-  newArrivals: { en: 'New arrivals', hi: 'नई फ़िल्में', hinglish: 'Nayi films' },
+  newArrivals: { en: 'New arrivals', hi: 'नई फ़िल्में और सीरीज़', hinglish: 'Nayi movies aur series' },
   communityFeed: { en: 'Community feed', hi: 'कम्युनिटी फ़ीड', hinglish: 'Community feed' },
   viewAll: { en: 'View all', hi: 'सब देखें', hinglish: 'Sab dekho' },
   loginToLike: {

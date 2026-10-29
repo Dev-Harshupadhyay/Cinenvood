@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
-import { searchTitles, tmdbImage } from '@/lib/tmdb';
+import { searchTitles } from '@/lib/tmdb';
 import { getCurrentUser } from '@/lib/session';
+import { imgUrl } from '@/lib/tmdb-proxy';
 
 export async function GET(req: Request) {
   const user = await getCurrentUser();
@@ -13,9 +14,10 @@ export async function GET(req: Request) {
     configured,
     results: results.map((r) => ({
       id: r.id,
+      mediaType: r.media_type,
       title: r.title ?? r.name ?? '',
       year: (r.release_date ?? r.first_air_date ?? '').slice(0, 4),
-      poster: tmdbImage(r.poster_path, 'w342'),
+      poster: imgUrl(r.poster_path, 'w342'),
       vote: r.vote_average ?? 0,
       overview: r.overview ?? ''
     }))

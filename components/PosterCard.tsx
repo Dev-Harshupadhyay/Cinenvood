@@ -2,10 +2,19 @@ import Link from 'next/link';
 import type { PosterTitle } from '@/lib/queries';
 import { formatRuntime } from '@/lib/format';
 
-export default function PosterCard({ title, priority = false }: { title: PosterTitle; priority?: boolean }) {
-  const score = title.communityScore ?? title.tmdbScore ?? title.imdbRating;
+export default function PosterCard({
+  title,
+  priority = false,
+  posterOnly = false
+}: {
+  title: PosterTitle;
+  priority?: boolean;
+  posterOnly?: boolean;
+}) {
+  const score = posterOnly ? null : title.communityScore ?? title.tmdbScore ?? title.imdbRating;
+  const isSeries = title.mediaType === 'tv';
   return (
-    <Link href={`/movies/${title.slug}`} className="poster-card">
+    <Link href={`/movies/${title.slug}`} className="poster-card" data-poster-only={posterOnly} data-media-type={isSeries ? 'tv' : 'movie'}>
       <div className="poster-media">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -16,18 +25,12 @@ export default function PosterCard({ title, priority = false }: { title: PosterT
           width={500}
           height={750}
         />
-        {score ? (
-          <span className="poster-score">
-            <b>★</b>
-            {score.toFixed(1)}
-          </span>
-        ) : null}
+        {isSeries ? <span className="poster-kind">SERIES</span> : null}
+        {score ? <span className="poster-score"><b>★</b>{score.toFixed(1)}</span> : null}
         <div className="poster-hover">
-          <span className="ph-meta">
-            {title.reviewCount > 0 ? `${title.reviewCount} review${title.reviewCount > 1 ? 's' : ''}` : 'No reviews'}
-          </span>
-          <span className="ph-go">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" aria-hidden="true">
+          <span className="ph-meta">View title</span>
+          <span className="ph-go" aria-hidden="true">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
               <path d="M5 12h14m0 0-6-6m6 6-6 6" />
             </svg>
           </span>
@@ -35,17 +38,14 @@ export default function PosterCard({ title, priority = false }: { title: PosterT
       </div>
       <div className="poster-body">
         <h3 title={title.title}>{title.title}</h3>
-        <p className="pm">
-          {title.year}
-          <i />
-          {formatRuntime(title.runtime)}
-          {title.genres[0] ? (
-            <>
-              <i />
-              {title.genres[0]}
-            </>
-          ) : null}
-        </p>
+        {posterOnly ? (
+          <p className="pm">{title.year}{isSeries ? <><i />TV series</> : null}</p>
+        ) : (
+          <p className="pm">
+            {title.year}<i />{isSeries ? 'TV series' : formatRuntime(title.runtime)}
+            {title.genres[0] ? <><i />{title.genres[0]}</> : null}
+          </p>
+        )}
       </div>
     </Link>
   );

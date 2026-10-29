@@ -5,10 +5,10 @@ import { settle } from '@/lib/safe';
 import DataBanner from '@/components/DataBanner';
 
 export const metadata = {
-  title: 'Movies',
-  description: 'Browse the CINE·MOOD catalogue — 250+ films with posters, cast, genres and community verdicts.',
+  title: 'Films & series',
+  description: 'Browse CINE·MOOD films and TV series — posters, genres and community verdicts.',
   alternates: { canonical: '/movies' },
-  openGraph: { title: 'Movies · CINE·MOOD', description: 'Browse 250+ films with verdicts and ratings.' }
+  openGraph: { title: 'Films & series · CINE·MOOD', description: 'Browse films and TV series with community verdicts.' }
 };
 
 const SORTS = [
@@ -21,12 +21,13 @@ const SORTS = [
 export default async function MoviesPage({
   searchParams
 }: {
-  searchParams: Promise<{ q?: string; genre?: string; sort?: string }>;
+  searchParams: Promise<{ q?: string; genre?: string; sort?: string; type?: string }>;
 }) {
-  const { q = '', genre = 'All', sort = 'trending' } = await searchParams;
+  const { q = '', genre = 'All', sort = 'trending', type = 'all' } = await searchParams;
+  const mediaType: 'movie' | 'tv' | 'all' = type === 'movie' || type === 'tv' ? type : 'all';
   const [genresRes, titlesRes] = await Promise.all([
     settle(getGenres(), [] as string[]),
-    settle(getCatalogue({ q, genre, sort, take: 60 }), [])
+    settle(getCatalogue({ q, genre, sort, take: 60, mediaType }), [])
   ]);
   const genres = genresRes.data;
   const titles = titlesRes.data;
@@ -37,6 +38,7 @@ export default async function MoviesPage({
     if (q) p.set('q', q);
     if (genre !== 'All') p.set('genre', genre);
     if (sort !== 'trending') p.set('sort', sort);
+    if (mediaType !== 'all') p.set('type', mediaType);
     Object.entries(patch).forEach(([k, v]) => (v ? p.set(k, v) : p.delete(k)));
     const s = p.toString();
     return `/movies${s ? `?${s}` : ''}`;
@@ -50,7 +52,7 @@ export default async function MoviesPage({
           <div className="eyebrow">Catalogue</div>
           <h1 style={{ fontSize: 'clamp(28px,4vw,42px)' }}>{q ? `Results for “${q}”` : 'Every title, one shelf'}</h1>
           <p className="sub">
-            {titles.length} title{titles.length === 1 ? '' : 's'} · {genre === 'All' ? 'all genres' : genre} · sorted by {sort}
+            {titles.length} title{titles.length === 1 ? '' : 's'} · {mediaType === 'all' ? 'films & series' : mediaType === 'tv' ? 'TV series' : 'films'} · {genre === 'All' ? 'all genres' : genre} · sorted by {sort}
           </p>
         </div>
         {q ? (
@@ -58,6 +60,18 @@ export default async function MoviesPage({
             Clear search
           </Link>
         ) : null}
+      </div>
+
+      <div className="chip-row" style={{ marginBottom: 14 }}>
+        {[
+          { key: 'all', label: 'All titles' },
+          { key: 'movie', label: 'Films' },
+          { key: 'tv', label: 'TV series' }
+        ].map((option) => (
+          <Link key={option.key} href={qs({ type: option.key === 'all' ? '' : option.key })} className="chip" data-on={mediaType === option.key}>
+            {option.label}
+          </Link>
+        ))}
       </div>
 
       <div className="chip-row" style={{ marginBottom: 14 }}>
@@ -81,8 +95,8 @@ export default async function MoviesPage({
 
       {titles.length === 0 ? (
         <div className="empty">
-          <b>No titles found</b>
-          Filter badlo ya search clear karo.
+          <b>{mediaType === 'tv' ? 'No TV series in the catalogue yet' : 'No titles found'}</b>
+          {mediaType === 'tv' ? 'Try the header search for wider TMDB discovery, or import a series from the admin panel.' : 'Filter badlo ya search clear karo.'}
         </div>
       ) : (
         <div className="grid-posters">

@@ -1,32 +1,20 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { parseList } from '@/lib/format';
+import { clientIp, LIMITS, rateLimit } from '@/lib/rate-limit';
+import { searchEverywhere } from '@/lib/search';
 
 export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const q = (searchParams.get('q') ?? '').trim();
-  if (q.length < 2) return NextResponse.json({ results: [] });
+  const q = (new URL(req.url).searchParams.get('q') ?? '').trim().slice(0, 100);
+  if (q.length < 2) return NextResponse.json({ results: [] }, { headers: { 'Cache-Control': 'no-store' } });
 
-  const rows = await prisma.title.findMany({
-    where: {
-      status: 'PUBLISHED',
-      OR: [{ title: { contains: q, mode: 'insensitive' } }, { overview: { contains: q, mode: 'insensitive' } }, { director: { contains: q, mode: 'insensitive' } }]
-    },
-    take: 6,
-    include: { reviews: { where: { status: 'PUBLISHED' }, select: { rating: true } } }
-  });
+  const ip = clientIp(req);
+  const gate = await rateLimit(`search:${ip}`, LIMITS.search.limit, LIMITS.search.windowMs);
+  if (!gate.ok) return NextResponse.json({ results: [], limited: true }, { headers: { 'Cache-Control': 'no-store' } });
 
-  return NextResponse.json({
-    results: rows.map((t) => {
-      const ratings = t.reviews.map((r) => r.rating);
-      return {
-        slug: t.slug,
-        title: t.title,
-        year: t.year,
-        poster: t.poster,
-        genres: parseList<string>(t.genres),
-        score: ratings.length ? Math.round((ratings.reduce((a, b) => a + b, 0) / ratings.length) * 10) / 10 : t.imdbRating
-      };
-    })
-  });
+  try {
+    const results = await searchEverywhere(q);
+    return NextResponse.json({ results }, { headers: { 'Cache-Control': 'no-store' } });
+  } catch (error) {
+    console.warn('[search] graceful fallback:', error instanceof Error ? error.message : 'unknown');
+    return NextResponse.json({ results: [] }, { headers: { 'Cache-Control': 'no-store' } });
+  }
 }

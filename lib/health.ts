@@ -85,11 +85,11 @@ export async function runHealth() {
         SELECT table_name, column_name FROM information_schema.columns
         WHERE table_schema = 'cinemood' AND (
           (table_name = 'Review' AND column_name IN ('bodyEn','editorial','authorName')) OR
-          (table_name = 'Title' AND column_name IN ('trailerEn','trailerHi'))
+          (table_name = 'Title' AND column_name IN ('trailerEn','trailerHi','mediaType'))
         )
       `;
       const colSet = new Set(cols.map((c) => `${c.table_name}.${c.column_name}`));
-      const requiredColumns = ['Review.bodyEn', 'Review.editorial', 'Review.authorName', 'Title.trailerEn', 'Title.trailerHi'];
+      const requiredColumns = ['Review.bodyEn', 'Review.editorial', 'Review.authorName', 'Title.trailerEn', 'Title.trailerHi', 'Title.mediaType'];
       const missingColumns = requiredColumns.filter((c) => !colSet.has(c));
       if (schemaOk && missingColumns.length) {
         schemaOk = false;

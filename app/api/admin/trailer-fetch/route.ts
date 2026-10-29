@@ -55,10 +55,11 @@ export async function POST(req: Request) {
   const apiKey = process.env.YOUTUBE_API_KEY?.trim();
   if (!apiKey) return NextResponse.json({ error: 'Add YOUTUBE_API_KEY in Vercel Environment Variables, then redeploy.' }, { status: 503 });
 
-  const title = await prisma.title.findUnique({ where: { id: parsed.data.titleId }, select: { title: true, year: true } });
+  const title = await prisma.title.findUnique({ where: { id: parsed.data.titleId }, select: { title: true, year: true, mediaType: true } });
   if (!title) return NextResponse.json({ error: 'Title not found' }, { status: 404 });
 
-  const base = `${title.title} ${title.year} official movie trailer`;
+  const kind = title.mediaType === 'tv' ? 'TV series' : 'movie';
+  const base = `${title.title} ${title.year} official ${kind} trailer`;
   try {
     const [en, hi] = await Promise.all([
       searchTrailer(apiKey, `${base} English`, 'en', 'US'),

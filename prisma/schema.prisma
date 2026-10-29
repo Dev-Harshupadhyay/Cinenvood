@@ -49,6 +49,7 @@ model Title {
   id         String      @id @default(cuid())
   slug       String      @unique
   tmdbId     Int?        @unique
+  mediaType  String      @default("movie") // movie | tv
   title      String
   year       Int
   runtime    Int

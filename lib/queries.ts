@@ -12,6 +12,9 @@ export type PosterTitle = {
   genres: string[];
   imdbRating: number | null;
   tmdbScore: number | null;
+  mediaType?: 'movie' | 'tv';
+  overview?: string;
+  backdrop?: string;
   reviewCount: number;
   likes: number;
   communityScore: number | null;
@@ -23,6 +26,7 @@ const titleSelect = {
   id: true,
   slug: true,
   title: true,
+  mediaType: true,
   year: true,
   runtime: true,
   poster: true,
@@ -43,6 +47,9 @@ function mapTitle(t: any): PosterTitle {
     id: t.id,
     slug: t.slug,
     title: t.title,
+    mediaType: t.mediaType === 'tv' ? 'tv' : 'movie',
+    overview: t.overview ?? '',
+    backdrop: t.backdrop ?? '',
     year: t.year,
     runtime: t.runtime,
     poster: t.poster,
@@ -57,9 +64,10 @@ function mapTitle(t: any): PosterTitle {
   };
 }
 
-export async function getCatalogue(opts: { q?: string; genre?: string; sort?: string; take?: number } = {}) {
-  const { q, genre, sort = 'trending', take = 60 } = opts;
+export async function getCatalogue(opts: { q?: string; genre?: string; sort?: string; take?: number; mediaType?: 'movie' | 'tv' | 'all' } = {}) {
+  const { q, genre, sort = 'trending', take = 60, mediaType = 'all' } = opts;
   const where: any = { status: 'PUBLISHED' };
+  if (mediaType !== 'all') where.mediaType = mediaType;
   if (q) {
     where.OR = [{ title: { contains: q, mode: 'insensitive' } }, { overview: { contains: q, mode: 'insensitive' } }, { director: { contains: q, mode: 'insensitive' } }];
   }

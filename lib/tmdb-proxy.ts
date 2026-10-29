@@ -35,7 +35,7 @@ export function viaProxy(url: string): string {
 
 /** image.tmdb.org path -> humara /api/img route (browser ISP-safe). */
 export function imgUrl(path: string | null | undefined, size = 'w500'): string {
-  if (!path) return '/posters/placeholder.jpg';
+  if (!path) return '/posters/placeholder.svg';
   if (path.startsWith('/')) return path; // already local (seed posters)
   const idx = path.indexOf('/t/p/');
   const rel = idx >= 0 ? path.slice(idx + 5) : path; // "w500/xyz.jpg"

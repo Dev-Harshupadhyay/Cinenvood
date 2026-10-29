@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-type Result = { id: number; title: string; year: string; poster: string; vote: number; overview: string };
+type Result = { id: number; mediaType: 'movie' | 'tv'; title: string; year: string; poster: string; vote: number; overview: string };
 
 export default function TmdbImport({ configured }: { configured: boolean }) {
   const [q, setQ] = useState('');
@@ -14,34 +14,39 @@ export default function TmdbImport({ configured }: { configured: boolean }) {
 
   async function search(e: React.FormEvent) {
     e.preventDefault();
-    if (q.trim().length < 2) return;
+    const query = q.trim();
+    if (query.length < 2 || busy) return;
     setBusy(true);
     setMsg('');
+    setResults([]);
     try {
-      const res = await fetch(`/api/tmdb?q=${encodeURIComponent(q)}`);
+      const res = await fetch(`/api/tmdb?q=${encodeURIComponent(query)}`, { cache: 'no-store' });
       const data = await res.json();
-      setResults(data.results ?? []);
-      if (!data.results?.length) setMsg('No results. Check the API key or query.');
+      if (!res.ok) throw new Error(data.error ?? 'Search is unavailable right now.');
+      setResults(Array.isArray(data.results) ? data.results : []);
+      if (!data.results?.length) setMsg('No results yet. Try another spelling or title.');
+    } catch (error) {
+      setMsg(error instanceof Error ? error.message : 'Search is unavailable right now. Try again.');
     } finally {
       setBusy(false);
     }
   }
 
-  async function importTitle(id: number) {
+  async function importTitle(id: number, mediaType: 'movie' | 'tv') {
     setBusy(true);
     setMsg('');
     try {
       const res = await fetch('/api/tmdb/import', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ id })
+        body: JSON.stringify({ id, mediaType })
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? 'Import failed');
-      setMsg(`Imported “${data.title.title}” → /movies/${data.title.slug}`);
+      if (!res.ok) throw new Error(data.error ?? 'Import failed. Try again.');
+      setMsg(`Added “${data.title.title}” to the catalogue ✓`);
       router.refresh();
-    } catch (err) {
-      setMsg(err instanceof Error ? err.message : 'Import failed');
+    } catch (error) {
+      setMsg(error instanceof Error ? error.message : 'Import failed. Try again.');
     } finally {
       setBusy(false);
     }
@@ -50,47 +55,46 @@ export default function TmdbImport({ configured }: { configured: boolean }) {
   return (
     <div className="panel">
       <div className="panel-title">
-        <span>TMDB import</span>
+        <span>TMDB import · Films & series</span>
         <span className="status" style={{ color: configured ? 'var(--accent)' : 'var(--faint)' }}>
           {configured ? 'API connected' : 'Demo mode'}
         </span>
       </div>
 
-      {!configured && (
+      {!configured ? (
         <div className="notice" style={{ marginBottom: 14 }}>
-          <b>TMDB_API_KEY missing.</b> Demo catalogue chal raha hai. Real fetch ke liye <code>.env</code> mein{' '}
-          <code>TMDB_API_KEY=…</code> daalo (v3 key ya v4 bearer token) aur server restart karo. UI wahi rahega — data live ho jayega.
+          <b>TMDB_API_KEY is not set here.</b> Existing catalogue search still works; add your existing TMDB key to enable live movie and TV search.
         </div>
-      )}
+      ) : null}
 
       <form onSubmit={search} style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
         <input
           className="input"
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Search TMDB — e.g. Interstellar"
-          disabled={!configured}
+          placeholder="Search a movie or TV series"
+          disabled={!configured || busy}
         />
-        <button type="submit" className="btn btn-primary" disabled={!configured || busy}>
-          {busy ? 'Searching…' : 'Search'}
+        <button type="submit" className="btn btn-primary" disabled={!configured || busy || q.trim().length < 2}>
+          {busy ? 'Searching…' : 'Search TMDB'}
         </button>
       </form>
 
-      {msg ? <p className="form-note" style={{ marginBottom: 10 }}>{msg}</p> : null}
+      {msg ? <p className="form-note" role="status" style={{ marginBottom: 10 }}>{msg}</p> : null}
 
       <div style={{ display: 'grid', gap: 8 }}>
         {results.map((r) => (
-          <div key={r.id} className="member-row" style={{ borderTop: '1px solid var(--border)', paddingTop: 8 }}>
+          <div key={`${r.mediaType}-${r.id}`} className="member-row tmdb-import-row" style={{ borderTop: '1px solid var(--border)', paddingTop: 8 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            {r.poster ? <img src={r.poster} alt="" style={{ width: 34, height: 50, objectFit: 'cover', borderRadius: 6 }} /> : null}
+            {r.poster ? <img src={r.poster} alt={`${r.title} poster`} style={{ width: 40, height: 58, objectFit: 'cover', borderRadius: 6 }} /> : <span className="tmdb-import-placeholder">▣</span>}
             <div style={{ minWidth: 0 }}>
               <div className="mr-name">
-                {r.title} <span className="faint">({r.year})</span>
+                {r.title} <span className="faint">({r.year || 'TBA'})</span>
               </div>
-              <div className="mr-meta">TMDB {r.vote.toFixed(1)} · {r.overview.slice(0, 60)}…</div>
+              <div className="mr-meta">{r.mediaType === 'tv' ? 'TV series' : 'Film'} · TMDB {r.vote.toFixed(1)} · {r.overview.slice(0, 72)}{r.overview.length > 72 ? '…' : ''}</div>
             </div>
-            <button type="button" className="btn btn-sm" style={{ marginLeft: 'auto' }} onClick={() => importTitle(r.id)} disabled={busy}>
-              Import
+            <button type="button" className="btn btn-sm" style={{ marginLeft: 'auto' }} onClick={() => importTitle(r.id, r.mediaType)} disabled={busy}>
+              Add
             </button>
           </div>
         ))}

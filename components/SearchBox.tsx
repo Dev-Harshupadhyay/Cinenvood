@@ -1,16 +1,28 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-type Item = { slug: string; title: string; year: number; poster: string; score: number | null };
+type Item = {
+  key: string;
+  href: string;
+  title: string;
+  year: number;
+  poster: string;
+  score: number | null;
+  mediaType: 'movie' | 'tv';
+  source: 'catalogue' | 'tmdb';
+};
 
-export default function SearchBox({ placeholder = 'Search movies, people, moods…' }: { placeholder?: string } = {}) {
+export default function SearchBox({ placeholder = 'Search movies, series…' }: { placeholder?: string } = {}) {
   const [q, setQ] = useState('');
   const [items, setItems] = useState<Item[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
   const box = useRef<HTMLDivElement>(null);
+  const input = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -22,36 +34,69 @@ export default function SearchBox({ placeholder = 'Search movies, people, moods�
   }, []);
 
   useEffect(() => {
-    if (q.trim().length < 2) {
+    const term = q.trim();
+    if (term.length < 2) {
       setItems([]);
+      setOpen(false);
+      setLoading(false);
+      setActiveIndex(-1);
       return;
     }
+
     const ctrl = new AbortController();
-    const t = setTimeout(async () => {
-      setLoading(true);
+    setItems([]);
+    setLoading(true);
+    setOpen(true);
+    setActiveIndex(-1);
+
+    const timer = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`, { signal: ctrl.signal });
-        const data = await res.json();
-        setItems(data.results ?? []);
-        setOpen(true);
+        const res = await fetch(`/api/search?q=${encodeURIComponent(term)}`, {
+          signal: ctrl.signal,
+          headers: { accept: 'application/json' },
+          cache: 'no-store'
+        });
+        const data = res.ok ? await res.json() : { results: [] };
+        if (!ctrl.signal.aborted) setItems(Array.isArray(data.results) ? data.results : []);
       } catch {
-        /* aborted */
+        // Network/API hiccups degrade to the same calm empty state; never throw into the header.
+        if (!ctrl.signal.aborted) setItems([]);
       } finally {
-        setLoading(false);
+        if (!ctrl.signal.aborted) setLoading(false);
       }
-    }, 220);
+    }, 240);
+
     return () => {
-      clearTimeout(t);
+      clearTimeout(timer);
       ctrl.abort();
     };
   }, [q]);
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!q.trim()) return;
+    const term = q.trim();
+    if (term.length < 2) return;
     setOpen(false);
-    router.push(`/movies?q=${encodeURIComponent(q.trim())}`);
+    const active = activeIndex >= 0 ? items[activeIndex] : null;
+    router.push(active?.href ?? `/search?q=${encodeURIComponent(term)}`);
   }
+
+  function onInputKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    const visibleCount = Math.min(items.length, 8);
+    if (e.key === 'Escape') {
+      setOpen(false);
+      setActiveIndex(-1);
+    } else if (e.key === 'ArrowDown' && visibleCount) {
+      e.preventDefault();
+      setOpen(true);
+      setActiveIndex((index) => (index + 1) % visibleCount);
+    } else if (e.key === 'ArrowUp' && visibleCount) {
+      e.preventDefault();
+      setActiveIndex((index) => (index <= 0 ? visibleCount - 1 : index - 1));
+    }
+  }
+
+  const allHref = `/search?q=${encodeURIComponent(q.trim())}`;
 
   return (
     <div className="search" ref={box}>
@@ -61,55 +106,73 @@ export default function SearchBox({ placeholder = 'Search movies, people, moods�
           <path d="m20 20-3.4-3.4" />
         </svg>
         <input
+          ref={input}
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          onFocus={() => items.length && setOpen(true)}
+          onFocus={() => { if (q.trim().length >= 2) setOpen(true); }}
+          onKeyDown={onInputKeyDown}
           placeholder={placeholder}
-          aria-label="Search the catalogue"
+          aria-label="Search movies and series"
+          aria-expanded={open}
+          aria-controls="search-results"
+          aria-activedescendant={activeIndex >= 0 ? `search-result-${activeIndex}` : undefined}
+          autoComplete="off"
         />
-        {loading && (
-          <svg className="spin" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" aria-hidden="true">
+        {q ? (
+          <button type="button" className="search-clear" aria-label="Clear search" onClick={() => { setQ(''); input.current?.focus(); }}>
+            ×
+          </button>
+        ) : null}
+        {loading ? (
+          <svg className="spin search-spinner" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" aria-label="Searching">
             <path d="M21 12a9 9 0 1 1-6.2-8.6" />
           </svg>
-        )}
+        ) : null}
       </form>
 
-      {open && (
-        <div className="search-pop">
-          {items.length === 0 ? (
-            <div className="search-empty">Kuch nahi mila — try another title.</div>
+      {open && q.trim().length >= 2 ? (
+        <div className="search-pop" id="search-results" role="listbox" aria-label="Movie and series results">
+          {loading ? (
+            <div className="search-loading">
+              <span className="search-loading-poster" />
+              <span><i /><i /></span>
+              <span className="search-loading-poster" />
+              <span><i /><i /></span>
+            </div>
+          ) : items.length === 0 ? (
+            <div className="search-empty"><b>No match yet</b><span>Try another title or spelling.</span></div>
           ) : (
-            items.map((it) => (
-              <div
-                key={it.slug}
-                className="search-item"
-                role="button"
-                tabIndex={0}
-                onClick={() => {
-                  setOpen(false);
-                  router.push(`/movies/${it.slug}`);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    setOpen(false);
-                    router.push(`/movies/${it.slug}`);
-                  }
-                }}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={it.poster} alt="" />
-                <div>
-                  <div className="st">{it.title}</div>
-                  <div className="sm">
-                    {it.year}
-                    {it.score ? ` · ★ ${it.score.toFixed(1)}` : ''}
-                  </div>
-                </div>
-              </div>
-            ))
+            <>
+              {items.slice(0, 8).map((item, index) => (
+                <Link
+                  key={item.key}
+                  id={`search-result-${index}`}
+                  href={item.href}
+                  className="search-item"
+                  role="option"
+                  aria-selected={activeIndex === index}
+                  data-active={activeIndex === index}
+                  onMouseEnter={() => setActiveIndex(index)}
+                  onClick={() => setOpen(false)}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={item.poster || '/posters/placeholder.svg'} alt="" loading="lazy" />
+                  <span className="search-item-copy">
+                    <span className="search-item-title">{item.title}</span>
+                    <span className="search-item-meta">
+                      {item.year || 'Year TBA'}{item.score ? ` · ★ ${item.score.toFixed(1)}` : ''}
+                    </span>
+                  </span>
+                  <span className={`search-kind search-kind--${item.mediaType}`}>{item.mediaType === 'tv' ? 'SERIES' : 'FILM'}</span>
+                </Link>
+              ))}
+              <Link href={allHref} className="search-all" onClick={() => setOpen(false)}>
+                View all movie & series results <span aria-hidden="true">→</span>
+              </Link>
+            </>
           )}
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

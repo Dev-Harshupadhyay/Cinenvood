@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   // throw before the shell streams so crawlers get a real 404
   if (!title) notFound();
   return {
-    title: `${title.title} (${title.year})`,
+    title: `${title.title} (${title.year}) · ${title.mediaType === 'tv' ? 'Series' : 'Film'}`,
     description: title.overview.slice(0, 155),
     alternates: { canonical: `/movies/${title.slug}` },
     openGraph: { title: `${title.title} (${title.year})`, description: title.overview.slice(0, 155), images: [title.poster] }
@@ -53,7 +53,7 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
 
   const jsonLd = {
     '@context': 'https://schema.org',
-    '@type': 'Movie',
+    '@type': title.mediaType === 'tv' ? 'TVSeries' : 'Movie',
     name: title.title,
     description: title.overview,
     datePublished: String(title.year),
@@ -77,7 +77,7 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
             '@type': 'BreadcrumbList',
             itemListElement: [
               { '@type': 'ListItem', position: 1, name: 'Home', item: siteUrl },
-              { '@type': 'ListItem', position: 2, name: 'Movies', item: `${siteUrl}/movies` },
+              { '@type': 'ListItem', position: 2, name: 'Films & series', item: `${siteUrl}/movies` },
               { '@type': 'ListItem', position: 3, name: title.title, item: `${siteUrl}/movies/${title.slug}` }
             ]
           })
@@ -92,11 +92,11 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
         </div>
 
         <div className="detail-intro">
-          <div className="eyebrow">Movie · {title.year}</div>
+          <div className="eyebrow">{title.mediaType === 'tv' ? 'TV series' : 'Movie'} · {title.year}</div>
           <h1 className="detail-title">{title.title}</h1>
 
           <div className="detail-meta">
-            <span className="tag">{formatRuntime(title.runtime)}</span>
+            <span className="tag">{title.mediaType === 'tv' ? `${formatRuntime(title.runtime)} / ep` : formatRuntime(title.runtime)}</span>
             {title.genres.map((g) => (
               <Link key={g} href={`/movies?genre=${encodeURIComponent(g)}`} className="tag">
                 {g}
@@ -118,6 +118,7 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
             buckets={title.ratingBuckets}
             genres={title.genres}
             runtime={title.runtime}
+            mediaType={title.mediaType === 'tv' ? 'tv' : 'movie'}
           />
 
           <p className="detail-overview">{title.overview}</p>
@@ -212,7 +213,7 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
             <div style={{ display: 'grid', gap: 10, fontSize: 13 }}>
               {[
                 ['Year', title.year],
-                ['Runtime', formatRuntime(title.runtime)],
+                [title.mediaType === 'tv' ? 'Episode runtime' : 'Runtime', title.mediaType === 'tv' ? `${formatRuntime(title.runtime)} / ep` : formatRuntime(title.runtime)],
                 ['Genres', title.genres.join(', ') || '—'],
                 ['Director', title.director ?? '—'],
                 ['Likes', title._count.likes],

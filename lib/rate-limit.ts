@@ -86,6 +86,7 @@ export const LIMITS = {
   adminPage: { limit: 120, windowMs: 60_000 },
   adminAction: { limit: 60, windowMs: 60_000 },
   adminActionHourly: { limit: 600, windowMs: 60 * 60_000 },
+  search: { limit: 90, windowMs: 60_000 },
   signIn: { limit: 30, windowMs: 10 * 60_000 },
   review: { limit: 6, windowMs: 15 * 60_000 },
   comment: { limit: 10, windowMs: 10 * 60_000 },
