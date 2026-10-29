@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import Comments from '@/components/Comments';
 import LikeButton from '@/components/LikeButton';
 import SpoilerText from '@/components/SpoilerText';
+import VerdictBlock from '@/components/VerdictBlock';
 import { getSessionUser } from '@/lib/session';
 import { getReview, getLatestReviews, withViewerLikes } from '@/lib/queries';
 import { avatarGradient, initials, timeAgo, reviewByline } from '@/lib/format';
@@ -101,10 +102,6 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
                   {review.editorial ? ' · written by the site' : ''}
                 </div>
               </div>
-              <span className="rv-rating" style={{ fontSize: 22 }}>
-                {review.rating}
-                <small>/10</small>
-              </span>
             </div>
 
             {text.headline ? <h1 className="rv-detail-headline">{text.headline}</h1> : null}
@@ -120,6 +117,8 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
             ) : (
               <p className={`rv-body-full${review.editorial ? ' rv-body--editorial' : ''}`}>{text.body}</p>
             )}
+
+            <VerdictBlock rating={review.rating} size="full" />
 
             <div className="rv-foot">
               <LikeButton

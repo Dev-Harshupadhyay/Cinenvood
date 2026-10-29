@@ -1,10 +1,10 @@
 import Link from 'next/link';
-import { verdictFor } from '@/lib/verdict';
 import { avatarGradient, avatarSrc, hasOwnName, initials, reviewByline, timeAgo } from '@/lib/format';
 import { editionOf, type Edition } from '@/lib/edition';
 import LikeButton from './LikeButton';
 import FeatureButton from './FeatureButton';
 import SpoilerText from './SpoilerText';
+import VerdictBlock from './VerdictBlock';
 
 type Review = {
   id: string;
@@ -40,7 +40,6 @@ export default function ReviewCard({
   const isAdmin = review.user.role === 'ADMIN';
   const text = editionOf(review, edition);
   const isEditorial = Boolean(review.editorial);
-  const band = verdictFor(review.rating);
   // Naam bhool jaane par bhi byline kabhi khaali nahi: site ke verdicts "Admin" bank jaate hain.
   const byline = reviewByline(review);
   const kind = isEditorial || review.user.role === 'ADMIN' ? 'editorial' : 'member';
@@ -102,15 +101,6 @@ export default function ReviewCard({
           </div>
         </div>
 
-        <span className={`rv-rating rv-rating--big${isAdmin ? ' rv-rating--admin' : ''}`}>
-          <span className="rv-num">
-            {review.rating}
-            <small>/10</small>
-          </span>
-          <em className="rv-band" data-tone={band.tone}>
-            {band.short}
-          </em>
-        </span>
       </div>
 
       <Link href={`/movies/${review.title.slug}`} className="rv-movie">
@@ -136,6 +126,9 @@ export default function ReviewCard({
       ) : (
         <p className={`rv-body${isEditorial ? ' rv-body--editorial rv-body--clamp' : ''}`}>{text.body}</p>
       )}
+
+      {/* score comes AFTER the review so the words get read first */}
+      <VerdictBlock rating={review.rating} size="card" />
 
       <div className="rv-foot">
         <LikeButton
