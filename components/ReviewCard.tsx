@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { verdictFor } from '@/lib/verdict';
-import { avatarGradient, initials, timeAgo } from '@/lib/format';
+import { avatarGradient, displayName, hasOwnName, initials, timeAgo } from '@/lib/format';
 import { editionOf, type Edition } from '@/lib/edition';
 import LikeButton from './LikeButton';
 import SpoilerText from './SpoilerText';
@@ -36,7 +36,11 @@ export default function ReviewCard({
   const text = editionOf(review, edition);
   const isEditorial = Boolean(review.editorial);
   const band = verdictFor(review.rating);
-  const byline = isEditorial ? review.authorName || review.user.name || 'Harsh' : review.user.name ?? 'Member';
+  const byline = isEditorial
+    ? review.authorName || review.user.name || 'Harsh'
+    : displayName(review.user.name, review.user.email);
+  const verified = isEditorial || isAdmin;
+  const supporters = review._count.likes;
 
   return (
     <article
@@ -47,7 +51,7 @@ export default function ReviewCard({
       {isAdmin ? <span className="av-quote" aria-hidden="true">“</span> : null}
 
       <div className="rv-head rv-head--premium">
-        <span className={`avatar rv-avatar${isAdmin ? ' avatar--admin' : ''}`} style={{ background: avatarGradient(review.user.email) }}>
+        <span className={`avatar rv-avatar${verified ? ' avatar--admin' : ''}`} style={{ background: avatarGradient(review.user.email) }}>
           {review.user.image ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={review.user.image} alt="" />
@@ -57,15 +61,26 @@ export default function ReviewCard({
         </span>
 
         <div className="rv-id">
+          <span className="rv-kicker">
+            <span className="rv-kicker-line" aria-hidden="true" />
+            Review by
+          </span>
           <div className="rv-name rv-name--lg">
             {byline}
-            {isAdmin ? <span className="av-crown" aria-hidden="true">✦</span> : null}
+            {verified ? (
+              <span className="rv-verified" title="Verified editorial voice">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M12 2.6l2.3 1.9 3-.3 1.1 2.8 2.6 1.5-1 2.8 1 2.8-2.6 1.5-1.1 2.8-3-.3L12 21.4l-2.3-1.9-3 .3-1.1-2.8L3 15.5l1-2.8-1-2.8 2.6-1.5 1.1-2.8 3 .3L12 2.6z" />
+                </svg>
+              </span>
+            ) : null}
+            {!verified && !hasOwnName(review.user.name) ? <span className="rv-name-hint">name not set</span> : null}
           </div>
           <div className="rv-role">
             {isEditorial ? (
-              <span className="rv-role-chip">EDITORIAL · CiNEMAsFLiX</span>
+              <span className="rv-role-chip rv-role-chip--gold">FOUNDER · EDITOR-IN-CHIEF</span>
             ) : isAdmin ? (
-              <span className="rv-role-chip">FOUNDER &amp; EDITOR</span>
+              <span className="rv-role-chip">ADMIN</span>
             ) : (
               <span className="rv-role-plain">Member review</span>
             )}
@@ -99,7 +114,7 @@ export default function ReviewCard({
             {review.title.year} · {review._count.comments} {review._count.comments === 1 ? 'comment' : 'comments'}
           </div>
         </div>
-        {review.featured ? <span className="av-pin">PINNED</span> : null}
+        {isEditorial ? <span className="av-pin av-pin--gold">VERDICT</span> : review.featured ? <span className="av-pin">PINNED</span> : null}
       </Link>
 
       {text.headline ? <h3 className="rv-headline rv-headline--serif">{text.headline}</h3> : null}
@@ -116,14 +131,28 @@ export default function ReviewCard({
           initialCount={review._count.likes}
           initialLiked={Boolean(review.likedByViewer)}
           authed={authed}
+          label="Agree"
         />
-        <Link href={`/reviews/${review.id}`} className="btn btn-sm btn-ghost">
+
+        <Link href={`/reviews/${review.id}`} className="btn btn-sm btn-ghost rv-replies">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" aria-hidden="true">
             <path d="M21 12a8 8 0 0 1-11.5 7.2L4 21l1.8-5.5A8 8 0 1 1 21 12z" />
           </svg>
           {review._count.comments}
+          <span className="rv-agree-label">{review._count.comments === 1 ? 'reply' : 'replies'}</span>
         </Link>
-        {isAdmin ? <span className="av-sign">— Harsh</span> : null}
+
+        {supporters > 0 ? (
+          <span className="rv-supported">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 21s-8-4.9-8-10.4A4.6 4.6 0 0 1 12 7a4.6 4.6 0 0 1 8 3.6C20 16.1 12 21 12 21z" />
+            </svg>
+            {supporters} supported
+          </span>
+        ) : null}
+
+        {verified ? <span className="av-sign">— {byline}</span> : null}
+
         <Link href={`/reviews/${review.id}`} className="link-more" style={{ marginLeft: 'auto' }}>
           Read full verdict
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" aria-hidden="true">

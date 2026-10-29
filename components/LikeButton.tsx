@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 
-type Props = { reviewId: string; initialCount: number; initialLiked: boolean; authed: boolean };
+type Props = { reviewId: string; initialCount: number; initialLiked: boolean; authed: boolean; label?: string };
 
-export default function LikeButton({ reviewId, initialCount, initialLiked, authed }: Props) {
+export default function LikeButton({ reviewId, initialCount, initialLiked, authed, label }: Props) {
   const [liked, setLiked] = useState(initialLiked);
   const [count, setCount] = useState(initialCount);
   const [busy, setBusy] = useState(false);
@@ -36,7 +36,15 @@ export default function LikeButton({ reviewId, initialCount, initialLiked, authe
   }
 
   return (
-    <button type="button" className="btn btn-sm btn-ghost" onClick={toggle} disabled={busy} data-on={liked} aria-pressed={liked}>
+    <button
+      type="button"
+      className="btn btn-sm btn-ghost rv-agree"
+      onClick={toggle}
+      disabled={busy}
+      data-on={liked}
+      aria-pressed={liked}
+      aria-label={label ? `${label} — ${count}` : undefined}
+    >
       <svg
         width="14"
         height="14"
@@ -49,6 +57,7 @@ export default function LikeButton({ reviewId, initialCount, initialLiked, authe
       >
         <path d="M12 20s-7-4.3-7-9.2A3.9 3.9 0 0 1 12 8a3.9 3.9 0 0 1 7 2.8C19 15.7 12 20 12 20z" />
       </svg>
+      {label ? <span className="rv-agree-label" style={{ color: liked ? 'var(--accent)' : undefined }}>{label}</span> : null}
       <span style={{ color: liked ? 'var(--accent)' : undefined }}>{count}</span>
     </button>
   );

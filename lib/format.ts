@@ -65,3 +65,33 @@ export function avg(values: number[]) {
   if (!values.length) return 0;
   return values.reduce((a, b) => a + b, 0) / values.length;
 }
+
+/**
+ * Public byline for a review.
+ *
+ * Google se aaya naam sabse pehle; agar user ne naam set nahi kiya to email se
+ * ek readable naam bana lete hain ("rahul.sharma@…" → "Rahul Sharma"). Kuch bhi
+ * na mile to "CineMood Member" — card kabhi khaali byline nahi dikhata.
+ */
+export function displayName(name?: string | null, email?: string | null): string {
+  const clean = (name ?? '').trim();
+  if (clean) return clean;
+
+  const local = (email ?? '').split('@')[0] ?? '';
+  const pretty = local
+    .replace(/[._-]+/g, ' ')
+    .replace(/\d+/g, ' ')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 3)
+    .map((w) => w[0]?.toUpperCase() + w.slice(1).toLowerCase())
+    .join(' ');
+
+  return pretty || 'CineMood Member';
+}
+
+/** True when the byline was derived (user never set a display name). */
+export function hasOwnName(name?: string | null): boolean {
+  return Boolean((name ?? '').trim());
+}

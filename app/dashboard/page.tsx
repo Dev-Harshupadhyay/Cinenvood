@@ -2,6 +2,7 @@ import Link from 'next/link';
 import PosterCard from '@/components/PosterCard';
 import ReviewCard from '@/components/ReviewCard';
 import ProfileForm from '@/components/ProfileForm';
+import { displayName } from '@/lib/format';
 import { requireUser } from '@/lib/session';
 import { prisma } from '@/lib/prisma';
 import { getCatalogue, withViewerLikes } from '@/lib/queries';
@@ -79,7 +80,13 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             )}
           </span>
           <span style={{ minWidth: 0 }}>
-            <span style={{ display: 'block', fontWeight: 650, fontSize: 14 }}>{user.name ?? 'Member'}</span>
+            <span style={{ display: 'block', fontWeight: 650, fontSize: 14 }}>{displayName(user.name, user.email)}</span>
+            {!user.name?.trim() ? (
+              <span className="name-nudge">
+                Naam set karo — review par yahi byline dikhega.{' '}
+                <a href="/dashboard?tab=profile">Add name →</a>
+              </span>
+            ) : null}
             <span className="faint mono" style={{ fontSize: 10 }}>
               {user.role === 'ADMIN' ? 'CURATOR' : 'MEMBER'}
             </span>

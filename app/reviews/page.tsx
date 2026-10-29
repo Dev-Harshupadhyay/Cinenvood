@@ -31,7 +31,11 @@ export default async function ReviewsFeed({ searchParams }: { searchParams: Prom
   ];
 
   const withLikes = await withViewerLikes(rowsRaw, sessionUser?.id).catch(() => rowsRaw);
-  const list = sort === 'top' ? [...withLikes].sort((a, b) => b._count.likes - a._count.likes) : withLikes;
+  // The site's own verdicts always sit on top — community votes/rank chaahe jo ho.
+  const pinnedRows = withLikes.filter((r) => (r as { editorial?: boolean }).editorial || (r as { featured?: boolean }).featured);
+  const restRows = withLikes.filter((r) => !pinnedRows.includes(r));
+  if (sort === 'top') restRows.sort((a, b) => b._count.likes - a._count.likes);
+  const list = [...pinnedRows, ...restRows];
   const pick = pickRaw[0];
 
   return (
