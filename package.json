@@ -9,10 +9,12 @@
     "db:push": "prisma db push",
     "db:seed": "node prisma/seed.mjs",
     "db:studio": "prisma studio",
-    "setup": "prisma db push && node prisma/seed.mjs"
+    "setup": "prisma db push && node prisma/seed.mjs",
+    "db:import": "node prisma/import.mjs"
   },
   "dependencies": {
     "@prisma/client": "^6.2.1",
+    "@vercel/analytics": "^1.5.0",
     "next": "15.5.28",
     "next-auth": "^5.0.0-beta.29",
     "react": "19.1.1",
@@ -23,6 +25,7 @@
     "@types/node": "^22.10.2",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
+    "pg": "^8.23.1",
     "prisma": "^6.2.1",
     "typescript": "^5.7.2"
   },

@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { fetchOmdb } from '@/lib/omdb';
 import { getCurrentUser } from '@/lib/session';
+import { rateLimit, tooMany, LIMITS } from '@/lib/rate-limit';
 
 const schema = z.object({
   action: z.enum([
@@ -24,6 +25,12 @@ export async function POST(req: Request) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: 'Sign in required' }, { status: 401 });
   if (user.role !== 'ADMIN') return NextResponse.json({ error: 'Admin only' }, { status: 403 });
+
+  // Two windows: burst + hourly. Both must pass, no bypass path.
+  const burst = await rateLimit(`admin:act:${user.id}`, LIMITS.adminAction.limit, LIMITS.adminAction.windowMs);
+  if (!burst.ok) return tooMany(burst, `Admin action limit — ${burst.retryAfter}s baad try karo.`);
+  const hourly = await rateLimit(`admin:hour:${user.id}`, LIMITS.adminActionHourly.limit, LIMITS.adminActionHourly.windowMs);
+  if (!hourly.ok) return tooMany(hourly, 'Hourly admin limit khatam. Thodi der baad try karo.');
 
   const parsed = schema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
@@ -81,6 +88,11 @@ export async function POST(req: Request) {
       await prisma.comment.delete({ where: { id } });
       break;
   }
+
+  // Audit trail — every admin mutation is attributable.
+  await prisma.adminLog
+    .create({ data: { actor: user.email, action, target: id, meta: value ?? null } })
+    .catch(() => null);
 
   return NextResponse.json({ ok: true });
 }

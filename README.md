@@ -34,44 +34,57 @@ That is a deliberate product decision — it keeps the site legal, advertiser-sa
 | Area | What you get |
 | --- | --- |
 | **Discovery** | Hero with featured poster + community score ring, genre chips, trending rail, top-rated / community-pulse / top-reviewer sidebars, new arrivals |
-| **Catalogue** | Instant search (title, synopsis, director — case-insensitive), genre filter, sort by trending / rating / newest / title |
+| **Catalogue** | **270 films** with TMDB posters, backdrops, cast, director, runtime and TMDB scores. Instant search (title, synopsis, director — case-insensitive), genre filter, sort by trending / rating / newest / title |
 | **Film page** | Score ring, 10→6 rating distribution, cast, LIKE + WATCHLIST, review composer, review list, similar titles, JSON-LD |
 | **Reviews** | 10-star picker, headline, body, spoiler blur-reveal, one review per user per film (upsert), likes, threaded comments |
 | **Admin verdict** | Any review by an ADMIN gets a premium animated card — conic gradient border, Instrument Serif headline, drop cap, PINNED badge, signature |
 | **Dashboard** | Stats (reviews, likes received, comments, watchlist), my reviews, watchlist, editable profile |
-| **Admin panel** | KPIs, moderation (publish / hide / pin / delete), catalogue (feature / hide), members (role / delete), comments, TMDB import |
-| **Auth** | Google OAuth + passwordless demo login, JWT sessions, role gating, **login required to like, comment and review** |
+| **Admin panel** | KPIs, moderation (publish / hide / pin / delete), catalogue (feature / hide), members (role / delete), comments, TMDB import, **first-party analytics** and an **admin audit trail** |
+| **Auth** | **Google-only in production** (OAuth), JWT sessions, `ADMIN_EMAIL` role gate, **login required to like, comment and review** |
+| **Guest mode** | Signed-out visitors get a `localStorage` guest id and **read-only** access — browse catalogue and read every review, no account created |
+| **Rate limiting** | Two-layer (instance memory + shared Postgres counter) on admin pages, admin actions, sign-in, reviews, comments, likes and analytics beacons — 429 + `Retry-After`, no bypass flag |
+| **Analytics** | Cookie-less first-party page views, 14-day chart, top pages/titles, devices, referrers, guests vs members, plus Vercel Analytics |
 | **i18n** | One-click **English / हिंदी / Hinglish** switcher in the header (cookie-persisted) |
 | **Design** | 5 accent themes (emerald, cyan, rose, violet, amber), real light mode, Instrument Serif display type, mobile-first at 390px |
-| **SEO/PWA** | Sitemap, robots, OG image, manifest, per-film JSON-LD |
+| **SEO/PWA** | Dynamic sitemap, robots, OG image, manifest, JSON-LD (WebSite, Organization, Movie, Review, BreadcrumbList), canonical URLs |
+| **Responsive** | One layout for desktop and mobile: bottom tab bar ≤900px, chip rails, scroll-contained tables, 0px horizontal overflow at 390px |
 
 ---
 
 ## 📸 Screenshots
 
-### Home — hero, rails and community feed
+### Home — cinematic hero, genre rails, live catalogue
 ![Home page](./docs/screenshots/01-home.jpg)
 
-### Admin verdict — the premium pinned review card
-![Admin verdict](./docs/screenshots/02-admin-verdict.jpg)
+### Catalogue — 270 films, poster-first grid
+![Catalogue](./docs/screenshots/09-catalogue.jpg)
 
-### Film detail — score ring, rating distribution, actions
+### Film detail — score ring, rating distribution, cast
 ![Movie detail](./docs/screenshots/05-movie-detail.jpg)
 
-### Admin panel — moderation, pinning, top reviews by likes
+### Legacy review — imported from the old app, credited to the site
+![Legacy editorial review](./docs/screenshots/10-legacy-review.jpg)
+
+### Admin panel — KPIs, pinned verdicts, moderation
 ![Admin panel](./docs/screenshots/03-admin-panel.jpg)
+
+### Admin analytics — first-party, cookie-less traffic
+![Admin analytics](./docs/screenshots/11-admin-analytics.jpg)
+
+### Moderation — who said what, on which film, with how many likes
+![Moderation](./docs/screenshots/12-admin-moderation.jpg)
 
 ### Member dashboard
 ![Dashboard](./docs/screenshots/04-dashboard.jpg)
 
-### About — the site and the developer
-![About page](./docs/screenshots/07-about.jpg)
+### Community — members, top reviewers, top verdicts
+![Community](./docs/screenshots/13-community.jpg)
 
-### Language switcher — English / हिंदी / Hinglish
-![Hinglish UI](./docs/screenshots/08-hinglish.jpg)
+### Sign in — Google only, guest browsing underneath
+![Sign in](./docs/screenshots/14-login.jpg)
 
-### Mobile (390px)
-<img src="./docs/screenshots/06-mobile.jpg" alt="Mobile view" width="300" />
+### Mobile — app-style bottom tabs
+<img src="./docs/screenshots/06-mobile.jpg" alt="Mobile home" width="270" /> <img src="./docs/screenshots/15-mobile-movie.jpg" alt="Mobile film page" width="270" /> <img src="./docs/screenshots/16-mobile-admin.jpg" alt="Mobile admin" width="270" />
 
 ---
 
@@ -99,7 +112,7 @@ npm install
 cp .env.example .env        # then fill the values below
 npx prisma generate
 npx prisma db push          # creates tables in the Postgres schema
-node prisma/seed.mjs        # 7 users · 14 films · 24 reviews (1 pinned verdict)
+npm run db:import           # 270 real films + 9 legacy editorial reviews · 0 users
 npm run dev                 # http://localhost:3000
 ```
 
@@ -121,10 +134,19 @@ TMDB_API_KEY=""                      # v3 key or v4 read token — both auto-det
 OMDB_API_KEY=""                      # optional: IMDb / RT / Metacritic scores
 ```
 
-### Demo logins (no password)
+### Signing in
 
-| Email | Role |
+There are **no seeded accounts** — a fresh database has zero users on purpose.
+
+| Path | Behaviour |
 | --- | --- |
+| **Google** (production) | Any Gmail signs in; the profile (name, email, photo) is upserted into `cinemood."User"`. The account whose email equals `ADMIN_EMAIL` becomes `ADMIN`. |
+| **Local dev fallback** | Only when Google keys are missing **and** `NODE_ENV !== 'production'`, `/login` shows a password-less email form. It is compiled out of production builds. |
+| **Guest** | No login needed to read. A `cm-guest-id` lives in `localStorage`; like / review / comment redirect to `/login?next=…`. |
+
+See [`docs/GOOGLE-AUTH-SETUP.md`](./docs/GOOGLE-AUTH-SETUP.md) for the six-click Google Cloud walkthrough.
+
+--- | --- |
 | `admin@cinemood.app` | **ADMIN** — admin panel, pinning, moderation |
 | any other email | **MEMBER** — review, like, comment, watchlist |
 
@@ -177,8 +199,10 @@ Copy strings live in `lib/i18n.ts` — add a key there and it works everywhere.
 
 - **Like, comment, review, watchlist → login required.** Anonymous visitors get a "Sign in with Google" CTA and are
   redirected back to the exact page after login (`/login?next=…`).
-- Google button appears automatically once `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` exist; demo email login stays as a fallback.
-- Admin actions are re-checked server-side on every request (`requireAdmin()`), never trusted from the UI.
+- Google is the only production provider; the local email form exists solely for `next dev` and never ships.
+- Admin access is decided by `email === ADMIN_EMAIL`, re-checked server-side on every request (`requireAdmin()`) and never trusted from the UI.
+- Admin page loads and admin mutations are rate-limited (120/min and 60/min + 600/hour). Every mutation writes an `AdminLog` row.
+- Denied admins land on `/admin-denied` which prints **their** email and the configured admin email — no guesswork.
 
 ---
 
@@ -193,8 +217,11 @@ User ──< Review ──< Comment
 Title ──< Review
 ```
 
-`Review.featured` powers the pinned admin verdict. `Title.imdbId / rtRating / metascore / imdbVotes` are filled by
-**Admin → Titles → Enrich** (needs `OMDB_API_KEY`).
+`Review.featured` powers the pinned admin verdict. `Review.userId` is **nullable**: legacy reviews imported from the old
+app are `editorial = true` with an `authorName` byline, so they can be shown without inventing an account.
+`Title.imdbId / rtRating / metascore / imdbVotes` are filled by **Admin → Titles → Enrich** (needs `OMDB_API_KEY`).
+
+Support tables: `PageView` (first-party analytics), `RateLimit` (shared counters), `AdminLog` (audit trail).
 
 ---
 

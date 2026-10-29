@@ -3,7 +3,12 @@ import ReviewCard from '@/components/ReviewCard';
 import { getSessionUser } from '@/lib/session';
 import { getLatestReviews, withViewerLikes } from '@/lib/queries';
 
-export const metadata = { title: 'Reviews' };
+export const metadata = {
+  title: 'Reviews',
+  description: 'Editorial verdicts and community reviews — the newest takes on the CINE·MOOD feed.',
+  alternates: { canonical: '/reviews' },
+  openGraph: { title: 'Reviews · CINE·MOOD', description: 'Editorial verdicts and community reviews.' }
+};
 
 export default async function ReviewsFeed({ searchParams }: { searchParams: Promise<{ sort?: string }> }) {
   const { sort = 'recent' } = await searchParams;

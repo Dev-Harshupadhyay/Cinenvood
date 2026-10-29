@@ -13,7 +13,8 @@ import { prisma } from '@/lib/prisma';
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const title = await getTitleBySlug(slug);
-  if (!title) return { title: 'Not found' };
+  // throw before the shell streams so crawlers get a real 404
+  if (!title) notFound();
   return {
     title: `${title.title} (${title.year})`,
     description: title.overview.slice(0, 155),
@@ -39,10 +40,10 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
     ...r,
     title: { id: title.id, slug: title.slug, title: title.title, year: title.year, poster: title.poster }
   }));
-  const adminVerdict = reviewsForCards.find((r) => r.user.role === 'ADMIN') ?? null;
-  const myReview = sessionUser ? reviewsForCards.find((r) => r.user.email === sessionUser.email) ?? null : null;
+  const adminVerdict = reviewsForCards.find((r) => r.user?.role === 'ADMIN' || r.editorial) ?? null;
+  const myReview = sessionUser ? reviewsForCards.find((r) => r.user?.email === sessionUser.email) ?? null : null;
   const related = similar.filter((t) => t.id !== title.id).slice(0, 5);
-  const score = title.communityScore ?? title.imdbRating ?? 0;
+  const score = title.communityScore ?? title.tmdbScore ?? title.imdbRating ?? 0;
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -53,14 +54,29 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
     genre: title.genres,
     image: title.poster,
     director: title.director ? { '@type': 'Person', name: title.director } : undefined,
-    aggregateRating: title.communityScore
-      ? { '@type': 'AggregateRating', ratingValue: title.communityScore, bestRating: 10, ratingCount: Math.max(title.reviews.length, 1) }
-      : undefined
+    aggregateRating:
+      title.communityScore && title.reviews.length > 0
+        ? { '@type': 'AggregateRating', ratingValue: title.communityScore, bestRating: 10, worstRating: 1, ratingCount: title.reviews.length }
+        : undefined
   };
 
   return (
     <div className="container page-clip" style={{ position: 'relative' }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+              { '@type': 'ListItem', position: 1, name: 'Home', item: process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000' },
+              { '@type': 'ListItem', position: 2, name: 'Movies', item: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'}/movies` },
+              { '@type': 'ListItem', position: 3, name: title.title, item: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'}/movies/${title.slug}` }
+            ]
+          })
+        }}
+      />
       <div className="backdrop-strip" style={{ backgroundImage: `url(${title.backdrop || title.poster})` }} />
 
       <div className="detail-hero">
@@ -80,7 +96,7 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
                 {g}
               </Link>
             ))}
-            {title.imdbRating ? <span className="tag tag-gold">★ {title.imdbRating.toFixed(1)} TMDB</span> : null}
+            {title.tmdbScore ? <span className="tag tag-gold">★ {title.tmdbScore.toFixed(1)} TMDB</span> : null}
             <span className="tag tag-accent">{title.reviews.length} community reviews</span>
             {title.director ? <span className="tag">Dir. {title.director}</span> : null}
           </div>
@@ -217,7 +233,7 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
                     <span className="rn">{t.title}</span>
                     <span className="rm">{t.year}</span>
                   </span>
-                  <span className="rank-score">{(t.communityScore ?? t.imdbRating ?? 0).toFixed(1)}</span>
+                  <span className="rank-score">{(t.communityScore ?? t.tmdbScore ?? t.imdbRating ?? 0).toFixed(1)}</span>
                 </Link>
               ))}
             </div>

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/session';
+import { rateLimit, tooMany, LIMITS } from '@/lib/rate-limit';
 
 const schema = z.object({
   titleId: z.string().min(1),
@@ -14,6 +15,9 @@ const schema = z.object({
 export async function POST(req: Request) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: 'Sign in required' }, { status: 401 });
+
+  const gate = await rateLimit(`review:${user.id}`, LIMITS.review.limit, LIMITS.review.windowMs);
+  if (!gate.ok) return tooMany(gate, `Review limit — ${gate.retryAfter}s baad try karo.`);
 
   const parsed = schema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) {

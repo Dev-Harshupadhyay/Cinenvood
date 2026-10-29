@@ -32,7 +32,7 @@ export default async function HomePage() {
   const topRated = [...catalogue].sort((a, b) => (b.communityScore ?? 0) - (a.communityScore ?? 0)).slice(0, 5);
   const fresh = [...catalogue].sort((a, b) => b.year - a.year).slice(0, 10);
   const hero = featured ?? catalogue[0];
-  const heroScore = hero ? ((hero as any).communityScore ?? hero.imdbRating ?? 0) : 0;
+  const heroScore = hero ? ((hero as any).communityScore ?? (hero as any).tmdbScore ?? hero.imdbRating ?? 0) : 0;
 
   return (
     <>
@@ -85,7 +85,7 @@ export default async function HomePage() {
 
       <div className="container">
         <div className="section" style={{ paddingTop: 26 }}>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <div className="chip-row">
             {genres.slice(0, 8).map((g) => (
               <Link key={g} href={`/movies?genre=${encodeURIComponent(g)}`} className="chip">
                 {g}
@@ -165,7 +165,7 @@ export default async function HomePage() {
                           {t.year} · {t.reviewCount} reviews
                         </span>
                       </span>
-                      <span className="rank-score">{(t.communityScore ?? t.imdbRating ?? 0).toFixed(1)}</span>
+                      <span className="rank-score">{(t.communityScore ?? t.tmdbScore ?? t.imdbRating ?? 0).toFixed(1)}</span>
                     </Link>
                   ))}
                 </div>
@@ -202,6 +202,15 @@ export default async function HomePage() {
                     all
                   </Link>
                 </div>
+                {members.length === 0 ? (
+                  <div className="empty" style={{ padding: '18px 14px' }}>
+                    <b>Pehla member bano</b>
+                    Koi fake profile nahi — sirf real Google accounts. Sign in karke apna pehla verdict likho.
+                    <div style={{ marginTop: 10 }}>
+                      <Link href="/login" className="btn btn-sm btn-primary">Sign in with Google</Link>
+                    </div>
+                  </div>
+                ) : null}
                 {members.map((m) => (
                   <div key={m.id} className="member-row">
                     <span className="avatar" style={{ background: avatarGradient(m.email), width: 32, height: 32, fontSize: 11 }}>

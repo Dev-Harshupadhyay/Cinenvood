@@ -10,6 +10,8 @@ type Review = {
   body: string;
   spoiler: boolean;
   featured?: boolean;
+  editorial?: boolean;
+  authorName?: string | null;
   createdAt: Date | string;
   user: { id: string; name: string | null; email: string; image: string | null; role?: string };
   title: { id: string; slug: string; title: string; year: number; poster: string };
@@ -41,7 +43,7 @@ export default function ReviewCard({ review, authed }: { review: Review; authed:
           {isAdmin ? (
             <div className="av-meta">
               <span className="av-dot" aria-hidden="true" />
-              ADMIN VERDICT · FOUNDER &amp; EDITOR
+              {review.editorial ? 'EDITORIAL VERDICT · CiNEMAsFLiX' : 'ADMIN VERDICT · FOUNDER & EDITOR'}
             </div>
           ) : (
             <div className="rv-time">{timeAgo(review.createdAt)}</div>

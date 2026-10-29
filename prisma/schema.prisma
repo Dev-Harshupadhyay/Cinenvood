@@ -57,6 +57,7 @@ model Title {
   genres     String // JSON array of strings
   director   String?
   cast       String? // JSON array of { name, role }
+  tmdbScore  Float?
   imdbRating Float?
   imdbId     String?
   rtRating   Float?
@@ -84,10 +85,12 @@ model Review {
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
 
-  userId  String
-  titleId String
-  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  title   Title  @relation(fields: [titleId], references: [id], onDelete: Cascade)
+  userId     String?
+  authorName String? // legacy / editorial byline (no account needed)
+  editorial  Boolean @default(false) // written by the site, not a member
+  titleId    String
+  user       User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title      Title   @relation(fields: [titleId], references: [id], onDelete: Cascade)
 
   likes    ReviewLike[]
   comments Comment[]
@@ -133,4 +136,42 @@ model TitleLike {
 
   @@unique([userId, titleId, kind])
   @@index([titleId, kind])
+}
+
+// ── Analytics (first-party, cookie-less) ────────────────────────────────
+model PageView {
+  id        String   @id @default(cuid())
+  path      String
+  titleId   String?
+  referrer  String?
+  device    String? // mobile | tablet | desktop
+  lang      String?
+  guest     Boolean  @default(true)
+  visitor   String? // hashed guest id / user id — never raw PII
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([path])
+  @@index([titleId])
+}
+
+// ── Rate limiting (DB-backed so serverless instances share state) ───────
+model RateLimit {
+  key     String   @id
+  count   Int      @default(0)
+  resetAt DateTime
+
+  @@index([resetAt])
+}
+
+// ── Admin audit trail ───────────────────────────────────────────────────
+model AdminLog {
+  id        String   @id @default(cuid())
+  actor     String // admin email
+  action    String // review.status, title.feature, user.delete ...
+  target    String // affected id
+  meta      String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
 }

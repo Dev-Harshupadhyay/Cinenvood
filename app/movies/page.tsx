@@ -2,7 +2,12 @@ import Link from 'next/link';
 import PosterCard from '@/components/PosterCard';
 import { getCatalogue, getGenres } from '@/lib/queries';
 
-export const metadata = { title: 'Movies' };
+export const metadata = {
+  title: 'Movies',
+  description: 'Browse the CINE·MOOD catalogue — 250+ films with posters, cast, genres and community verdicts.',
+  alternates: { canonical: '/movies' },
+  openGraph: { title: 'Movies · CINE·MOOD', description: 'Browse 250+ films with verdicts and ratings.' }
+};
 
 const SORTS = [
   { key: 'trending', label: 'Trending' },
@@ -46,7 +51,7 @@ export default async function MoviesPage({
         ) : null}
       </div>
 
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
+      <div className="chip-row" style={{ marginBottom: 14 }}>
         <Link href={qs({ genre: 'All' })} className="chip" data-on={genre === 'All'}>
           All genres
         </Link>

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { signOut } from 'next-auth/react';
 import { initials, avatarGradient } from '@/lib/format';
+import GuestChip from './GuestChip';
 
 type Props = {
   user: { name: string | null; email: string; image: string | null; role: 'USER' | 'ADMIN' } | null;
@@ -23,12 +24,10 @@ export default function UserMenu({ user }: Props) {
 
   if (!user) {
     return (
-      <div style={{ display: 'flex', gap: 8 }}>
-        <Link href="/login" className="btn btn-sm btn-ghost">
-          Sign in
-        </Link>
-        <Link href="/login?mode=signup" className="btn btn-sm btn-primary">
-          Join
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        <GuestChip />
+        <Link href="/login" className="btn btn-sm btn-primary">
+          Sign in with Google
         </Link>
       </div>
     );

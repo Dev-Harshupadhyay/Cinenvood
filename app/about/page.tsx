@@ -1,7 +1,11 @@
 import Link from 'next/link';
 import Image from 'next/image';
 
-export const metadata = { title: 'About CINE·MOOD' };
+export const metadata = {
+  title: 'About CINE·MOOD',
+  description: 'How CINE·MOOD works: cinematic discovery, editorial verdicts, community reviews and the stack behind it.',
+  alternates: { canonical: '/about' }
+};
 
 const STATS = [
   { k: '14', l: 'films seeded' },

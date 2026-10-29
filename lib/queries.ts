@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { parseList } from '@/lib/format';
+import { withAuthor, withAuthors } from '@/lib/reviews';
 
 export type PosterTitle = {
   id: string;
@@ -10,6 +11,7 @@ export type PosterTitle = {
   poster: string;
   genres: string[];
   imdbRating: number | null;
+  tmdbScore: number | null;
   reviewCount: number;
   likes: number;
   communityScore: number | null;
@@ -24,6 +26,7 @@ const titleSelect = {
   poster: true,
   genres: true,
   imdbRating: true,
+  tmdbScore: true,
   _count: { select: { reviews: true, likes: true } },
   reviews: { where: { status: 'PUBLISHED' as const }, select: { rating: true } }
 } as const;
@@ -39,6 +42,7 @@ function mapTitle(t: any): PosterTitle {
     poster: t.poster,
     genres: parseList<string>(t.genres),
     imdbRating: t.imdbRating,
+    tmdbScore: t.tmdbScore ?? null,
     reviewCount: t._count?.reviews ?? 0,
     likes: t._count?.likes ?? 0,
     communityScore: ratings.length ? Math.round((ratings.reduce((a, b) => a + b, 0) / ratings.length) * 10) / 10 : null
@@ -93,6 +97,7 @@ export async function getTitleBySlug(slug: string) {
   const ratings = row.reviews.map((r) => r.rating);
   return {
     ...row,
+    reviews: withAuthors(row.reviews) as typeof row.reviews,
     genres: parseList<string>(row.genres),
     cast: parseList<{ name: string; role: string }>(row.cast),
     communityScore: ratings.length ? Math.round((ratings.reduce((a, b) => a + b, 0) / ratings.length) * 10) / 10 : null,
@@ -111,7 +116,7 @@ export async function withViewerLikes<T extends { id: string }>(reviews: T[], vi
 }
 
 export async function getLatestReviews(take = 6, opts: { excludeTitleId?: string; userId?: string } = {}) {
-  return prisma.review.findMany({
+  const rows = await prisma.review.findMany({
     where: {
       status: 'PUBLISHED',
       ...(opts.excludeTitleId ? { titleId: { not: opts.excludeTitleId } } : {}),
@@ -125,10 +130,11 @@ export async function getLatestReviews(take = 6, opts: { excludeTitleId?: string
       _count: { select: { likes: true, comments: true } }
     }
   });
+  return withAuthors(rows);
 }
 
 export async function getTopReviews(take = 5) {
-  return prisma.review.findMany({
+  const rows = await prisma.review.findMany({
     where: { status: 'PUBLISHED' },
     orderBy: [{ featured: 'desc' }, { likes: { _count: 'desc' } }, { createdAt: 'desc' }],
     take,
@@ -138,10 +144,11 @@ export async function getTopReviews(take = 5) {
       _count: { select: { likes: true, comments: true } }
     }
   });
+  return withAuthors(rows);
 }
 
 export async function getReview(id: string) {
-  return prisma.review.findUnique({
+  const row = await prisma.review.findUnique({
     where: { id },
     include: {
       user: { select: { id: true, name: true, email: true, image: true, bio: true } },
@@ -154,6 +161,11 @@ export async function getReview(id: string) {
       }
     }
   });
+  if (!row) return null;
+  return {
+    ...withAuthor(row),
+    comments: row.comments.map((c) => ({ ...c, user: { ...c.user, role: (c.user.role ?? 'USER') as 'USER' | 'ADMIN' } }))
+  };
 }
 
 export async function getGenres() {
@@ -182,4 +194,60 @@ export async function getTopMembers(take = 5) {
     orderBy: { reviews: { _count: 'desc' } }
   });
   return users.filter((u) => u._count.reviews > 0);
+}
+
+/* ── Analytics (admin) ────────────────────────────────────────────────── */
+export type DayPoint = { day: string; views: number; visitors: number };
+export type TopPath = { path: string; views: number };
+
+export async function getAnalytics() {
+  const since30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  const since7 = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+  const [daily, topPaths, topTitles, devices, refs, totals] = await Promise.all([
+    prisma.$queryRaw<DayPoint[]>`
+      SELECT to_char(d.day, 'DD Mon') AS day,
+             COUNT(v.id)::int AS views,
+             COUNT(DISTINCT v.visitor)::int AS visitors
+      FROM generate_series(current_date - interval '13 days', current_date, interval '1 day') AS d(day)
+      LEFT JOIN "cinemood"."PageView" v ON date_trunc('day', v."createdAt") = d.day
+      GROUP BY d.day ORDER BY d.day`,
+    prisma.$queryRaw<TopPath[]>`
+      SELECT path, COUNT(*)::int AS views FROM "cinemood"."PageView"
+      WHERE "createdAt" > ${since30}
+      GROUP BY path ORDER BY views DESC LIMIT 8`,
+    prisma.$queryRaw<{ title: string; slug: string; views: number }[]>`
+      SELECT t.title, t.slug, COUNT(*)::int AS views
+      FROM "cinemood"."PageView" v JOIN "cinemood"."Title" t ON t.id = v."titleId"
+      WHERE v."createdAt" > ${since30}
+      GROUP BY t.title, t.slug ORDER BY views DESC LIMIT 8`,
+    prisma.$queryRaw<{ device: string; views: number }[]>`
+      SELECT COALESCE(device, 'unknown') AS device, COUNT(*)::int AS views
+      FROM "cinemood"."PageView" WHERE "createdAt" > ${since30}
+      GROUP BY device ORDER BY views DESC`,
+    prisma.$queryRaw<{ referrer: string; views: number }[]>`
+      SELECT COALESCE(referrer, 'direct') AS referrer, COUNT(*)::int AS views
+      FROM "cinemood"."PageView" WHERE "createdAt" > ${since30}
+      GROUP BY referrer ORDER BY views DESC LIMIT 6`,
+    prisma.$queryRaw<{ total: number; last7: number; visitors7: number; guests: number; members: number }[]>`
+      SELECT COUNT(*)::int AS total,
+             COUNT(*) FILTER (WHERE "createdAt" > ${since7})::int AS last7,
+             COUNT(DISTINCT visitor) FILTER (WHERE "createdAt" > ${since7})::int AS visitors7,
+             COUNT(*) FILTER (WHERE guest)::int AS guests,
+             COUNT(*) FILTER (WHERE NOT guest)::int AS members
+      FROM "cinemood"."PageView"`
+  ]);
+
+  return {
+    daily,
+    topPaths,
+    topTitles,
+    devices,
+    refs,
+    total: totals[0]?.total ?? 0,
+    last7: totals[0]?.last7 ?? 0,
+    visitors7: totals[0]?.visitors7 ?? 0,
+    guests: totals[0]?.guests ?? 0,
+    members: totals[0]?.members ?? 0
+  };
 }

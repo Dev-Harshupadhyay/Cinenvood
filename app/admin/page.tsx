@@ -3,6 +3,8 @@ import AdminButton from '@/components/AdminButton';
 import TmdbImport from '@/components/TmdbImport';
 import { requireAdmin } from '@/lib/session';
 import { prisma } from '@/lib/prisma';
+import { getAnalytics } from '@/lib/queries';
+import { withAuthors } from '@/lib/reviews';
 import { tmdbConfigured } from '@/lib/tmdb';
 import { avatarGradient, initials, timeAgo } from '@/lib/format';
 
@@ -13,6 +15,8 @@ const TABS = [
   { key: 'moderation', label: 'Moderation' },
   { key: 'titles', label: 'Titles' },
   { key: 'users', label: 'Users' },
+  { key: 'analytics', label: 'Analytics' },
+  { key: 'activity', label: 'Activity log' },
   { key: 'import', label: 'TMDB import' }
 ];
 
@@ -43,7 +47,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
 
   const pendingReviews =
     tab === 'moderation'
-      ? await prisma.review.findMany({
+      ? withAuthors(await prisma.review.findMany({
           where: { status: { in: ['PENDING', 'PUBLISHED'] } },
           orderBy: [{ status: 'asc' }, { createdAt: 'desc' }],
           take: 40,
@@ -52,7 +56,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
             title: { select: { title: true, slug: true, poster: true } },
             _count: { select: { likes: true, comments: true } }
           }
-        })
+        }))
       : [];
 
   const allTitles =
@@ -62,6 +66,15 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
           include: { _count: { select: { reviews: true, likes: true } } }
         })
       : [];
+
+  const analytics = tab === 'analytics' ? await getAnalytics() : null;
+
+  const adminLog =
+    tab === 'activity'
+      ? await prisma.adminLog.findMany({ orderBy: { createdAt: 'desc' }, take: 50 })
+      : [];
+
+  const editorialCount = await prisma.review.count({ where: { editorial: true } });
 
   const allUsers =
     tab === 'users'
@@ -142,6 +155,11 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
             <div className="sv">{likes + comments}</div>
             <div className="sd">{likes} likes · {comments} comments</div>
           </div>
+          <div className="stat-card">
+            <div className="sl">Editorial</div>
+            <div className="sv">{editorialCount}</div>
+            <div className="sd">legacy + admin verdicts</div>
+          </div>
         </div>
 
         {tab === 'overview' ? (
@@ -173,11 +191,12 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
                   <span style={{ minWidth: 0, flex: 1 }}>
                     <span className="mr-name" style={{ display: 'block' }}>
                       {r.headline ?? r.title.title}
-                      {r.user.role === 'ADMIN' ? <span className="mini-badge">ADMIN</span> : null}
+                      {r.user?.role === 'ADMIN' ? <span className="mini-badge">ADMIN</span> : null}
+                      {r.editorial ? <span className="mini-badge">EDITORIAL</span> : null}
                       {r.featured ? <span className="mini-badge">PINNED</span> : null}
                     </span>
                     <span className="mr-meta">
-                      {r.user.name ?? 'Member'} · {r.title.title}
+                      {r.user?.name ?? r.authorName ?? 'CiNEMAsFLiX'} · {r.title.title}
                     </span>
                   </span>
                   <span className="mr-count" style={{ minWidth: 62, textAlign: 'right' }}>
@@ -266,8 +285,8 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
                         </div>
                       </td>
                       <td>
-                        <span className="t-title">{r.user.name ?? 'Member'}</span>
-                        <div className="t-sub">{r.user.email}</div>
+                        <span className="t-title">{r.user?.name ?? r.authorName ?? 'Editorial'}</span>
+                        <div className="t-sub">{r.user?.email ?? 'cinemood editorial · no account'}</div>
                       </td>
                       <td className="mono">{r.rating}/10</td>
                       <td>
@@ -421,6 +440,135 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
                 </tbody>
               </table>
             </div>
+          </div>
+        ) : null}
+
+        {tab === 'analytics' && analytics ? (
+          <>
+            <div className="stat-grid">
+              <div className="stat-card">
+                <div className="sl">Page views</div>
+                <div className="sv">{analytics.total}</div>
+                <div className="sd">{analytics.last7} last 7 days</div>
+              </div>
+              <div className="stat-card">
+                <div className="sl">Visitors · 7d</div>
+                <div className="sv">{analytics.visitors7}</div>
+                <div className="sd">unique, hashed ids</div>
+              </div>
+              <div className="stat-card">
+                <div className="sl">Guests vs members</div>
+                <div className="sv">{analytics.guests}<small style={{ fontSize: 13, opacity: 0.6 }}> / {analytics.members}</small></div>
+                <div className="sd">read-only vs signed in</div>
+              </div>
+              <div className="stat-card">
+                <div className="sl">Catalogue</div>
+                <div className="sv">{titles}</div>
+                <div className="sd">{reviews} reviews total</div>
+              </div>
+            </div>
+
+            <div className="panel">
+              <div className="panel-title">
+                <span>Traffic · last 14 days</span>
+                <span className="faint mono" style={{ fontSize: 10 }}>first-party · no cookies</span>
+              </div>
+              <div className="spark">
+                {analytics.daily.map((d) => {
+                  const max = Math.max(1, ...analytics.daily.map((x) => x.views));
+                  return (
+                    <div key={d.day} className="spark-col" title={`${d.day}: ${d.views} views · ${d.visitors} visitors`}>
+                      <span className="spark-bar" style={{ height: `${Math.max(3, (d.views / max) * 100)}%` }} />
+                      <span className="spark-label">{d.day.split(' ')[0]}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="split" style={{ gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              <div className="panel">
+                <div className="panel-title"><span>Top pages · 30d</span></div>
+                {analytics.topPaths.length === 0 ? (
+                  <p className="faint" style={{ fontSize: 13 }}>Abhi tak koi page view record nahi hua.</p>
+                ) : (
+                  analytics.topPaths.map((p, i) => (
+                    <div key={p.path} className="member-row">
+                      <span className="rank-num" style={{ width: 20 }}>{String(i + 1).padStart(2, '0')}</span>
+                      <span className="mr-name mono" style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.path}</span>
+                      <span className="mr-count">{p.views}</span>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              <div className="panel">
+                <div className="panel-title"><span>Top titles · 30d</span></div>
+                {analytics.topTitles.length === 0 ? (
+                  <p className="faint" style={{ fontSize: 13 }}>Koi title page abhi tak khola nahi gaya.</p>
+                ) : (
+                  analytics.topTitles.map((t, i) => (
+                    <div key={t.slug} className="member-row">
+                      <span className="rank-num" style={{ width: 20 }}>{String(i + 1).padStart(2, '0')}</span>
+                      <Link href={`/movies/${t.slug}`} className="mr-name" style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.title}</Link>
+                      <span className="mr-count">{t.views}</span>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <div className="split" style={{ gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              <div className="panel">
+                <div className="panel-title"><span>Devices · 30d</span></div>
+                {analytics.devices.map((d) => (
+                  <div key={d.device} className="member-row">
+                    <span className="mr-name" style={{ flex: 1 }}>{d.device}</span>
+                    <span className="mr-count">{d.views}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="panel">
+                <div className="panel-title"><span>Referrers · 30d</span></div>
+                {analytics.refs.map((r) => (
+                  <div key={r.referrer} className="member-row">
+                    <span className="mr-name" style={{ flex: 1 }}>{r.referrer}</span>
+                    <span className="mr-count">{r.views}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        ) : null}
+
+        {tab === 'activity' ? (
+          <div className="panel">
+            <div className="panel-title">
+              <span>Admin actions · last 50</span>
+              <span className="faint mono" style={{ fontSize: 10 }}>audit trail</span>
+            </div>
+            {adminLog.length === 0 ? (
+              <p className="faint" style={{ fontSize: 13 }}>Koi admin action record nahi hua — moderation karte hi yahan dikhega.</p>
+            ) : (
+              <div className="t-scroll">
+                <table className="table">
+                  <thead>
+                    <tr><th>When</th><th>Admin</th><th>Action</th><th>Target</th><th>Value</th></tr>
+                  </thead>
+                  <tbody>
+                    {adminLog.map((l) => (
+                      <tr key={l.id}>
+                        <td className="mono t-sub">{timeAgo(l.createdAt)}</td>
+                        <td>{l.actor}</td>
+                        <td className="mono">{l.action}</td>
+                        <td className="mono t-sub">{l.target.slice(0, 10)}…</td>
+                        <td className="mono t-sub">{l.meta ?? '—'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         ) : null}
 

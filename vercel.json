@@ -2,6 +2,8 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
   "buildCommand": "prisma generate && next build",
-  "installCommand": "npm install",
-  "regions": ["bom1"]
+  "installCommand": "npm install --legacy-peer-deps",
+  "regions": [
+    "bom1"
+  ]
 }

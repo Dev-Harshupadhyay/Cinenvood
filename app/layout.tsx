@@ -1,7 +1,10 @@
 import type { Metadata, Viewport } from 'next';
 import { IBM_Plex_Mono, Instrument_Serif, Outfit, Poppins } from 'next/font/google';
 import Link from 'next/link';
+import { Analytics } from '@vercel/analytics/next';
 import Header from '@/components/Header';
+import Tracker from '@/components/Tracker';
+import MobileNav from '@/components/MobileNav';
 import { themeScript } from '@/components/theme-script';
 import './globals.css';
 
@@ -24,8 +27,13 @@ export const metadata: Metadata = {
     title: 'CINE·MOOD — cinematic discovery & community reviews',
     description: 'Cinematic discovery, expert verdicts and community reviews.'
   },
-  twitter: { card: 'summary_large_image' },
-  robots: { index: true, follow: true }
+  twitter: { card: 'summary_large_image', creator: '@cinemood' },
+  robots: { index: true, follow: true, googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 } },
+  alternates: { canonical: '/' },
+  keywords: ['movie reviews', 'film community', 'cinema ratings', 'Hinglish reviews', 'CINE MOOD'],
+  applicationName: 'CINE·MOOD',
+  authors: [{ name: 'Harsh Upadhyay', url: 'https://github.com/Dev-Harshupadhyay' }],
+  category: 'entertainment'
 };
 
 export const viewport: Viewport = {
@@ -42,8 +50,43 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className={`${poppins.variable} ${outfit.variable} ${mono.variable} ${serif.variable}`}>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@graph': [
+                {
+                  '@type': 'WebSite',
+                  '@id': `${siteUrl}/#website`,
+                  url: siteUrl,
+                  name: 'CINE·MOOD',
+                  description: 'Cinematic discovery, editorial verdicts and community reviews.',
+                  inLanguage: ['en', 'hi'],
+                  potentialAction: {
+                    '@type': 'SearchAction',
+                    target: { '@type': 'EntryPoint', urlTemplate: `${siteUrl}/movies?q={search_term_string}` },
+                    'query-input': 'required name=search_term_string'
+                  }
+                },
+                {
+                  '@type': 'Organization',
+                  '@id': `${siteUrl}/#org`,
+                  name: 'CINE·MOOD',
+                  url: siteUrl,
+                  logo: `${siteUrl}/icon.svg`,
+                  founder: { '@type': 'Person', name: 'Harsh Upadhyay' },
+                  sameAs: ['https://github.com/Dev-Harshupadhyay/Cinenvood']
+                }
+              ]
+            })
+          }}
+        />
         <Header />
         <main>{children}</main>
+        <Tracker />
+        <MobileNav />
+        <Analytics />
         <footer className="site-footer">
           <div className="container">
             <div className="footer-grid">

@@ -4,7 +4,11 @@ import { getSessionUser } from '@/lib/session';
 import { getPlatformStats, getTopMembers, getTopReviews, withViewerLikes } from '@/lib/queries';
 import { avatarGradient, initials } from '@/lib/format';
 
-export const metadata = { title: 'Community' };
+export const metadata = {
+  title: 'Community',
+  description: 'Real members, real verdicts — top reviewers, ratings and the people behind them.',
+  alternates: { canonical: '/community' }
+};
 
 export default async function CommunityPage() {
   const sessionUser = await getSessionUser();
@@ -61,6 +65,15 @@ export default async function CommunityPage() {
             <div className="panel-title">
               <span>Top reviewers</span>
             </div>
+            {members.length === 0 ? (
+              <div className="empty" style={{ padding: '16px 12px', fontSize: 13 }}>
+                <b>Abhi koi member nahi</b>
+                Site par sirf real Google logins hain — seeded/bot profiles hata diye gaye hain. Pehla review tumhara ho sakta hai.
+                <div style={{ marginTop: 10 }}>
+                  <Link href="/login" className="btn btn-sm btn-primary">Sign in with Google</Link>
+                </div>
+              </div>
+            ) : null}
             {members.map((m, i) => (
               <div key={m.id} className="member-row">
                 <span className="rank-num">{String(i + 1).padStart(2, '0')}</span>

@@ -59,6 +59,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
       poster: t.poster,
       genres: JSON.parse(t.genres),
       imdbRating: t.imdbRating,
+      tmdbScore: t.tmdbScore ?? null,
       reviewCount: t._count.reviews,
       likes: t._count.likes,
       communityScore: ratings.length ? Math.round((ratings.reduce((a, b) => a + b, 0) / ratings.length) * 10) / 10 : null

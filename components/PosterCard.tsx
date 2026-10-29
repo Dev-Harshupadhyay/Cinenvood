@@ -3,7 +3,7 @@ import type { PosterTitle } from '@/lib/queries';
 import { formatRuntime } from '@/lib/format';
 
 export default function PosterCard({ title, priority = false }: { title: PosterTitle; priority?: boolean }) {
-  const score = title.communityScore ?? title.imdbRating;
+  const score = title.communityScore ?? title.tmdbScore ?? title.imdbRating;
   return (
     <Link href={`/movies/${title.slug}`} className="poster-card">
       <div className="poster-media">

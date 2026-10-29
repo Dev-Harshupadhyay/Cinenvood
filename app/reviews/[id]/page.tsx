@@ -12,8 +12,19 @@ import { prisma } from '@/lib/prisma';
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
   const review = await getReview(id);
-  if (!review) return { title: 'Review not found' };
-  return { title: `${review.title.title} — ${review.rating}/10`, description: review.body.slice(0, 150) };
+  // throw before the shell streams so crawlers get a real 404
+  if (!review) notFound();
+  return {
+    title: `${review.title.title} — ${review.rating}/10`,
+    description: review.body.replace(/\s+/g, ' ').slice(0, 150),
+    alternates: { canonical: `/reviews/${review.id}` },
+    openGraph: {
+      type: 'article',
+      title: `${review.title.title} — ${review.rating}/10`,
+      description: review.body.replace(/\s+/g, ' ').slice(0, 150),
+      images: [review.title.poster]
+    }
+  };
 }
 
 export default async function ReviewPage({ params }: { params: Promise<{ id: string }> }) {
@@ -29,8 +40,33 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
   ]);
   const moreWithLikes = await withViewerLikes(more, sessionUser?.id);
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Review',
+        itemReviewed: { '@type': 'Movie', name: review.title.title, datePublished: String(review.title.year), image: review.title.poster },
+        reviewRating: { '@type': 'Rating', ratingValue: review.rating, bestRating: 10, worstRating: 1 },
+        name: review.headline ?? `${review.title.title} review`,
+        reviewBody: review.body.slice(0, 500),
+        author: { '@type': review.editorial ? 'Organization' : 'Person', name: review.user.name ?? 'CINE·MOOD' },
+        datePublished: new Date(review.createdAt).toISOString(),
+        publisher: { '@type': 'Organization', name: 'CINE·MOOD' }
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000' },
+          { '@type': 'ListItem', position: 2, name: 'Reviews', item: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'}/reviews` },
+          { '@type': 'ListItem', position: 3, name: review.title.title, item: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'}/movies/${review.title.slug}` }
+        ]
+      }
+    ]
+  };
+
   return (
     <div className="container" style={{ paddingTop: 34, paddingBottom: 40 }}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <div className="split">
         <article>
           <Link href={`/movies/${review.title.slug}`} className="link-more" style={{ marginBottom: 14, display: 'inline-flex' }}>
@@ -48,9 +84,13 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
                 )}
               </span>
               <div className="rv-id">
-                <div className="rv-name">{review.user.name ?? 'Member'}</div>
+                <div className="rv-name">
+                  {review.user.name ?? 'Member'}
+                  {review.editorial ? <span className="mini-badge" style={{ marginLeft: 8 }}>EDITORIAL</span> : null}
+                </div>
                 <div className="rv-time">
                   {timeAgo(review.createdAt)} · {review.status.toLowerCase()}
+                  {review.editorial ? ' · written by the site' : ''}
                 </div>
               </div>
               <span className="rv-rating" style={{ fontSize: 22 }}>
