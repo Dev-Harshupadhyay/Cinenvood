@@ -9,6 +9,7 @@ export type CurrentUser = {
   name: string | null;
   email: string;
   image: string | null;
+  googleImage: string | null;
   role: 'USER' | 'ADMIN';
   bio: string | null;
 };
@@ -24,7 +25,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
   if (!session?.user?.email) return null;
   const user = await prisma.user.findUnique({
     where: { email: session.user.email.toLowerCase() },
-    select: { id: true, name: true, email: true, image: true, role: true, bio: true }
+    select: { id: true, name: true, email: true, image: true, googleImage: true, role: true, bio: true }
   });
   return user as CurrentUser | null;
 }

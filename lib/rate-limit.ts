@@ -90,5 +90,6 @@ export const LIMITS = {
   review: { limit: 6, windowMs: 15 * 60_000 },
   comment: { limit: 10, windowMs: 10 * 60_000 },
   like: { limit: 45, windowMs: 60_000 },
-  track: { limit: 200, windowMs: 60_000 }
+  track: { limit: 200, windowMs: 60_000 },
+  profile: { limit: 20, windowMs: 10 * 60_000 }
 } as const;

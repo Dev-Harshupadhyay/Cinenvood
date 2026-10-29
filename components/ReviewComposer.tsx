@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { verdictFor } from '@/lib/verdict';
 
 type Existing = { id: string; rating: number; headline: string | null; body: string; spoiler: boolean } | null;
 
@@ -24,6 +25,7 @@ export default function ReviewComposer({
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const router = useRouter();
+  const verdict = verdictFor(rating);
 
   if (!authed) {
     return (
@@ -92,36 +94,6 @@ export default function ReviewComposer({
       </div>
 
       <div className="field">
-        <label>Your rating</label>
-        <div className="rating-picker">
-          <div className="rating-stars" role="radiogroup" aria-label="Rating out of 10">
-            {Array.from({ length: 10 }).map((_, i) => {
-              const value = i + 1;
-              return (
-                <button
-                  key={value}
-                  type="button"
-                  data-on={value <= rating}
-                  aria-label={`${value} out of 10`}
-                  aria-checked={value === rating}
-                  role="radio"
-                  onClick={() => setRating(value)}
-                >
-                  <svg width="21" height="21" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 3.2l2.7 5.5 6 .9-4.3 4.2 1 6-5.4-2.8L6.6 19.8l1-6L3.3 9.6l6-.9z" />
-                  </svg>
-                </button>
-              );
-            })}
-          </div>
-          <span className="rating-value">
-            {rating}
-            <small>/10</small>
-          </span>
-        </div>
-      </div>
-
-      <div className="field">
         <label htmlFor="headline">Headline</label>
         <input
           id="headline"
@@ -145,6 +117,60 @@ export default function ReviewComposer({
           onChange={(e) => setBody(e.target.value)}
           placeholder="What worked, what didn't, and who should watch it…"
         />
+      </div>
+
+      {/* ── the verdict comes after the words, not before them ───────── */}
+      <div className="score-block" data-tone={verdict.tone}>
+        <div className="score-block-head">
+          <span className="sb-eyebrow">Your verdict</span>
+          <span className="sb-word">{verdict.label}</span>
+        </div>
+
+        <div className="sb-main">
+          <div className="sb-dial" aria-hidden="true">
+            <span className="sb-num">{rating}</span>
+            <span className="sb-of">/10</span>
+          </div>
+
+          <div className="sb-right">
+            <div className="sb-ticks" role="radiogroup" aria-label="Rating out of 10">
+              {Array.from({ length: 10 }).map((_, i) => {
+                const value = i + 1;
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    role="radio"
+                    aria-checked={value === rating}
+                    aria-label={`${value} out of 10`}
+                    className="sb-tick"
+                    data-on={value <= rating}
+                    onClick={() => setRating(value)}
+                  >
+                    <span />
+                  </button>
+                );
+              })}
+            </div>
+            <p className="sb-line">{verdict.line}</p>
+          </div>
+        </div>
+
+        <input
+          className="sb-range"
+          type="range"
+          min={1}
+          max={10}
+          step={1}
+          value={rating}
+          aria-label="Rating out of 10"
+          onChange={(e) => setRating(Number(e.target.value))}
+        />
+        <div className="sb-scale" aria-hidden="true">
+          <span>1 · SKIP</span>
+          <span>5 · TIME-PASS</span>
+          <span>10 · MASTERPIECE</span>
+        </div>
       </div>
 
       <label className="checkbox" style={{ marginBottom: 14 }}>

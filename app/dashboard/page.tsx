@@ -252,7 +252,13 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
           </>
         ) : null}
 
-        {tab === 'profile' ? <ProfileForm name={user.name ?? ''} bio={user.bio ?? ''} /> : null}
+        {tab === 'profile' ? <ProfileForm
+          name={user.name ?? ''}
+          bio={user.bio ?? ''}
+          image={user.image ?? null}
+          googleImage={user.googleImage ?? null}
+          email={user.email}
+        /> : null}
       </div>
     </div>
   );

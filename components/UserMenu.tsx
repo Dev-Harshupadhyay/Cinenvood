@@ -68,6 +68,13 @@ export default function UserMenu({ user }: Props) {
             </svg>
             My reviews
           </Link>
+          <Link href="/dashboard?tab=profile" className="menu-item" onClick={() => setOpen(false)}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" aria-hidden="true">
+              <circle cx="12" cy="8.5" r="3.4" />
+              <path d="M4.8 20c0-3.4 3.2-5.6 7.2-5.6s7.2 2.2 7.2 5.6" />
+            </svg>
+            Edit profile
+          </Link>
           <Link href="/dashboard/watchlist" className="menu-item" onClick={() => setOpen(false)}>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" aria-hidden="true">
               <path d="M6 4h12v16l-6-4-6 4z" />

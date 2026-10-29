@@ -28,13 +28,14 @@ enum TitleStatus {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  name      String?
-  email     String   @unique
-  image     String?
-  role      Role     @default(USER)
-  bio       String?
-  createdAt DateTime @default(now())
+  id          String   @id @default(cuid())
+  name        String?
+  email       String   @unique
+  image       String?
+  googleImage String?
+  role        Role     @default(USER)
+  bio         String?
+  createdAt   DateTime @default(now())
 
   reviews     Review[]
   comments    Comment[]

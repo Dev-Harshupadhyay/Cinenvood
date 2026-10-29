@@ -65,13 +65,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       const image = user.image ?? (profile as { picture?: string } | undefined)?.picture ?? null;
       const provider = account?.provider ?? 'google';
 
+      // A member can override their photo/name in the dashboard — signing in again
+      // must never wipe that. Google's own picture is kept aside so it can be restored.
+      const existing = await prisma.user.findUnique({
+        where: { email },
+        select: { image: true, name: true }
+      });
+
       const dbUser = await prisma.user.upsert({
         where: { email },
-        update: { name: user.name ?? undefined, image: image ?? undefined },
+        update: {
+          googleImage: image ?? undefined,
+          image: existing?.image ?? image ?? undefined,
+          name: existing?.name ?? user.name ?? undefined
+        },
         create: {
           email,
           name: user.name ?? email.split('@')[0],
           image,
+          googleImage: image,
           role: email === ADMIN_EMAIL ? 'ADMIN' : 'USER'
         }
       });

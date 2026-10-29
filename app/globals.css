@@ -2406,3 +2406,154 @@ html, body { max-width: 100%; overflow-x: clip; }
 @media (max-width: 760px) {
   .rv-feature { order: 4; }
 }
+
+/* ══════════════════════════════════════════════════════════════════
+   SCORE BLOCK — review composer ka verdict (review ke NEECHE, rich)
+   ══════════════════════════════════════════════════════════════════ */
+.score-block {
+  --tone: var(--accent);
+  position: relative;
+  margin: 4px 0 16px;
+  padding: 16px 18px 14px;
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--gold) 34%, var(--border));
+  background:
+    radial-gradient(120% 140% at 0% 0%, color-mix(in srgb, var(--gold) 12%, transparent) 0%, transparent 58%),
+    linear-gradient(180deg, color-mix(in srgb, var(--surface) 92%, var(--gold)) 0%, var(--surface) 100%);
+  overflow: hidden;
+}
+.score-block[data-tone='skip'] { --tone: #c2604f; }
+.score-block[data-tone='pass'] { --tone: #c39a45; }
+.score-block[data-tone='go'] { --tone: #46a37c; }
+.score-block[data-tone='must'] { --tone: #d9b45f; }
+.score-block[data-tone='master'] { --tone: #e8c87e; }
+
+.score-block-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  margin-bottom: 12px;
+}
+.sb-eyebrow {
+  font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--faint);
+}
+.sb-word {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+  padding: 4px 10px; border-radius: 999px; white-space: nowrap;
+  color: var(--tone);
+  border: 1px solid color-mix(in srgb, var(--tone) 46%, transparent);
+  background: color-mix(in srgb, var(--tone) 12%, transparent);
+}
+
+.sb-main { display: flex; align-items: center; gap: 18px; }
+.sb-dial {
+  flex: 0 0 auto;
+  width: 84px; height: 84px; border-radius: 50%;
+  display: grid; place-content: center; text-align: center;
+  border: 1px solid color-mix(in srgb, var(--tone) 40%, transparent);
+  background:
+    radial-gradient(circle at 50% 32%, color-mix(in srgb, var(--tone) 22%, transparent) 0%, transparent 68%),
+    var(--bg-soft, color-mix(in srgb, var(--text) 4%, transparent));
+  box-shadow: inset 0 0 0 6px color-mix(in srgb, var(--tone) 7%, transparent);
+}
+.sb-num {
+  font-family: var(--font-display); font-size: 34px; font-weight: 700; line-height: 1;
+  letter-spacing: -0.045em; color: var(--text);
+}
+.sb-of { font-family: var(--font-mono); font-size: 10px; color: var(--faint); letter-spacing: 0.08em; }
+
+.sb-right { flex: 1; min-width: 0; }
+.sb-ticks { display: flex; gap: 5px; margin-bottom: 9px; }
+.sb-tick {
+  flex: 1; height: 22px; padding: 0; border: 0; background: none; cursor: pointer;
+  display: flex; align-items: flex-end;
+}
+.sb-tick > span {
+  display: block; width: 100%; height: 7px; border-radius: 3px;
+  background: color-mix(in srgb, var(--text) 12%, transparent);
+  transition: height 0.16s ease, background 0.16s ease;
+}
+.sb-tick[data-on='true'] > span {
+  height: 18px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--tone) 88%, white 12%) 0%, var(--tone) 100%);
+}
+.sb-tick:hover > span { height: 20px; }
+.sb-line {
+  font-size: 12.5px; line-height: 1.55; color: var(--muted);
+  margin: 0; min-height: 2.6em;
+}
+
+.sb-range {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 24px; margin: 12px 0 2px; background: none; cursor: pointer;
+}
+.sb-range::-webkit-slider-runnable-track {
+  height: 4px; border-radius: 3px;
+  background: linear-gradient(90deg, var(--tone) 0%, color-mix(in srgb, var(--tone) 30%, transparent) 100%);
+}
+.sb-range::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 18px; height: 18px; margin-top: -7px; border-radius: 50%;
+  background: var(--tone); border: 3px solid var(--surface);
+  box-shadow: 0 2px 10px color-mix(in srgb, var(--tone) 55%, transparent);
+}
+.sb-range::-moz-range-track {
+  height: 4px; border-radius: 3px;
+  background: linear-gradient(90deg, var(--tone) 0%, color-mix(in srgb, var(--tone) 30%, transparent) 100%);
+}
+.sb-range::-moz-range-thumb {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--tone); border: 3px solid var(--surface); border: 0;
+}
+
+.sb-scale {
+  display: flex; justify-content: space-between; gap: 8px;
+  font-family: var(--font-mono); font-size: 8.5px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--faint);
+}
+
+@media (max-width: 560px) {
+  .score-block { padding: 14px 14px 12px; }
+  .sb-main { gap: 12px; }
+  .sb-dial { width: 64px; height: 64px; }
+  .sb-num { font-size: 26px; }
+  .sb-line { font-size: 12px; }
+  .sb-scale span:nth-child(2) { display: none; }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   PROFILE — photo editor
+   ══════════════════════════════════════════════════════════════════ */
+.pf-photo {
+  display: flex; gap: 16px; align-items: flex-start;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface-2, color-mix(in srgb, var(--text) 3%, transparent));
+  margin-bottom: 16px;
+}
+.pf-avatar {
+  flex: 0 0 auto;
+  width: 84px; height: 84px; border-radius: 50%;
+  display: grid; place-items: center; overflow: hidden;
+  font-family: var(--font-display); font-size: 26px; font-weight: 700; color: #fff;
+  border: 1px solid color-mix(in srgb, var(--text) 14%, transparent);
+  box-shadow: 0 8px 24px -14px rgba(0, 0, 0, 0.7);
+}
+.pf-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pf-photo-side { flex: 1; min-width: 0; }
+.pf-photo-title {
+  font-family: var(--font-display); font-size: 17px; font-weight: 600; letter-spacing: -0.01em;
+  margin-bottom: 2px;
+}
+.pf-photo-src {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em; color: var(--faint);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 10px;
+}
+.pf-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+.pf-actions .btn[data-on='true'] { opacity: 0.55; }
+.pf-hint { font-size: 11.5px; line-height: 1.6; color: var(--faint); margin: 0; }
+
+@media (max-width: 480px) {
+  .pf-photo { gap: 12px; }
+  .pf-avatar { width: 66px; height: 66px; font-size: 21px; }
+}
