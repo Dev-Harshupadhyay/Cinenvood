@@ -33,18 +33,9 @@ export default function TrailerModal({ title, trailerEn, trailerHi }: Props) {
   return (
     <>
       <div className="trailer-link-group">
-        <a href={watchLink} target="_blank" rel="noreferrer" className="btn trailer-watch-link" aria-label={`Watch ${title} trailer on YouTube`}>
+        <button type="button" className="btn trailer-watch-link" aria-label={`Watch ${title} trailer`} onClick={() => setOpen(true)}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" /></svg>
-          Trailer ↗
-        </a>
-        {hasEn && hasHi ? (
-          <>
-            <a href={youtubeWatch(trailerEn)!} target="_blank" rel="noreferrer" className="btn btn-sm btn-ghost">EN ↗</a>
-            <a href={youtubeWatch(trailerHi)!} target="_blank" rel="noreferrer" className="btn btn-sm btn-ghost">हिंदी ↗</a>
-          </>
-        ) : null}
-        <button type="button" className="btn btn-sm btn-ghost trailer-iframe-button" onClick={() => setOpen(true)}>
-          Play here · iframe
+          Watch Trailer
         </button>
       </div>
 
@@ -58,14 +49,12 @@ export default function TrailerModal({ title, trailerEn, trailerHi }: Props) {
               </div>
               <button type="button" className="btn btn-sm btn-ghost" onClick={() => setOpen(false)} aria-label="Close trailer">✕</button>
             </div>
-            {hasEn && hasHi ? (
-              <div className="chip-row" style={{ padding: '10px 16px 0' }}>
-                <button type="button" className="chip" data-on={lang === 'en'} onClick={() => setLang('en')}>English</button>
-                <button type="button" className="chip" data-on={lang === 'hi'} onClick={() => setLang('hi')}>Hindi</button>
-              </div>
-            ) : null}
             <div className="yt-frame">
               {key ? <YouTubePlayer videoId={key} title={`${title} trailer (${lang})`} fallbackUrl={youtubeWatch(key)!} /> : null}
+            </div>
+            <div className="trailer-language-switch" role="group" aria-label="Trailer language">
+              <button type="button" className="chip" data-on={lang === 'en'} aria-pressed={lang === 'en'} disabled={!hasEn} onClick={() => setLang('en')}>English</button>
+              <button type="button" className="chip" data-on={lang === 'hi'} aria-pressed={lang === 'hi'} disabled={!hasHi} onClick={() => setLang('hi')}>Hindi</button>
             </div>
             <div className="trailer-modal-actions">
               <a href={youtubeWatch(key)!} target="_blank" rel="noreferrer" className="btn btn-sm btn-ghost">Open on YouTube ↗</a>

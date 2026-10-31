@@ -127,10 +127,18 @@ const SEARCH_GENRES: Record<string, { movie: string; tv: string }> = {
   thriller: { movie: '53', tv: '9648' }
 };
 
+function genreWords(query: string) {
+  return query.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, ' ').trim().split(/\s+/);
+}
+
+export function isGenreSearchTerm(query: string) {
+  return genreWords(query).some((word) => Boolean(SEARCH_GENRES[word] ?? SEARCH_GENRES[word.replace(/s$/, '')]));
+}
+
 /** Genre terms such as "drama" also discover popular matching movies and TV series. */
 export async function discoverTitlesByGenre(query: string): Promise<TmdbSearchItem[]> {
   if (!tmdbConfigured()) return [];
-  const words = query.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, ' ').trim().split(/\s+/);
+  const words = genreWords(query);
   const genre = words.map((word) => SEARCH_GENRES[word] ?? SEARCH_GENRES[word.replace(/s$/, '')]).find(Boolean);
   if (!genre) return [];
   const params = (id: string) => ({ with_genres: id, include_adult: 'false', language: 'en-US', sort_by: 'popularity.desc', page: '1' });

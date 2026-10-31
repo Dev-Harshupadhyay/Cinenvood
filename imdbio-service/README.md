@@ -2,7 +2,7 @@
 
 This folder contains a small FastAPI service that runs the Python `imdbio` package. The Next.js app on Vercel calls this service over HTTPS because Vercel's Next.js runtime does not execute Python library code directly.
 
-IMDbio itself does **not** require an IMDb API key. The service token below is only a private shared secret between your Vercel app and this Render service.
+IMDbio itself does **not** require an IMDb API key. The service token below is only a private shared secret between your Vercel app and this Render service. The service pins `imdbio==0.0.9`; `0.0.8` used a plain HTTP client that IMDb's WAF can reject, while `0.0.9` uses a browser-impersonating client for IMDb requests.
 
 ## Deploy on Render (recommended: Blueprint)
 
@@ -35,7 +35,14 @@ The Blueprint config sets:
 7. Add an environment variable named `IMDBIO_SERVICE_TOKEN`. Generate a long random secret in Render (or use Render's Generate Value option if shown). Save it.
 8. Create the service and wait for the deploy to finish.
 
-After deployment, copy the service's public URL, for example `https://cinevood-imdbio.onrender.com`. Check `https://YOUR-RENDER-URL/health`; it should return JSON with `"ok": true`.
+After deployment, copy the service's public URL, for example `https://cinevood-imdbio.onrender.com`. Check `https://YOUR-RENDER-URL/health`; it should return JSON with `"ok": true`. This only confirms the web service is running. To verify IMDb is returning real data, call the authenticated smoke test from a trusted terminal:
+
+```bash
+curl -H "Authorization: Bearer $IMDBIO_SERVICE_TOKEN" \
+  "https://YOUR-RENDER-URL/diagnostics"
+```
+
+A healthy response has `"ok": true`, a non-zero `searchCount`, and `"detailsFound": true`. The diagnostic tests a known title and never returns the service token.
 
 ## Configure the Vercel app
 

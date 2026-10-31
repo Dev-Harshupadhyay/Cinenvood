@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { searchImdbTitles } from '@/lib/imdbio';
-import { discoverTitlesByGenre, searchTitles, type TmdbSearchItem } from '@/lib/tmdb';
+import { discoverTitlesByGenre, isGenreSearchTerm, searchTitles, type TmdbSearchItem } from '@/lib/tmdb';
 import { imgUrl } from '@/lib/tmdb-proxy';
 
 export type UnifiedSearchResult = {
@@ -46,9 +46,7 @@ export async function searchEverywhere(input: string): Promise<UnifiedSearchResu
         status: 'PUBLISHED',
         OR: [
           { title: { contains: q, mode: 'insensitive' } },
-          { overview: { contains: q, mode: 'insensitive' } },
-          { director: { contains: q, mode: 'insensitive' } },
-          // Genres are stored as JSON text; substring matching lets "drama", "action", etc. work as searches too.
+          // Genres are stored as JSON text; search them without flooding title matches with plot-text fallbacks.
           { genres: { contains: q, mode: 'insensitive' } }
         ]
       },
@@ -134,5 +132,9 @@ export async function searchEverywhere(input: string): Promise<UnifiedSearchResu
     return bExact - aExact || (b.popularity ?? b.score ?? 0) - (a.popularity ?? a.score ?? 0);
   });
 
-  return [...local, ...external].slice(0, MAX_RESULTS);
+  const combined = [...local, ...external];
+  const exactTitles = combined.filter((item) => normalize(item.title) === normalizedQuery);
+  // An exact title is a single, canonical hit; don't pad it with fallback matches from other sources.
+  if (exactTitles.length && !isGenreSearchTerm(q)) return exactTitles.slice(0, 1);
+  return combined.slice(0, MAX_RESULTS);
 }
