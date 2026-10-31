@@ -99,7 +99,7 @@ export default async function ReviewsFeed({ searchParams }: { searchParams: Prom
                     src={pick.title.poster}
                     title={pick.title.title}
                     year={pick.title.year}
-                    mediaType={pick.title.mediaType}
+                    mediaType={pick.title.mediaType === 'tv' ? 'tv' : 'movie'}
                     imdbId={pick.title.imdbId}
                     alt=""
                     width={56}
