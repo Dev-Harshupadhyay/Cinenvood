@@ -47,7 +47,7 @@ export async function searchEverywhere(input: string): Promise<UnifiedSearchResu
     return {
       key: `catalogue-${row.id}`, title: row.title, year: row.year, poster: row.poster,
       score: communityScore !== null ? Math.round(communityScore * 10) / 10 : row.imdbRating,
-      mediaType: (row.mediaType === 'tv' ? 'tv' : 'movie') as const, href: `/movies/${row.slug}`,
+      mediaType: (row.mediaType === 'tv' ? 'tv' : 'movie') as 'tv' | 'movie', href: `/movies/${row.slug}`,
       source: 'catalogue' as const
     };
   }).sort((a, b) => {
