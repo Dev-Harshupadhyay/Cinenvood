@@ -3,9 +3,9 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 type Candidate = { key: string; title: string; channel: string; thumbnail: string | null; likelyOfficial?: boolean };
-type Props = { titleId: string; trailerEn?: string | null; trailerHi?: string | null };
+type Props = { titleId: string; titleName?: string; year?: number; trailerEn?: string | null; trailerHi?: string | null };
 
-export default function TrailerForm({ titleId, trailerEn, trailerHi }: Props) {
+export default function TrailerForm({ titleId, titleName = '', year, trailerEn, trailerHi }: Props) {
   const router = useRouter();
   const [en, setEn] = useState(trailerEn ?? '');
   const [hi, setHi] = useState(trailerHi ?? '');
@@ -47,14 +47,19 @@ export default function TrailerForm({ titleId, trailerEn, trailerHi }: Props) {
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? 'YouTube search failed');
       setCandidates({ en: json.en ?? [], hi: json.hi ?? [] });
-      if (!(json.en?.length || json.hi?.length)) setMsg('No trailers found. Paste a YouTube URL or video key instead.');
-      else setMsg('Choose the official trailer you want, then press Save.');
+      const warnings = Array.isArray(json.warnings) ? json.warnings.filter((warning: unknown): warning is string => typeof warning === 'string') : [];
+      if (!(json.en?.length || json.hi?.length)) setMsg('No embeddable results found. Use the YouTube search link below or paste a video URL/key.');
+      else setMsg(warnings.length ? `${warnings.join(' ')} Choose from the results that loaded, then press Save.` : 'Choose the official trailer you want, then press Save.');
     } catch (error) {
       setMsg(error instanceof Error ? error.message : 'YouTube search failed');
     } finally {
       setSaving(false);
     }
   }
+
+  const manualSearchUrl = titleName
+    ? `https://www.youtube.com/results?search_query=${encodeURIComponent(`${titleName} ${year ?? ''} official trailer`)}`
+    : null;
 
   function CandidateList({ label, items, onPick, selected }: { label: string; items: Candidate[]; onPick: (key: string) => void; selected: string }) {
     if (!items.length) return <div className="trailer-no-results">No {label} candidates</div>;
@@ -83,6 +88,7 @@ export default function TrailerForm({ titleId, trailerEn, trailerHi }: Props) {
       <div className="trailer-form-actions">
         <button type="button" className="btn btn-sm btn-primary" onClick={save} disabled={saving}>{saving ? 'Working…' : 'Save trailers'}</button>
         <button type="button" className="btn btn-sm btn-ghost" onClick={searchYouTube} disabled={saving}>Search YouTube API</button>
+        {manualSearchUrl ? <a className="link-more" href={manualSearchUrl} target="_blank" rel="noreferrer">Open YouTube search ↗</a> : null}
         {en || hi ? <a className="link-more" href={`https://www.youtube.com/watch?v=${en || hi}`} target="_blank" rel="noreferrer">Preview ↗</a> : null}
         {msg ? <span className="trailer-message" role="status">{msg}</span> : null}
       </div>

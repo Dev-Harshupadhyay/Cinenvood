@@ -422,7 +422,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
                       <td className="mono">{t._count.reviews}</td>
                       <td className="mono">{t._count.likes}</td>
                       <td>
-                        <TrailerForm titleId={t.id} trailerEn={(t as any).trailerEn} trailerHi={(t as any).trailerHi} />
+                        <TrailerForm titleId={t.id} titleName={t.title} year={t.year} trailerEn={(t as any).trailerEn} trailerHi={(t as any).trailerHi} />
                       </td>
                       <td>
                         <span className={`status status-${t.status === 'PUBLISHED' ? 'published' : 'hidden'}`}>{t.status}</span>

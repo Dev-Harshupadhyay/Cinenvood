@@ -172,6 +172,38 @@ export async function getImdbTitle(imdbId: string): Promise<ImdbTitle | null> {
   };
 }
 
+function normalizeTitle(value: string) {
+  return value.normalize('NFKC').toLowerCase().replace(/[^\p{L}\p{M}\p{N}]+/gu, ' ').trim();
+}
+
+function mediaKindMatches(kind: string | null, mediaType: 'movie' | 'tv') {
+  if (!kind) return true;
+  const normalized = kind.toLowerCase();
+  return mediaType === 'tv'
+    ? normalized === 'tvseries' || normalized === 'tvminiseries'
+    : normalized === 'movie' || normalized === 'tvmovie' || normalized === 'short';
+}
+
+/** Resolve a catalogue title to IMDbio when it lacks a saved IMDb ID. Exact name/year matching only. */
+export async function getImdbTitleForCatalogue(input: {
+  title: string;
+  year: number;
+  mediaType: 'movie' | 'tv';
+  imdbId?: string | null;
+}): Promise<ImdbTitle | null> {
+  if (input.imdbId) return getImdbTitle(input.imdbId);
+  const query = `${input.title} ${input.year > 0 ? input.year : ''}`.trim();
+  const candidates = await searchImdbTitles(query);
+  const wanted = normalizeTitle(input.title);
+  if (!wanted) return null;
+  const match = candidates
+    .filter((candidate) => mediaKindMatches(candidate.kind, input.mediaType))
+    .filter((candidate) => normalizeTitle(candidate.title) === wanted || normalizeTitle(candidate.titleLocalized ?? '') === wanted)
+    .filter((candidate) => !input.year || !candidate.year || Math.abs(candidate.year - input.year) <= 1)
+    .sort((a, b) => Number(b.year === input.year) - Number(a.year === input.year))[0];
+  return match ? getImdbTitle(match.imdbId) : null;
+}
+
 export async function getImdbReviews(imdbId: string): Promise<ImdbReview[]> {
   if (!/^tt\d+$/.test(imdbId)) return [];
   const data = await imdbFetch(`/title/${encodeURIComponent(imdbId)}/reviews`, 1800);

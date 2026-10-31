@@ -26,11 +26,12 @@ type JarvisRecord = {
 };
 
 function normalize(value: string) {
-  return value.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  return value.normalize('NFKC').toLowerCase().replace(/[^\p{L}\p{M}\p{N}]+/gu, ' ').trim();
 }
 
 function mediaTypeForImdbKind(kind: string | null) {
-  return kind === 'tvSeries' || kind === 'tvMiniSeries' ? 'tv' : 'movie';
+  const normalized = kind?.toLowerCase();
+  return normalized === 'tvseries' || normalized === 'tvminiseries' ? 'tv' : 'movie';
 }
 
 async function resolveImdbId(titleId: string | undefined, requestedImdbId: string | undefined) {
@@ -41,7 +42,13 @@ async function resolveImdbId(titleId: string | undefined, requestedImdbId: strin
   if (requestedImdbId || title.imdbId) return { title, imdbId: requestedImdbId ?? title.imdbId };
 
   const candidates = await searchImdbTitles(`${title.title} ${title.year}`).catch(() => []);
-  const exact = candidates.find((candidate) => [candidate.title, candidate.titleLocalized].some((name) => name && normalize(name) === normalize(title.title)) && (title.year === 0 || candidate.year === title.year || candidate.year === null));
+  const wanted = normalize(title.title);
+  const exact = wanted ? candidates.find((candidate) => {
+    const titleMatches = [candidate.title, candidate.titleLocalized].some((name) => name && normalize(name) === wanted);
+    const typeMatches = !candidate.kind || mediaTypeForImdbKind(candidate.kind) === title.mediaType;
+    const yearMatches = !title.year || !candidate.year || Math.abs(candidate.year - title.year) <= 1;
+    return titleMatches && typeMatches && yearMatches;
+  }) : undefined;
   return { title, imdbId: exact?.imdbId ?? null };
 }
 
@@ -133,7 +140,7 @@ async function hasManualReview(titleId: string, ownerId: string | null) {
 
 async function getJarvisRecord(titleId: string): Promise<JarvisRecord | null> {
   return prisma.review.findFirst({
-    where: { titleId, status: 'PUBLISHED', editorial: true, authorName: 'Jarvis', sourceLang: 'jarvis-auto' },
+    where: { titleId, status: 'PUBLISHED', editorial: true, authorName: 'Jarvis', sourceLang: 'jarvis-auto-v2' },
     select: { id: true, rating: true, headline: true, body: true, headlineHi: true, bodyHi: true, headlineEn: true, bodyEn: true, createdAt: true }
   });
 }
@@ -193,10 +200,31 @@ export async function POST(req: Request) {
       if (ownerReview || editorialReviews.some((item) => item.authorName?.trim().toLowerCase() !== 'jarvis')) return { kind: 'manual' as const };
 
       const prior = await tx.review.findFirst({
-        where: { titleId, status: 'PUBLISHED', editorial: true, authorName: 'Jarvis', sourceLang: 'jarvis-auto' },
+        where: { titleId, status: 'PUBLISHED', editorial: true, authorName: 'Jarvis', sourceLang: 'jarvis-auto-v2' },
         select: { id: true, rating: true, headline: true, body: true, headlineHi: true, bodyHi: true, headlineEn: true, bodyEn: true, createdAt: true }
       });
       if (prior) return { kind: 'review' as const, review: prior, created: false };
+      const legacy = await tx.review.findFirst({
+        where: { titleId, status: 'PUBLISHED', editorial: true, authorName: 'Jarvis', sourceLang: 'jarvis-auto' },
+        select: { id: true }
+      });
+      if (legacy) {
+        const refreshed = await tx.review.update({
+          where: { id: legacy.id },
+          data: {
+            rating: score,
+            headline: draft.headlineHi,
+            body: draft.bodyHi,
+            headlineHi: draft.headlineHi,
+            bodyHi: draft.bodyHi,
+            headlineEn: draft.headlineEn,
+            bodyEn: draft.bodyEn,
+            sourceLang: 'jarvis-auto-v2'
+          },
+          select: { id: true, rating: true, headline: true, body: true, headlineHi: true, bodyHi: true, headlineEn: true, bodyEn: true, createdAt: true }
+        });
+        return { kind: 'review' as const, review: refreshed, created: true };
+      }
       const created = await tx.review.create({
         data: {
           titleId,
@@ -207,7 +235,7 @@ export async function POST(req: Request) {
           bodyHi: draft.bodyHi,
           headlineEn: draft.headlineEn,
           bodyEn: draft.bodyEn,
-          sourceLang: 'jarvis-auto',
+          sourceLang: 'jarvis-auto-v2',
           editorial: true,
           authorName: 'Jarvis',
           status: 'PUBLISHED',

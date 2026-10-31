@@ -12,7 +12,7 @@ The repository now has a root-level `render.yaml`, which Render can detect.
 2. Open [Render Dashboard](https://dashboard.render.com/).
 3. Click **New +** → **Blueprint**.
 4. Connect the GitHub repository `Dev-Harshupadhyay/Cinenvood`.
-5. Select the branch containing `render.yaml` (currently `feat/imdbio-youtube-trailers`, unless you merge it first).
+5. Select the GitHub branch that contains `render.yaml`.
 6. Render reads the root `render.yaml` and creates the `cinevood-imdbio` web service. Review the settings and apply.
 
 The Blueprint config sets:

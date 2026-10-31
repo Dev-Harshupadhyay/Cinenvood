@@ -136,7 +136,7 @@ export async function getLatestReviews(take = 6, opts: { excludeTitleId?: string
   const rows = await prisma.review.findMany({
     where: {
       status: 'PUBLISHED',
-      OR: [{ sourceLang: null }, { sourceLang: { not: 'jarvis-auto' } }],
+      OR: [{ sourceLang: null }, { sourceLang: { notIn: ['jarvis-auto', 'jarvis-auto-v2'] } }],
       ...(opts.excludeTitleId ? { titleId: { not: opts.excludeTitleId } } : {}),
       ...(opts.userId ? { userId: opts.userId } : {})
     },
@@ -153,7 +153,7 @@ export async function getLatestReviews(take = 6, opts: { excludeTitleId?: string
 
 export async function getTopReviews(take = 5) {
   const rows = await prisma.review.findMany({
-    where: { status: 'PUBLISHED', OR: [{ sourceLang: null }, { sourceLang: { not: 'jarvis-auto' } }] },
+    where: { status: 'PUBLISHED', OR: [{ sourceLang: null }, { sourceLang: { notIn: ['jarvis-auto', 'jarvis-auto-v2'] } }] },
     orderBy: [{ homeSpot: 'desc' }, { editorial: 'desc' }, { featured: 'desc' }, { likes: { _count: 'desc' } }, { createdAt: 'desc' }],
     take,
     include: {
@@ -197,7 +197,7 @@ export async function getPlatformStats() {
   const [users, titles, reviews, comments, likes, watchlists] = await Promise.all([
     prisma.user.count(),
     prisma.title.count({ where: { status: 'PUBLISHED' } }),
-    prisma.review.count({ where: { status: 'PUBLISHED', OR: [{ sourceLang: null }, { sourceLang: { not: 'jarvis-auto' } }] } }),
+    prisma.review.count({ where: { status: 'PUBLISHED', OR: [{ sourceLang: null }, { sourceLang: { notIn: ['jarvis-auto', 'jarvis-auto-v2'] } }] } }),
     prisma.comment.count({ where: { status: 'PUBLISHED' } }),
     prisma.reviewLike.count(),
     prisma.titleLike.count({ where: { kind: 'WATCHLIST' } })

@@ -15,7 +15,7 @@ import EditionSwitch from '@/components/EditionSwitch';
 import TrailerModal from '@/components/TrailerModal';
 import { avatarGradient, formatRuntime, initials } from '@/lib/format';
 import { prisma } from '@/lib/prisma';
-import { getImdbReviews, getImdbTitle } from '@/lib/imdbio';
+import { getImdbReviews, getImdbTitleForCatalogue } from '@/lib/imdbio';
 import ImdbTrailer from '@/components/ImdbTrailer';
 import JarvisAutoReview from '@/components/JarvisAutoReview';
 
@@ -37,9 +37,13 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
   const [title, sessionUser, edition] = await Promise.all([getTitleBySlug(slug), getSessionUser(), getEdition()]);
   if (!title) notFound();
 
-  const [imdbData, imdbReviewResults] = title.imdbId
-    ? await Promise.all([getImdbTitle(title.imdbId), getImdbReviews(title.imdbId)])
-    : [null, []];
+  const imdbData = await getImdbTitleForCatalogue({
+    title: title.title,
+    year: title.year,
+    mediaType: title.mediaType === 'tv' ? 'tv' : 'movie',
+    imdbId: title.imdbId
+  });
+  const imdbReviewResults = imdbData ? await getImdbReviews(imdbData.imdbId) : [];
   const imdbReviews = imdbReviewResults.filter((review) => review.spoiler === false);
   const imdbRating = imdbData?.rating ?? (title.imdbId ? title.imdbRating : null);
   const imdbPoster = imdbData?.coverUrl || title.poster;
@@ -62,7 +66,7 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
     ...r,
     title: { id: title.id, slug: title.slug, title: title.title, year: title.year, poster: title.poster, imdbRating: title.imdbRating }
   }));
-  const reviewsForCards = allReviewsForCards.filter((review) => review.sourceLang !== 'jarvis-auto');
+  const reviewsForCards = allReviewsForCards.filter((review) => !review.sourceLang?.startsWith('jarvis-auto'));
   const myReview = sessionUser ? reviewsForCards.find((r) => r.user?.email === sessionUser.email) ?? null : null;
   const related = similar.filter((t) => t.id !== title.id).slice(0, 5);
   const score = title.communityScore ?? imdbRating ?? title.tmdbScore ?? 0;
