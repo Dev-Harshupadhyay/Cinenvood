@@ -49,7 +49,7 @@ export default function ReviewCard({
   const verified = isEditorial || isAdmin;
   // Jarvis = the house AI. Uska apna chip aur glyph, taaki AI-written review dikh jaaye.
   const isJarvis = isEditorial && byline.trim().toLowerCase() === 'jarvis';
-  const isAutoJarvis = isJarvis && review.sourceLang === 'jarvis-auto';
+  const isAutoJarvis = isJarvis && review.sourceLang?.startsWith('jarvis-auto');
   const supporters = review._count.likes;
 
   return (

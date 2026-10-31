@@ -79,7 +79,7 @@ export function editionOf(review: ReviewLike, edition: Edition): EditionedReview
   const enBody = review.bodyEn?.trim() || null;
   const hiBody = review.bodyHi?.trim() || (body ? body : null);
 
-  const original: ReviewLang = review.sourceLang === 'jarvis-auto'
+  const original: ReviewLang = review.sourceLang?.startsWith('jarvis-auto')
     ? 'hinglish'
     : (review.sourceLang as ReviewLang | undefined) ?? detectLang(body);
 
