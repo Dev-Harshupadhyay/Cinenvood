@@ -41,7 +41,7 @@ That is a deliberate product decision — it keeps the site legal, advertiser-sa
 | **Dashboard** | Stats (reviews, likes received, comments, watchlist), my reviews, watchlist, editable profile |
 | **Admin panel** | Responsive control room: KPIs, moderation, catalogue, members, evidence-based Jarvis editorial summaries, TMDB import, YouTube trailer search, analytics and audit trail — password-only admin session |
 | **Trailers** | On-demand YouTube trailer discovery by title + year, embeddable-result filtering, an in-page player and YouTube search fallback; saved English/Hindi links remain supported |
-| **Jarvis** | Ask grounded movie questions, draft an editable review with explicit consent, or generate/cache a public bilingual AI editorial review in the owner's style when no owner-authored manual review exists; uses IMDbio title facts and available non-spoiler reviews |
+| **Jarvis** | Ask grounded movie questions, draft an editable review with explicit consent, or click **Jarvis Review** on a search result/title page to generate and cache a bilingual owner-style editorial review with a distinct Jarvis verdict score; no catalogue-wide batch generation; uses IMDbio title facts and available non-spoiler reviews |
 | **Auth** | Google OAuth for members; separate `ADMIN_EMAIL` + `ADMIN_PASSWORD` sign-in at `/admin/login`; a Google session alone never grants admin access |
 | **Guest mode** | Signed-out visitors get a `localStorage` guest id and **read-only** access — browse catalogue and read every review, no account created |
 | **Rate limiting** | Two-layer (instance memory + shared Postgres counter) on search, admin pages/actions, sign-in, reviews, comments, likes and analytics beacons — 429 + `Retry-After`, no bypass flag |

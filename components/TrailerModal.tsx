@@ -33,9 +33,9 @@ export default function TrailerModal({ title, trailerEn, trailerHi }: Props) {
   return (
     <>
       <div className="trailer-link-group">
-        <a href={watchLink} target="_blank" rel="noreferrer" className="btn btn-primary trailer-watch-link">
+        <a href={watchLink} target="_blank" rel="noreferrer" className="btn trailer-watch-link" aria-label={`Watch ${title} trailer on YouTube`}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" /></svg>
-          Watch trailer on YouTube ↗
+          Trailer ↗
         </a>
         {hasEn && hasHi ? (
           <>

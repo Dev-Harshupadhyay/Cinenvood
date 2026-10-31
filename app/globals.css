@@ -1211,6 +1211,39 @@ p { margin: 0; }
   position: relative;
 }
 .detail-poster img { width: 100%; height: auto; aspect-ratio: 2 / 3; object-fit: cover; display: block; }
+
+/* A restrained red cinema accent, scoped to movie/series details only. */
+.movie-detail-page .backdrop-strip { opacity: .25; filter: saturate(1.28); }
+.movie-detail-page .backdrop-strip::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, rgba(8, 7, 9, .06), rgba(105, 9, 24, .2) 57%, rgba(8, 7, 10, .62));
+}
+.movie-detail-page .detail-poster {
+  border-color: rgba(216, 35, 55, .52);
+  box-shadow: 0 18px 54px rgba(122, 8, 26, .25), 0 0 0 1px rgba(216, 35, 55, .12);
+}
+.movie-detail-page .detail-intro > .eyebrow { color: #f05b68; }
+.movie-detail-page .detail-meta .tag-accent {
+  border-color: rgba(216, 35, 55, .42);
+  color: #ff8993;
+  background: rgba(122, 8, 26, .19);
+}
+.movie-detail-page .trailer-watch-link,
+.movie-detail-page .trailer-search-button {
+  color: #fff;
+  border-color: #c9162d;
+  background: #c9162d;
+  box-shadow: 0 7px 24px rgba(201, 22, 45, .24);
+}
+.movie-detail-page .trailer-watch-link:hover,
+.movie-detail-page .trailer-search-button:hover {
+  color: #fff;
+  border-color: #e1263d;
+  background: #e1263d;
+  transform: translateY(-1px);
+}
 .detail-title { font-size: clamp(28px, 4.4vw, 50px); letter-spacing: -0.04em; margin-bottom: 10px; }
 .detail-meta { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 14px; }
 .detail-overview { color: var(--muted); font-size: var(--fs-md); line-height: 1.7; max-width: 72ch; margin-bottom: 18px; }
@@ -2980,6 +3013,7 @@ html, body { max-width: 100%; overflow-x: clip; }
 .search-results-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(145px,1fr)); gap:16px; }
 .search-result-card { min-width:0; color:var(--text); animation:searchResultIn .28s both; animation-delay:calc(var(--result-index,0) * 14ms); transition:transform .2s var(--ease); }
 .search-result-card:hover { transform:translateY(-4px); }
+.search-result-link { display:block; color:inherit; text-decoration:none; }
 .search-result-poster { aspect-ratio:2/3; overflow:hidden; position:relative; border:1px solid var(--border); border-radius:var(--radius); background:var(--surface-2); box-shadow:var(--shadow-soft); }
 .search-result-poster img { width:100%; height:100%; display:block; object-fit:cover; transition:transform .35s var(--ease); }
 .search-result-card:hover .search-result-poster img { transform:scale(1.035); }
@@ -3121,3 +3155,6 @@ html, body { max-width: 100%; overflow-x: clip; }
 .jarvis-auto-review-copy { margin: 0; white-space: pre-wrap; line-height: 1.8; color: var(--text); }
 .jarvis-auto-review-disclosure { margin: 0; padding-top: 11px; border-top: 1px solid var(--border); color: var(--faint); font-size: 10px; line-height: 1.55; }
 .jarvis-auto-review--compact { padding: 15px; gap: 10px; }
+.search-result-card .jarvis-auto-review--compact { margin-top: 9px; padding: 10px; gap: 8px; }
+.search-result-card .jarvis-auto-review--compact .panel-title { align-items: flex-start; font-size: 10px; }
+.jarvis-review-trigger { justify-self: start; }
