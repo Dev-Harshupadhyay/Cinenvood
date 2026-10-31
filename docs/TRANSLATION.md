@@ -61,28 +61,16 @@ Gemini       → "It was decent, but nowhere near Train to Busan."  ← correct
 
 ---
 
-## 5. House ghostwriter (AI drafts in the author's voice)
+## 5. Jarvis: grounded movie intelligence and editorial summaries
 
-`lib/ghostwrite.ts` + `prisma/ghostwrite.mjs` read the last three editorial reviews as
-few-shot examples and produce **one review in both editions at once**, so the English
-and Hinglish versions carry the same opinions and paragraph order.
+`/jarvis` uses the existing Gemini integration with retrieval from one published Cinevood title, its catalogue metadata, optional live IMDbio details/reviews, and up to ten published non-spoiler community reviews. Answers cite the source IDs returned by the API. If a fact or review evidence is missing, Jarvis is instructed to say it cannot verify it; it does not use private profile data or hidden/spoiler reviews. This is grounded prompting/retrieval, not model fine-tuning or training.
 
-Style rules baked into the prompt:
-
-* opens with an honest verdict, often compared to a genre-mate
-* what worked → what didn't → "Overall, agar tum … pasand karte ho to …"
-* English film vocabulary inside Hinglish, 4 short paragraphs, 320–480 words
-* no invented director/cast/plot facts — only what the FILM block contains
-* headlines are complete thoughts, never a "…"
-
-Usage:
+In the product, **/admin → Editorial → Jarvis review summary** can prepare a bilingual synthesis only when that title has at least one published non-spoiler Cinevood community review. The generated text is a summary of those actual opinions, not a fabricated first-person review. An admin must verify and explicitly publish it. The command-line helper follows the same evidence requirement and creates a new editorial record rather than overwriting an existing review.
 
 ```bash
-node prisma/ghostwrite.mjs --title colony-2026                      # print only
-node prisma/ghostwrite.mjs --title colony-2026 --notes "3D show"    # steer it
-node prisma/ghostwrite.mjs --title colony-2026 --save               # publish as editorial
+node prisma/ghostwrite.mjs --title colony-2026
+node prisma/ghostwrite.mjs --title colony-2026 --notes "summarize the pacing opinions"
+node prisma/ghostwrite.mjs --title colony-2026 --save
 ```
 
-In the product: **/admin → Editorial verdicts → ✍︎ AI draft — Hinglish + English**
-(`POST /api/admin/ghostwrite`, ADMIN only, 8 drafts / 10 min). The draft fills the form;
-nothing is published until the admin presses Publish.
+The assistant endpoint is `POST /api/jarvis`, rate-limited per client IP. Gemini requires the server-only `GEMINI_API_KEY`; without it the feature reports that it is unavailable rather than returning fabricated answers.

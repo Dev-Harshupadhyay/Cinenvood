@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
+import YouTubePlayer from '@/components/YouTubePlayer';
 
 type Props = { title: string; trailerEn?: string | null; trailerHi?: string | null; poster?: string };
 
@@ -8,14 +9,9 @@ const youtubeWatch = (key?: string | null) => key ? `https://www.youtube.com/wat
 export default function TrailerModal({ title, trailerEn, trailerHi }: Props) {
   const [open, setOpen] = useState(false);
   const [lang, setLang] = useState<'en' | 'hi'>('en');
-  const [origin, setOrigin] = useState('');
   const hasEn = Boolean(trailerEn);
   const hasHi = Boolean(trailerHi);
   const hasAny = hasEn || hasHi;
-
-  useEffect(() => {
-    setOrigin(window.location.origin);
-  }, []);
 
   useEffect(() => {
     if (!hasEn && hasHi) setLang('hi');
@@ -31,9 +27,6 @@ export default function TrailerModal({ title, trailerEn, trailerHi }: Props) {
 
   const key = lang === 'hi' ? trailerHi || trailerEn : trailerEn || trailerHi;
   const watchLink = youtubeWatch(trailerEn || trailerHi);
-  const embedUrl = key
-    ? `https://www.youtube-nocookie.com/embed/${encodeURIComponent(key)}?autoplay=1&rel=0&enablejsapi=1${origin ? `&origin=${encodeURIComponent(origin)}` : ''}`
-    : null;
 
   if (!hasAny || !watchLink) return null;
 
@@ -72,16 +65,7 @@ export default function TrailerModal({ title, trailerEn, trailerHi }: Props) {
               </div>
             ) : null}
             <div className="yt-frame">
-              {embedUrl ? (
-                <iframe
-                  src={embedUrl}
-                  title={`${title} trailer (${lang})`}
-                  allow="autoplay; encrypted-media; picture-in-picture; web-share"
-                  allowFullScreen
-                  loading="lazy"
-                  referrerPolicy="strict-origin-when-cross-origin"
-                />
-              ) : null}
+              {key ? <YouTubePlayer videoId={key} title={`${title} trailer (${lang})`} fallbackUrl={youtubeWatch(key)!} /> : null}
             </div>
             <div className="trailer-modal-actions">
               <a href={youtubeWatch(key)!} target="_blank" rel="noreferrer" className="btn btn-sm btn-ghost">Open on YouTube ↗</a>

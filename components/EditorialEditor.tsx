@@ -97,7 +97,7 @@ export default function EditorialEditor({ titles, rows }: { titles: TitleOption[
         bodyEn: d.bodyEn ?? '',
         jarvis: true
       }));
-      setMessage('Draft ready — padho, edit karo, phir Publish dabao');
+      setMessage('Evidence-based summary ready — sources verify karke hi publish karo');
     } catch (e) {
       setMessage(e instanceof Error ? e.message : 'Draft failed');
     } finally {
@@ -139,13 +139,13 @@ export default function EditorialEditor({ titles, rows }: { titles: TitleOption[
             </select>
 
             <div className="field" style={{ margin: 0 }}>
-              <label>Notes for the AI draft (optional)</label>
+              <label>Editor notes for the evidence-based summary (optional)</label>
               <input
                 className="input"
                 value={notes}
                 maxLength={400}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="e.g. theatre mein dekhi, 3D show — villain weak tha"
+                placeholder="e.g. summarize the pacing concerns raised in the reviews"
               />
             </div>
 
@@ -156,7 +156,7 @@ export default function EditorialEditor({ titles, rows }: { titles: TitleOption[
               disabled={drafting || !form.titleId}
               style={{ justifySelf: 'start' }}
             >
-              {drafting ? 'Jarvis likh raha hai…' : '✦ Jarvis draft — Hinglish + English'}
+              {drafting ? 'Jarvis likh raha hai…' : '✦ Jarvis review summary — Hinglish + English'}
             </button>
           </div>
         ) : null}
@@ -192,9 +192,9 @@ export default function EditorialEditor({ titles, rows }: { titles: TitleOption[
             <input type="checkbox" checked={form.featured} onChange={(e) => setForm({ ...form, featured: e.target.checked })} />
             Pin as verdict
           </label>
-          <label className="check" title="Byline 'Review by Jarvis' dikhegi — AI-written drafts ke liye">
+          <label className="check" title="Byline 'Review by Jarvis' dikhegi — AI-generated summary ko editor review kare">
             <input type="checkbox" checked={form.jarvis} onChange={(e) => setForm({ ...form, jarvis: e.target.checked })} />
-            Jarvis (AI) ne likha
+            Jarvis AI summary
           </label>
         </div>
 

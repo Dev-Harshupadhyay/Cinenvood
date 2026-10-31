@@ -1,5 +1,12 @@
 import type { Metadata, Viewport } from 'next';
-import { IBM_Plex_Mono, Instrument_Serif, Outfit, Poppins } from 'next/font/google';
+import '@fontsource/poppins/400.css';
+import '@fontsource/poppins/500.css';
+import '@fontsource/poppins/600.css';
+import '@fontsource/poppins/700.css';
+import '@fontsource-variable/outfit';
+import '@fontsource/ibm-plex-mono/400.css';
+import '@fontsource/ibm-plex-mono/500.css';
+import '@fontsource/instrument-serif/400.css';
 import Link from 'next/link';
 import { Analytics } from '@vercel/analytics/next';
 import Header from '@/components/Header';
@@ -8,18 +15,13 @@ import MobileNav from '@/components/MobileNav';
 import { themeScript } from '@/components/theme-script';
 import './globals.css';
 
-const poppins = Poppins({ subsets: ['latin'], weight: ['400', '500', '600', '700'], variable: '--font-poppins', display: 'swap' });
-const outfit = Outfit({ subsets: ['latin'], weight: ['500', '600', '700'], variable: '--font-outfit', display: 'swap' });
-const mono = IBM_Plex_Mono({ subsets: ['latin'], weight: ['400', '500'], variable: '--font-mono-plex', display: 'swap' });
-const serif = Instrument_Serif({ subsets: ['latin'], weight: ['400'], variable: '--font-serif', display: 'swap' });
-
 import { siteUrl } from '@/lib/site';
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: { default: 'CINE·MOOD — cinematic discovery & community reviews', template: '%s · CINE·MOOD' },
   description:
-    'CineMood is a premium film discovery and review platform — cinematic catalogue, community verdicts, ratings, likes and comments. Built on Next.js.',
+    'CINE·MOOD is a film discovery and review platform with IMDbio metadata, community verdicts, official YouTube trailers and grounded Jarvis movie Q&A.',
   openGraph: {
     type: 'website',
     url: siteUrl,
@@ -49,7 +51,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className={`${poppins.variable} ${outfit.variable} ${mono.variable} ${serif.variable}`}>
+      <body>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -123,7 +125,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </div>
             <div className="footer-bottom">
               <span>© {new Date().getFullYear()} CINE·MOOD · reviews only, no downloads</span>
-              <span>Next.js · Prisma · Auth.js · TMDB metadata</span>
+              <span>Next.js · Prisma · Auth.js · TMDB + IMDbio metadata</span>
             </div>
           </div>
         </footer>

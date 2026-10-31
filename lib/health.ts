@@ -15,7 +15,11 @@ const ENV_KEYS: [string, string, boolean][] = [
   ['AUTH_GOOGLE_ID', 'Google client id', false],
   ['AUTH_GOOGLE_SECRET', 'Google client secret', false],
   ['TMDB_API_KEY', 'TMDB key', false],
-  ['YOUTUBE_API_KEY', 'YouTube Data API v3 key', false]
+  ['OMDB_API_KEY', 'OMDb key', false],
+  ['IMDBIO_API_URL', 'IMDbio service URL', false],
+  ['IMDBIO_API_TOKEN', 'IMDbio service token', false],
+  ['YOUTUBE_API_KEY', 'YouTube Data API v3 key', false],
+  ['GEMINI_API_KEY', 'Gemini AI key', false]
 ];
 
 export async function runHealth() {

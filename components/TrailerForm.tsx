@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-type Candidate = { key: string; title: string; channel: string; thumbnail: string | null };
+type Candidate = { key: string; title: string; channel: string; thumbnail: string | null; likelyOfficial?: boolean };
 type Props = { titleId: string; trailerEn?: string | null; trailerHi?: string | null };
 
 export default function TrailerForm({ titleId, trailerEn, trailerHi }: Props) {
@@ -65,7 +65,7 @@ export default function TrailerForm({ titleId, trailerEn, trailerHi }: Props) {
           {items.map((item) => (
             <button key={item.key} type="button" className="trailer-candidate" data-selected={selected === item.key} onClick={() => onPick(item.key)}>
               {item.thumbnail ? <img src={item.thumbnail} alt="" loading="lazy" /> : <span className="trailer-thumb-fallback">▶</span>}
-              <span><b>{item.title}</b><small>{item.channel}</small></span>
+              <span><b>{item.title}</b><small>{item.channel}{item.likelyOfficial ? ' · likely official' : ''}</small></span>
               <span className="trailer-select" aria-hidden="true">{selected === item.key ? '✓' : '+'}</span>
             </button>
           ))}

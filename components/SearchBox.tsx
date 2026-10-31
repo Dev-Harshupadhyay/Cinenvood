@@ -12,7 +12,7 @@ type Item = {
   poster: string;
   score: number | null;
   mediaType: 'movie' | 'tv';
-  source: 'catalogue' | 'tmdb';
+  source: 'catalogue' | 'imdb' | 'tmdb';
 };
 
 export default function SearchBox({ placeholder = 'Search movies, series…' }: { placeholder?: string } = {}) {

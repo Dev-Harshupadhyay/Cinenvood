@@ -4,7 +4,7 @@ import { searchEverywhere } from '@/lib/search';
 
 export const metadata: Metadata = {
   title: 'Search movies & series',
-  description: 'Search the CINE·MOOD catalogue and discover movies and TV series from TMDB.',
+  description: 'Search the CINE·MOOD catalogue and discover movie and TV titles from IMDb when available.',
   robots: { index: false, follow: false }
 };
 
@@ -27,7 +27,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
               {item.score ? <span className="search-result-score">★ {item.score.toFixed(1)}</span> : null}
             </div>
             <div className="search-result-title">{item.title}</div>
-            <div className="search-result-meta">{item.year || 'Year TBA'} · {item.source === 'catalogue' ? 'In catalogue' : 'TMDB discovery'}</div>
+            <div className="search-result-meta">{item.year || 'Year TBA'} · {item.source === 'catalogue' ? 'In catalogue' : item.source === 'imdb' ? 'IMDb discovery' : 'TMDB discovery'}</div>
           </Link>
         ))}
       </div>
@@ -38,7 +38,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
     <div className="container search-page">
       <div className="eyebrow">CINE·MOOD discovery</div>
       <h1>{query ? <>Results for <span>“{query}”</span></> : 'Search movies & series'}</h1>
-      <p className="sub">Films and TV series from the catalogue, with wider TMDB discovery when available.</p>
+      <p className="sub">Films and TV series from the Cinevood catalogue, with IMDb discovery when the service is configured.</p>
       {query.length < 2 ? (
         <div className="empty"><b>Type at least two characters</b>Use the search bar above to find a title or series.</div>
       ) : results.length === 0 ? (

@@ -11,7 +11,8 @@ export const metadata = {
 
 const WHERE = [
   ['Server & database', 'Vercel hosting + Supabase Postgres — the monthly bill that keeps reviews online.'],
-  ['TMDB & OMDb', 'Film metadata, posters and IMDb/RT scores. Free tiers, but rate limits cost time.'],
+  ['TMDB, IMDbio & OMDb', 'Film metadata, posters and IMDb/RT scores. Free tiers, but rate limits cost time.'],
+  ['YouTube & AI', 'Optional trailer search and grounded Jarvis answers use server-side API keys and quotas.'],
   ['Domain & assets', 'Domain renewal, fonts and the odd poster-sized test upload.'],
   ['Coffee', 'Honestly? Most of it. Late-night review edits run on chai.']
 ];

@@ -25,9 +25,9 @@ export default function AboutPage() {
           Reviews, not downloads<span style={{ color: 'var(--accent)' }}>.</span>
         </h1>
         <p className="muted" style={{ fontSize: 16, lineHeight: 1.8, marginBottom: 18 }}>
-          CINE·MOOD is a film discovery and review platform. Metadata (poster, cast, synopsis) comes from TMDB;
-          the verdict comes from people. No files, no mirrors, no torrents — ever. That keeps the product legal,
-          advertiser-safe and around for the long run.
+          CINE·MOOD is a film discovery and review platform. Catalogue and discovery metadata comes from TMDB and IMDbio;
+          the verdict comes from people. Official YouTube trailers are embedded through YouTube’s player. No full films,
+          episode files, mirrors or torrents — ever.
         </p>
 
         <div className="stat-grid" style={{ marginBottom: 20 }}>
@@ -90,7 +90,8 @@ export default function AboutPage() {
             <li>Next.js 15 App Router · React 19 · TypeScript</li>
             <li>Prisma + <b>Supabase Postgres</b> (schema <code className="mono">cinemood</code>)</li>
             <li>Auth.js v5 — Google OAuth + demo email login, JWT sessions, role-based admin</li>
-            <li>TMDB API through a server-side proxy (ISP-block safe) · OMDb for IMDb / RT scores</li>
+            <li>TMDB and IMDbio catalogue metadata · OMDb scores · official YouTube IFrame Player API</li>
+            <li>Grounded Jarvis movie Q&amp;A using published reviews and optional Gemini API</li>
             <li>Custom CSS design system — 5 accent themes, real light mode, mobile-first</li>
           </ul>
         </div>
@@ -113,7 +114,7 @@ export default function AboutPage() {
 
             <p className="muted" style={{ fontSize: 14, lineHeight: 1.85, margin: '12px 0 0' }}>
               Harsh builds and maintains CINE·MOOD end to end — Next.js frontend, Prisma data layer, Auth.js, admin
-              tooling, the review pipeline aur Jarvis (AI drafts). Idea simple hai: cinema deserves better than a
+              tooling, the review pipeline aur Jarvis (movie intelligence, grounded review summaries). Idea simple hai: cinema deserves better than a
               download table — ek aisi jagah jahan raay likhi jaaye, argument ho, aur spoiler se bacha jaaye.
             </p>
 
