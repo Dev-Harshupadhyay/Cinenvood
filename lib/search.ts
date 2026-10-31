@@ -9,7 +9,7 @@ export type UnifiedSearchResult = {
   score: number | null;
   mediaType: 'movie' | 'tv';
   href: string;
-  source: 'catalogue' | 'imdb';
+  source: 'catalogue' as const | 'imdb';
   overview?: string;
 };
 
