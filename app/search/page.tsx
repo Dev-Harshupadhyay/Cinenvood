@@ -38,7 +38,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
               <div className="search-result-title">{item.title}</div>
               <div className="search-result-meta">{item.year || 'Year TBA'} · {item.source === 'catalogue' ? 'In catalogue' : item.source === 'imdb' ? 'IMDbio discovery' : 'TMDB discovery'}</div>
             </Link>
-            <JarvisAutoReview imdbId={item.imdbId} titleId={item.titleId} title={item.title} compact />
+            {item.titleId || item.imdbId ? <JarvisAutoReview imdbId={item.imdbId} titleId={item.titleId} title={item.title} compact /> : null}
           </div>
         ))}
       </div>

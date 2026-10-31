@@ -10,12 +10,13 @@ type Trailer = {
   thumbnail: string | null;
   watchUrl: string;
   likelyOfficial: boolean;
+  language: 'en' | 'hi' | 'other';
 };
 
 type TrailerResponse = {
   results?: Trailer[];
   configured?: boolean;
-  source?: 'tmdb' | 'youtube';
+  source?: 'tmdb' | 'youtube' | 'mixed';
   code?: string;
 };
 
@@ -44,7 +45,8 @@ export default function ImdbTrailer({ title, year, tmdbId, mediaType = 'movie', 
   const [error, setError] = useState('');
   const [trailers, setTrailers] = useState<Trailer[]>([]);
   const [selected, setSelected] = useState('');
-  const [source, setSource] = useState<'tmdb' | 'youtube' | ''>('');
+  const [language, setLanguage] = useState<'en' | 'hi'>('en');
+  const [source, setSource] = useState<'tmdb' | 'youtube' | 'mixed' | ''>('');
 
   async function findTrailers() {
     setOpen(true);
@@ -60,9 +62,12 @@ export default function ImdbTrailer({ title, year, tmdbId, mediaType = 'movie', 
       if (!response.ok) throw new Error(errorMessage(data.code, data.configured));
       const matches = Array.isArray(data.results) ? data.results : [];
       setTrailers(matches);
-      setSource(data.source === 'tmdb' ? 'tmdb' : 'youtube');
+      setSource(data.source === 'tmdb' || data.source === 'mixed' ? data.source : 'youtube');
+      const initialLanguage = matches.some((item) => item.language === 'en') ? 'en' : 'hi';
+      setLanguage(initialLanguage);
+      const first = matches.find((item) => item.language === initialLanguage);
       if (matches.length === 0) setError('No trailer match found.');
-      else setSelected(matches[0].videoId);
+      else if (first) setSelected(first.videoId);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Trailer search failed.');
     } finally {
@@ -71,6 +76,12 @@ export default function ImdbTrailer({ title, year, tmdbId, mediaType = 'movie', 
   }
 
   const current = trailers.find((item) => item.videoId === selected);
+  const languageTrailers = trailers.filter((item) => item.language === language);
+  function switchLanguage(next: 'en' | 'hi') {
+    setLanguage(next);
+    const first = trailers.find((item) => item.language === next);
+    if (first) setSelected(first.videoId);
+  }
   const youtubeSearch = `https://www.youtube.com/results?search_query=${encodeURIComponent(`${title} ${year || ''} official trailer`)}`;
 
   return (
@@ -82,7 +93,7 @@ export default function ImdbTrailer({ title, year, tmdbId, mediaType = 'movie', 
         <div className="modal-backdrop" role="presentation" onClick={() => setOpen(false)}>
           <div className="modal-panel" role="dialog" aria-modal="true" aria-label={`${title} YouTube trailers`} onClick={(event) => event.stopPropagation()}>
             <div className="modal-head">
-              <div><div className="eyebrow" style={{ margin: 0 }}>Trailer matches · {source === 'tmdb' ? 'TMDB videos' : 'YouTube search'}</div><div style={{ fontWeight: 700 }}>{title}</div></div>
+              <div><div className="eyebrow" style={{ margin: 0 }}>Trailer matches · {source === 'mixed' ? 'TMDB + YouTube' : source === 'tmdb' ? 'TMDB videos' : 'YouTube search'}</div><div style={{ fontWeight: 700 }}>{title}</div></div>
               <button type="button" className="btn btn-sm btn-ghost" onClick={() => setOpen(false)} aria-label="Close trailer search">✕</button>
             </div>
             {loading ? <div className="empty">Checking TMDB and searching YouTube for trailer matches…</div> : null}
@@ -99,27 +110,38 @@ export default function ImdbTrailer({ title, year, tmdbId, mediaType = 'movie', 
               </div>
             ) : null}
             {trailers.length ? (
-              <div className="trailer-options-list" style={{ padding: 14, display: 'grid', gap: 8 }}>
-                {trailers.map((item) => (
-                  <button
-                    type="button"
-                    key={item.videoId}
-                    className="btn btn-sm btn-ghost"
-                    data-on={selected === item.videoId}
-                    onClick={() => setSelected(item.videoId)}
-                    style={{ justifyContent: 'space-between', textAlign: 'left', gap: 10 }}
-                  >
-                    {item.thumbnail ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={item.thumbnail} alt="" width={82} height={46} loading="lazy" style={{ objectFit: 'cover', borderRadius: 5 }} />
-                    ) : null}
-                    <span style={{ flex: 1 }}>{item.title}<span className="faint" style={{ display: 'block', fontSize: 11 }}>{item.channelTitle}{item.likelyOfficial ? ' · likely official' : ''}</span></span>
-                    <span>{selected === item.videoId ? 'Playing' : 'Play'}</span>
-                  </button>
-                ))}
-                {current ? <a href={current.watchUrl} target="_blank" rel="noreferrer" className="btn btn-sm btn-ghost">Open selected on YouTube ↗</a> : null}
-                <p className="faint" style={{ fontSize: 11 }}>“Likely official” is a title/channel-text hint, not verification. Check the uploader before relying on a result.</p>
-              </div>
+              <>
+                <div className="trailer-language-switch" role="group" aria-label="Trailer language">
+                  <button type="button" className="chip" data-on={language === 'en'} aria-pressed={language === 'en'} disabled={!trailers.some((item) => item.language === 'en')} onClick={() => switchLanguage('en')}>English</button>
+                  <button type="button" className="chip" data-on={language === 'hi'} aria-pressed={language === 'hi'} disabled={!trailers.some((item) => item.language === 'hi')} onClick={() => switchLanguage('hi')}>Hindi</button>
+                </div>
+                <div className="trailer-options-list" style={{ padding: 14, display: 'grid', gap: 8 }}>
+                  {languageTrailers.map((item) => (
+                    <button
+                      type="button"
+                      key={item.videoId}
+                      className="btn btn-sm btn-ghost"
+                      data-on={selected === item.videoId}
+                      onClick={() => setSelected(item.videoId)}
+                      style={{ justifyContent: 'space-between', textAlign: 'left', gap: 10 }}
+                    >
+                      {item.thumbnail ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={item.thumbnail} alt="" width={82} height={46} loading="lazy" style={{ objectFit: 'cover', borderRadius: 5 }} />
+                      ) : null}
+                      <span style={{ flex: 1 }}>
+                        {item.title}
+                        <span className="faint" style={{ display: 'block', fontSize: 11 }}>
+                          {item.channelTitle}{item.likelyOfficial ? ' · likely official' : ''}
+                        </span>
+                      </span>
+                      <span>{selected === item.videoId ? 'Playing' : 'Play'}</span>
+                    </button>
+                  ))}
+                  {current ? <a href={current.watchUrl} target="_blank" rel="noreferrer" className="btn btn-sm btn-ghost">Open selected on YouTube ↗</a> : null}
+                  <p className="faint" style={{ fontSize: 11 }}>“Likely official” is a title/channel-text hint, not verification. Check the uploader before relying on a result.</p>
+                </div>
+              </>
             ) : null}
           </div>
         </div>

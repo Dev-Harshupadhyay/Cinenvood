@@ -132,7 +132,8 @@ async function getOwnerContext() {
 
 async function getJarvisRecord(titleId: string): Promise<JarvisRecord | null> {
   return prisma.review.findFirst({
-    where: { titleId, status: 'PUBLISHED', editorial: true, authorName: 'Jarvis', sourceLang: 'jarvis-auto-v2' },
+    where: { titleId, status: 'PUBLISHED', editorial: true, authorName: 'Jarvis', sourceLang: { in: ['jarvis-auto-en-v3', 'jarvis-auto-v2'] } },
+    orderBy: { createdAt: 'desc' },
     select: { id: true, rating: true, headline: true, body: true, headlineHi: true, bodyHi: true, headlineEn: true, bodyEn: true, createdAt: true }
   });
 }
@@ -174,12 +175,12 @@ export async function POST(req: Request) {
     if (ownerContext.samples.length === 0) return NextResponse.json({ status: 'no-style', error: 'Jarvis needs a published, non-spoiler owner review as a style reference before it can create this review.' }, { status: 409 });
     const imdbReviews = await getImdbReviews(imdb.imdbId).catch(() => []);
     const draft = await generateAutoJarvisReviewOnce(imdb.imdbId, { title: imdb, styleSamples: ownerContext.samples, imdbReviews });
-    if (!draft) return NextResponse.json({ status: 'unavailable', error: 'Jarvis could not prepare a grounded bilingual review right now.' }, { status: 502 });
+    if (!draft) return NextResponse.json({ status: 'unavailable', error: 'Jarvis could not prepare a grounded short English review right now.' }, { status: 502 });
 
     const saved = await prisma.$transaction(async (tx) => {
       await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${imdb.imdbId}, 0))`;
       const prior = await tx.review.findFirst({
-        where: { titleId, status: 'PUBLISHED', editorial: true, authorName: 'Jarvis', sourceLang: 'jarvis-auto-v2' },
+        where: { titleId, status: 'PUBLISHED', editorial: true, authorName: 'Jarvis', sourceLang: { in: ['jarvis-auto-en-v3', 'jarvis-auto-v2'] } },
         select: { id: true, rating: true, headline: true, body: true, headlineHi: true, bodyHi: true, headlineEn: true, bodyEn: true, createdAt: true }
       });
       if (prior) return { kind: 'review' as const, review: prior, created: false };
@@ -192,13 +193,13 @@ export async function POST(req: Request) {
           where: { id: legacy.id },
           data: {
             rating: draft.rating,
-            headline: draft.headlineHi,
-            body: draft.bodyHi,
-            headlineHi: draft.headlineHi,
-            bodyHi: draft.bodyHi,
+            headline: draft.headlineEn,
+            body: draft.bodyEn,
+            headlineHi: null,
+            bodyHi: null,
             headlineEn: draft.headlineEn,
             bodyEn: draft.bodyEn,
-            sourceLang: 'jarvis-auto-v2'
+            sourceLang: 'jarvis-auto-en-v3'
           },
           select: { id: true, rating: true, headline: true, body: true, headlineHi: true, bodyHi: true, headlineEn: true, bodyEn: true, createdAt: true }
         });
@@ -208,13 +209,13 @@ export async function POST(req: Request) {
         data: {
           titleId,
           rating: draft.rating,
-          headline: draft.headlineHi,
-          body: draft.bodyHi,
-          headlineHi: draft.headlineHi,
-          bodyHi: draft.bodyHi,
+          headline: draft.headlineEn,
+          body: draft.bodyEn,
+          headlineHi: null,
+          bodyHi: null,
           headlineEn: draft.headlineEn,
           bodyEn: draft.bodyEn,
-          sourceLang: 'jarvis-auto-v2',
+          sourceLang: 'jarvis-auto-en-v3',
           editorial: true,
           authorName: 'Jarvis',
           status: 'PUBLISHED',

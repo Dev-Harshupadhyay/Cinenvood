@@ -25,6 +25,7 @@ type TrailerResult = {
   publishedAt: string | null;
   watchUrl: string;
   likelyOfficial: boolean;
+  language: 'en' | 'hi' | 'other';
 };
 
 function normalizeTitle(value: string) {
@@ -58,15 +59,18 @@ async function findTmdbTrailers(title: string, year: number, mediaType: MediaTyp
 
   const isPlayableCandidate = (video: TmdbVideo) =>
     video.site === 'YouTube' && (video.type === 'Trailer' || video.type === 'Teaser') && /^[A-Za-z0-9_-]{11}$/.test(video.key);
-  let videos = (await fetchTitleVideos(tmdbId, mediaType, 'en-US')).filter(isPlayableCandidate);
-  if (!videos.length) videos = (await fetchTitleVideos(tmdbId, mediaType, 'hi-IN')).filter(isPlayableCandidate);
+  const [englishVideos, hindiVideos] = await Promise.all([
+    fetchTitleVideos(tmdbId, mediaType, 'en-US'),
+    fetchTitleVideos(tmdbId, mediaType, 'hi-IN')
+  ]);
+  const videos = [...new Map([...englishVideos, ...hindiVideos].filter(isPlayableCandidate).map((video) => [video.key, video])).values()];
   return videos
     .sort((a, b) =>
       Number(b.official) - Number(a.official) ||
       Number(b.type === 'Trailer') - Number(a.type === 'Trailer') ||
       Number(b.iso_639_1 === 'en') - Number(a.iso_639_1 === 'en')
     )
-    .slice(0, 8)
+    .slice(0, 16)
     .map((video) => ({
       videoId: video.key,
       title: video.name || `${title} ${video.type.toLowerCase()}`,
@@ -74,14 +78,16 @@ async function findTmdbTrailers(title: string, year: number, mediaType: MediaTyp
       thumbnail: `https://img.youtube.com/vi/${video.key}/hqdefault.jpg`,
       publishedAt: video.published_at ?? null,
       watchUrl: `https://www.youtube.com/watch?v=${encodeURIComponent(video.key)}`,
-      likelyOfficial: video.official
+      likelyOfficial: video.official,
+      language: video.iso_639_1 === 'hi' ? 'hi' as const : video.iso_639_1 === 'en' ? 'en' as const : 'other' as const
     }));
 }
 
-async function searchYouTube(key: string, query: string) {
+async function searchYouTube(key: string, query: string, language: 'en' | 'hi') {
   const params = new URLSearchParams({
-    part: 'snippet', type: 'video', maxResults: '10', q: query,
-    videoEmbeddable: 'true', safeSearch: 'moderate', key
+    part: 'snippet', type: 'video', maxResults: '8', q: query,
+    videoEmbeddable: 'true', safeSearch: 'moderate', relevanceLanguage: language,
+    regionCode: language === 'hi' ? 'IN' : 'US', key
   });
   const response = await fetch(`https://www.googleapis.com/youtube/v3/search?${params}`, {
     signal: AbortSignal.timeout(4000), next: { revalidate: 1800 },
@@ -102,7 +108,7 @@ function searchError(response: Response, data: YoutubeResponse) {
   return NextResponse.json({ results: [], configured: true, code: 'upstream_error' }, { status: 502 });
 }
 
-function parseResults(items: YoutubeItem[]): TrailerResult[] {
+function parseResults(items: YoutubeItem[], language: 'en' | 'hi'): TrailerResult[] {
   return items.flatMap((item) => {
     const videoId = item.id?.videoId;
     if (!videoId || !/^[A-Za-z0-9_-]{11}$/.test(videoId)) return [];
@@ -115,7 +121,8 @@ function parseResults(items: YoutubeItem[]): TrailerResult[] {
       thumbnail: item.snippet?.thumbnails?.high?.url ?? item.snippet?.thumbnails?.medium?.url ?? item.snippet?.thumbnails?.default?.url ?? null,
       publishedAt: item.snippet?.publishedAt ?? null,
       watchUrl: `https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}`,
-      likelyOfficial: isLikelyOfficial(title, channelTitle)
+      likelyOfficial: isLikelyOfficial(title, channelTitle),
+      language
     }];
   });
 }
@@ -136,40 +143,51 @@ export async function GET(req: Request) {
 
   try {
     const tmdbResults = await findTmdbTrailers(title, year, mediaType, tmdbId).catch(() => []);
-    if (tmdbResults.length) {
-      return NextResponse.json({ results: tmdbResults, configured: true, source: 'tmdb' }, {
-        headers: { 'Cache-Control': 'public, s-maxage=1800, stale-while-revalidate=3600' }
-      });
-    }
-
     const key = process.env.YOUTUBE_API_KEY?.trim();
-    if (!key) {
+    if (!key && !tmdbResults.length) {
       return NextResponse.json({ results: [], configured: false, code: 'no_trailer_source' }, { status: 503 });
     }
 
-    // TMDB video records are tried first; YouTube search is the broader second source.
-    const precise = [title, year || '', 'official trailer'].filter(Boolean).join(' ');
-    const fallback = [title, year || '', 'trailer'].filter(Boolean).join(' ');
-    let result: Awaited<ReturnType<typeof searchYouTube>> | null = null;
-    let parsed: TrailerResult[] = [];
-    let usedFallback = false;
-    try {
-      result = await searchYouTube(key, precise);
-      if (!result.response.ok) return searchError(result.response, result.data);
-      parsed = parseResults(result.data.items ?? []);
-    } catch {
-      if (fallback === precise) throw new Error('YouTube search request failed');
-      usedFallback = true;
+    let youtubeResults: TrailerResult[] = [];
+    let rejectedSearches = 0;
+    const upstreamErrors: { response: Response; data: YoutubeResponse }[] = [];
+    if (key) {
+      const queryBase = [title, year || '', 'official trailer'].filter(Boolean).join(' ');
+      const [english, hindi] = await Promise.allSettled([
+        searchYouTube(key, `${queryBase} English`, 'en'),
+        searchYouTube(key, `${queryBase} Hindi`, 'hi')
+      ]);
+      for (const [result, language] of [[english, 'en'], [hindi, 'hi']] as const) {
+        if (result.status === 'rejected') {
+          rejectedSearches += 1;
+          continue;
+        }
+        if (!result.value.response.ok) {
+          upstreamErrors.push({ response: result.value.response, data: result.value.data });
+          continue;
+        }
+        youtubeResults = [...youtubeResults, ...parseResults(result.value.data.items ?? [], language)];
+      }
     }
-    if (!parsed.length && fallback !== precise) {
-      result = await searchYouTube(key, fallback);
-      if (!result.response.ok) return searchError(result.response, result.data);
-      parsed = parseResults(result.data.items ?? []);
-      usedFallback = true;
-    }
-    parsed.sort((a, b) => Number(b.likelyOfficial) - Number(a.likelyOfficial));
 
-    return NextResponse.json({ results: parsed, configured: true, source: 'youtube', query: usedFallback ? fallback : precise }, {
+    const byVideoId = new Map<string, TrailerResult>();
+    for (const item of [...tmdbResults, ...youtubeResults]) {
+      const existing = byVideoId.get(item.videoId);
+      if (!existing || (existing.language === 'other' && item.language !== 'other') || (!existing.likelyOfficial && item.likelyOfficial)) {
+        byVideoId.set(item.videoId, item);
+      }
+    }
+    const combined = [...byVideoId.values()]
+      .filter((item) => item.language === 'en' || item.language === 'hi')
+      .sort((a, b) => Number(b.likelyOfficial) - Number(a.likelyOfficial));
+    const results = (['en', 'hi'] as const).flatMap((language) => combined.filter((item) => item.language === language).slice(0, 10));
+
+    if (!results.length && upstreamErrors.length) return searchError(upstreamErrors[0].response, upstreamErrors[0].data);
+    if (!results.length && rejectedSearches === 2) {
+      return NextResponse.json({ results: [], configured: true, code: 'upstream_error' }, { status: 502 });
+    }
+    const source = tmdbResults.length && youtubeResults.length ? 'mixed' : tmdbResults.length ? 'tmdb' : 'youtube';
+    return NextResponse.json({ results, configured: Boolean(key) || tmdbResults.length > 0, source }, {
       headers: { 'Cache-Control': 'public, s-maxage=1800, stale-while-revalidate=3600' }
     });
   } catch {

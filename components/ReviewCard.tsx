@@ -49,7 +49,9 @@ export default function ReviewCard({
   const kind = isEditorial || review.user.role === 'ADMIN' ? 'editorial' : 'member';
   const verified = isEditorial || isAdmin;
   // Jarvis = the house AI. Uska apna chip aur glyph, taaki AI-written review dikh jaaye.
-  const isJarvis = isEditorial && byline.trim().toLowerCase() === 'jarvis';
+  const normalizedByline = byline.trim().toLowerCase();
+  const isJarvis = isEditorial && normalizedByline === 'jarvis';
+  const isAdminEditorial = isEditorial && normalizedByline === 'admin';
   const isAutoJarvis = isJarvis && review.sourceLang?.startsWith('jarvis-auto');
   const supporters = review._count.likes;
 
@@ -98,6 +100,8 @@ export default function ReviewCard({
           <div className="rv-role">
             {isJarvis ? (
               <span className="rv-role-chip rv-role-chip--ai">{isAutoJarvis ? 'JARVIS · AI REVIEW' : 'JARVIS · AI GHOSTWRITER'}</span>
+            ) : isAdminEditorial ? (
+              <span className="rv-role-chip rv-role-chip--gold">ADMIN REVIEW</span>
             ) : isEditorial ? (
               <span className="rv-role-chip rv-role-chip--gold">FOUNDER · EDITOR-IN-CHIEF</span>
             ) : review.user.role === 'ADMIN' ? (

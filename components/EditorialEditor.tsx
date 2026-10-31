@@ -18,7 +18,7 @@ type EditorialRow = {
   year: number;
 };
 
-const empty = { headline: '', body: '', headlineEn: '', bodyEn: '', rating: 7, titleId: '', featured: false, jarvis: false };
+const empty = { headline: '', body: '', headlineEn: '', bodyEn: '', rating: 7, titleId: '', featured: true, jarvis: false };
 
 export default function EditorialEditor({ titles, rows }: { titles: TitleOption[]; rows: EditorialRow[] }) {
   const router = useRouter();
@@ -45,8 +45,7 @@ export default function EditorialEditor({ titles, rows }: { titles: TitleOption[
       body: form.body,
       headlineEn: form.headlineEn,
       bodyEn: form.bodyEn,
-      featured: form.featured,
-      authorName: form.jarvis ? 'Jarvis' : 'CiNEMAsFLiX'
+      authorName: form.jarvis ? 'Jarvis' : 'Admin'
     };
     if (action === 'update') payload.id = editing;
     else payload.titleId = form.titleId;
@@ -114,7 +113,7 @@ export default function EditorialEditor({ titles, rows }: { titles: TitleOption[
       body: row.body,
       headlineEn: row.headlineEn ?? '',
       bodyEn: row.bodyEn ?? '',
-      featured: row.featured,
+      featured: true,
       jarvis: (row.authorName ?? '').toLowerCase() === 'jarvis'
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -125,7 +124,7 @@ export default function EditorialEditor({ titles, rows }: { titles: TitleOption[
       <div className="panel">
         <div className="panel-title">
           <span>{editing ? 'Edit editorial verdict' : 'New editorial verdict'}</span>
-          <span className="faint mono" style={{ fontSize: 10 }}>no user account · byline CiNEMAsFLiX</span>
+          <span className="faint mono" style={{ fontSize: 10 }}>admin-published · byline Admin</span>
         </div>
 
         {!editing ? (
@@ -190,8 +189,8 @@ export default function EditorialEditor({ titles, rows }: { titles: TitleOption[
 
         <div style={{ display: 'flex', gap: 18, flexWrap: 'wrap' }}>
           <label className="check">
-            <input type="checkbox" checked={form.featured} onChange={(e) => setForm({ ...form, featured: e.target.checked })} />
-            Pin as verdict
+            <input type="checkbox" checked={form.featured} disabled />
+            IMPORTANT · auto-pinned
           </label>
           <label className="check" title="Byline 'Review by Jarvis' dikhegi — AI-generated summary ko editor review kare">
             <input type="checkbox" checked={form.jarvis} onChange={(e) => setForm({ ...form, jarvis: e.target.checked })} />
@@ -225,7 +224,7 @@ export default function EditorialEditor({ titles, rows }: { titles: TitleOption[
                     <div className="t-sub">
                       {r.year}
                       {r.featured ? ' · pinned' : ''}
-                      {(r.authorName ?? '').toLowerCase() === 'jarvis' ? ' · ✦ Jarvis' : ''}
+                      {r.authorName?.trim() ? ` · ${(r.authorName ?? '').toLowerCase() === 'jarvis' ? '✦ Jarvis' : r.authorName}` : ' · Admin'}
                     </div>
                   </td>
                   <td className="mono">{r.rating}/10</td>

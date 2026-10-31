@@ -2877,6 +2877,9 @@ html, body { max-width: 100%; overflow-x: clip; }
 .modal-head { display:flex; align-items:center; justify-content: space-between; gap:12px; padding:14px 16px; border-bottom:1px solid var(--border); }
 .yt-frame { position: relative; aspect-ratio: 16/9; background: #000; }
 .yt-frame iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
+.trailer-language-switch { display:flex; justify-content:center; gap:8px; padding:10px 16px; border-bottom:1px solid var(--border); }
+.trailer-language-switch .chip { min-width:112px; min-height:38px; }
+.trailer-language-switch .chip:disabled { opacity:.4; cursor:not-allowed; }
 
 /* ── Admin control room refresh ─────────────────────────────────────── */
 .admin-shell {
@@ -3046,6 +3049,24 @@ html, body { max-width: 100%; overflow-x: clip; }
 .search-result-title { margin-top:9px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:650; font-size:13px; }
 .search-result-meta { margin-top:3px; color:var(--faint); font:9px var(--font-mono); }
 .search-page-actions { display:flex; justify-content:center; margin-top:30px; }
+@media (min-width: 900px) {
+  .search-pop { left:auto; right:0; width:min(520px, calc(100vw - 32px)); max-height:min(72vh, 720px); }
+  .search-page { max-width:1340px; }
+  .search-results-section { padding:18px; border:1px solid var(--border); border-radius:var(--radius-lg); background:color-mix(in srgb,var(--surface) 72%,transparent); }
+  .search-results-grid { grid-template-columns:repeat(auto-fill,minmax(168px,1fr)); gap:22px 18px; }
+  .search-result-poster { border-radius:var(--radius-lg); }
+  .search-result-title { font-size:14px; }
+  .search-result-meta { font-size:10px; }
+}
+.review-jarvis-assist { display:grid; gap:9px; padding:12px; border:1px solid var(--border); border-radius:var(--radius); background:color-mix(in srgb,var(--accent) 4%,var(--surface)); }
+.review-jarvis-assist .checkbox { margin:0; align-items:flex-start; line-height:1.55; }
+.review-jarvis-actions { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.review-jarvis-actions .btn { min-height:40px; }
+@media (max-width:600px) {
+  .review-jarvis-actions { align-items:stretch; flex-direction:column; }
+  .review-jarvis-actions .btn { width:100%; justify-content:center; }
+  .search-pop { max-height:58dvh; }
+}
 
 .poster-kind { position:absolute; top:9px; right:9px; z-index:2; border:1px solid rgba(185,167,255,.42); background:rgba(7,9,12,.78); color:#c4b8ff; border-radius:999px; padding:4px 7px; font:8px var(--font-mono); letter-spacing:.12em; }
 .poster-card[data-poster-only='true'] .poster-hover { background:linear-gradient(180deg,transparent 25%,rgba(0,0,0,.58)); }
@@ -3169,12 +3190,9 @@ html, body { max-width: 100%; overflow-x: clip; }
 }
 .jarvis-writer button.link-more { padding: 0; border: 0; background: transparent; font: inherit; cursor: pointer; }
 
-/* Cached, bilingual Jarvis editorial review */
+/* Cached, concise English Jarvis editorial review */
 .jarvis-auto-review { display: grid; gap: 13px; padding: 20px; border-color: color-mix(in srgb, var(--accent) 38%, var(--border)); background: radial-gradient(ellipse at 0 0, color-mix(in srgb, var(--accent) 9%, transparent), transparent 58%), var(--surface); }
 .jarvis-auto-review-meta { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; font-size: 11px; }
-.jarvis-review-tabs { display: flex; gap: 6px; width: fit-content; padding: 4px; border: 1px solid var(--border); border-radius: 10px; background: var(--panel); }
-.jarvis-review-tabs button { border: 0; border-radius: 7px; padding: 6px 11px; color: var(--muted); background: transparent; font: inherit; font-size: 11px; font-weight: 700; cursor: pointer; }
-.jarvis-review-tabs button[data-active='true'] { color: var(--accent); background: color-mix(in srgb, var(--accent) 13%, transparent); }
 .jarvis-auto-review-headline { margin: 0; font-family: var(--font-display, inherit); font-size: clamp(20px, 3vw, 26px); }
 .jarvis-auto-review-copy { margin: 0; white-space: pre-wrap; line-height: 1.8; color: var(--text); }
 .jarvis-auto-review-disclosure { margin: 0; padding-top: 11px; border-top: 1px solid var(--border); color: var(--faint); font-size: 10px; line-height: 1.55; }
@@ -3195,8 +3213,6 @@ html, body { max-width: 100%; overflow-x: clip; }
   .movie-detail-actions .trailer-search-button,
   .movie-detail-actions .trailer-watch-link { width: 100%; min-width: 0; min-height: 44px; justify-content: center; text-align: center; white-space: normal; line-height: 1.25; padding-inline: 8px; }
   .movie-detail-actions > .title-action-buttons button { width: 100%; min-height: 44px; justify-content: center; padding-inline: 6px; font-size: 12px; }
-  .jarvis-review-tabs { width: 100%; }
-  .jarvis-review-tabs button { flex: 1; min-height: 40px; }
   .jarvis-review-trigger { width: 100%; min-height: 44px; justify-self: stretch; }
   .modal-backdrop { align-items: center; padding: max(8px, env(safe-area-inset-top)) 8px max(8px, env(safe-area-inset-bottom)); }
   .modal-panel { width: 100%; max-height: calc(100dvh - 16px); overflow-y: auto; overscroll-behavior: contain; border-radius: 14px; }
