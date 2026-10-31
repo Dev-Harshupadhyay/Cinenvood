@@ -6,6 +6,7 @@ import { getCatalogue, getFeatured, getGenres, type PosterTitle } from '@/lib/qu
 import { formatRuntime } from '@/lib/format';
 import DataBanner from '@/components/DataBanner';
 import TrailerModal from '@/components/TrailerModal';
+import PosterImage from '@/components/PosterImage';
 import { settleAll } from '@/lib/safe';
 
 export default async function HomePage() {
@@ -43,8 +44,13 @@ export default async function HomePage() {
           </div>
           <div className="hero-side">
             <Link href={`/movies/${hero.slug}`} className="hero-poster" aria-label={`${hero.title} — view title`}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={hero.poster} alt={`${hero.title} poster`} />
+              <PosterImage
+                src={hero.poster}
+                title={hero.title}
+                year={hero.year}
+                mediaType={hero.mediaType}
+                imdbId={hero.imdbId}
+              />
             </Link>
           </div>
         </section>

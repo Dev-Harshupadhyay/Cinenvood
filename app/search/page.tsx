@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { searchEverywhere } from '@/lib/search';
 import JarvisAutoReview from '@/components/JarvisAutoReview';
+import PosterImage from '@/components/PosterImage';
 
 export const metadata: Metadata = {
   title: 'Search movies & series',
@@ -22,8 +23,15 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
           <div className="search-result-card" key={item.key} style={{ ['--result-index' as string]: index }}>
             <Link href={item.href} className="search-result-link">
               <div className="search-result-poster">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={item.poster || '/posters/placeholder.svg'} alt={`${item.title} poster`} loading={index < 8 ? 'eager' : 'lazy'} />
+                <PosterImage
+                  src={item.poster}
+                  title={item.title}
+                  year={item.year}
+                  mediaType={item.mediaType}
+                  imdbId={item.imdbId}
+                  fallbackSource={item.source === 'imdb' ? 'tmdb' : 'imdbio'}
+                  loading={index < 8 ? 'eager' : 'lazy'}
+                />
                 <span className={`search-kind search-kind--${item.mediaType}`}>{item.mediaType === 'tv' ? 'SERIES' : 'FILM'}</span>
                 {item.score ? <span className="search-result-score">★ {item.score.toFixed(1)}</span> : null}
               </div>

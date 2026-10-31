@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import PosterImage from '@/components/PosterImage';
 
 type Item = {
   key: string;
@@ -13,6 +14,7 @@ type Item = {
   score: number | null;
   mediaType: 'movie' | 'tv';
   source: 'catalogue' | 'imdb' | 'tmdb';
+  imdbId?: string;
 };
 
 export default function SearchBox({ placeholder = 'Search movies, series…' }: { placeholder?: string } = {}) {
@@ -155,8 +157,19 @@ export default function SearchBox({ placeholder = 'Search movies, series…' }: 
                   onMouseEnter={() => setActiveIndex(index)}
                   onClick={() => setOpen(false)}
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={item.poster || '/posters/placeholder.svg'} alt="" loading="lazy" />
+                  <PosterImage
+                    src={item.poster}
+                    title={item.title}
+                    year={item.year}
+                    mediaType={item.mediaType}
+                    imdbId={item.imdbId}
+                    fallbackSource={item.source === 'imdb' ? 'tmdb' : 'imdbio'}
+                    alt=""
+                    className="search-item-poster"
+                    width={39}
+                    height={56}
+                    loading="lazy"
+                  />
                   <span className="search-item-copy">
                     <span className="search-item-title">{item.title}</span>
                     <span className="search-item-meta">

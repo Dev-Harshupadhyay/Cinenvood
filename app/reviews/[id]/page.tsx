@@ -3,6 +3,7 @@ import { siteUrl } from '@/lib/site';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import Comments from '@/components/Comments';
+import PosterImage from '@/components/PosterImage';
 import LikeButton from '@/components/LikeButton';
 import SpoilerText from '@/components/SpoilerText';
 import VerdictBlock from '@/components/VerdictBlock';
@@ -166,8 +167,17 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
               <span>About the film</span>
             </div>
             <Link href={`/movies/${review.title.slug}`} style={{ display: 'flex', gap: 12 }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={review.title.poster} alt="" style={{ width: 78, borderRadius: 10, border: '1px solid var(--border)' }} />
+              <PosterImage
+                src={review.title.poster}
+                title={review.title.title}
+                year={review.title.year}
+                mediaType={review.title.mediaType === 'tv' ? 'tv' : 'movie'}
+                imdbId={review.title.imdbId}
+                alt=""
+                width={78}
+                height={117}
+                style={{ width: 78, height: 117, borderRadius: 10, border: '1px solid var(--border)', objectFit: 'cover' }}
+              />
               <span>
                 <span style={{ display: 'block', fontWeight: 650 }}>{review.title.title}</span>
                 <span className="faint mono" style={{ fontSize: 11 }}>
@@ -184,8 +194,18 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {moreWithLikes.map((r) => (
                 <Link key={r.id} href={`/reviews/${r.id}`} style={{ display: 'flex', gap: 10 }}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={r.title.poster} alt="" className="rank-poster" style={{ width: 36, height: 52 }} />
+                  <PosterImage
+                    src={r.title.poster}
+                    title={r.title.title}
+                    year={r.title.year}
+                    mediaType={r.title.mediaType}
+                    imdbId={r.title.imdbId}
+                    alt=""
+                    width={36}
+                    height={52}
+                    className="rank-poster"
+                    style={{ width: 36, height: 52, objectFit: 'cover' }}
+                  />
                   <span style={{ minWidth: 0 }}>
                     <span style={{ display: 'block', fontSize: 13, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {r.title.title}

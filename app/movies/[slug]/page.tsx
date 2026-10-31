@@ -18,6 +18,7 @@ import { prisma } from '@/lib/prisma';
 import { getImdbReviews, getImdbTitleForCatalogue } from '@/lib/imdbio';
 import ImdbTrailer from '@/components/ImdbTrailer';
 import JarvisAutoReview from '@/components/JarvisAutoReview';
+import PosterImage from '@/components/PosterImage';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -64,7 +65,7 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
 
   const allReviewsForCards = reviews.map((r) => ({
     ...r,
-    title: { id: title.id, slug: title.slug, title: title.title, year: title.year, poster: title.poster, imdbRating: title.imdbRating }
+    title: { id: title.id, slug: title.slug, title: title.title, year: title.year, poster: title.poster, imdbId: title.imdbId, mediaType: title.mediaType, imdbRating: title.imdbRating }
   }));
   const reviewsForCards = allReviewsForCards.filter((review) => !review.sourceLang?.startsWith('jarvis-auto'));
   const myReview = sessionUser ? reviewsForCards.find((r) => r.user?.email === sessionUser.email) ?? null : null;
@@ -107,8 +108,16 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
 
       <div className="detail-hero">
         <div className="detail-poster">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={imdbPoster} alt={`${title.title} poster`} width={500} height={750} />
+          <PosterImage
+            src={title.poster}
+            secondarySrc={imdbData?.coverUrl}
+            title={title.title}
+            year={title.year}
+            mediaType={title.mediaType === 'tv' ? 'tv' : 'movie'}
+            imdbId={title.imdbId}
+            width={500}
+            height={750}
+          />
         </div>
 
         <div className="detail-intro">
@@ -285,8 +294,16 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
             <div className="rank-list">
               {related.map((t) => (
                 <Link key={t.id} href={`/movies/${t.slug}`} className="rank-row">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img className="rank-poster" src={t.poster} alt="" loading="lazy" />
+                  <PosterImage
+                    className="rank-poster"
+                    src={t.poster}
+                    title={t.title}
+                    year={t.year}
+                    mediaType={t.mediaType}
+                    imdbId={t.imdbId}
+                    alt=""
+                    loading="lazy"
+                  />
                   <span className="rank-info">
                     <span className="rn">{t.title}</span>
                     <span className="rm">{t.year}</span>

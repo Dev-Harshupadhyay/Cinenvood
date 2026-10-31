@@ -5,6 +5,7 @@ import LikeButton from './LikeButton';
 import FeatureButton from './FeatureButton';
 import SpoilerText from './SpoilerText';
 import VerdictBlock from './VerdictBlock';
+import PosterImage from '@/components/PosterImage';
 
 type Review = {
   id: string;
@@ -23,7 +24,7 @@ type Review = {
   authorName?: string | null;
   createdAt: Date | string;
   user: { id: string; name: string | null; email: string; image: string | null; role?: string };
-  title: { id: string; slug: string; title: string; year: number; poster: string };
+  title: { id: string; slug: string; title: string; year: number; poster: string; mediaType?: 'movie' | 'tv'; imdbId?: string | null };
   _count: { likes: number; comments: number };
   likedByViewer?: boolean;
 };
@@ -121,8 +122,18 @@ export default function ReviewCard({
       </div>
 
       <Link href={`/movies/${review.title.slug}`} className="rv-movie">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={review.title.poster} alt="" loading="lazy" />
+        <PosterImage
+          src={review.title.poster}
+          title={review.title.title}
+          year={review.title.year}
+          mediaType={review.title.mediaType}
+          imdbId={review.title.imdbId}
+          alt=""
+          loading="lazy"
+          width={46}
+          height={68}
+          className="review-inline-poster"
+        />
         <div>
           <div className="rm-title">{review.title.title}</div>
           <div className="rm-meta">
