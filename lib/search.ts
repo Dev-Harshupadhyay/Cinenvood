@@ -46,7 +46,7 @@ export async function searchEverywhere(input: string): Promise<UnifiedSearchResu
     const communityScore = ratings.length ? ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length : null;
     return {
       key: `catalogue-${row.id}`, title: row.title, year: row.year, poster: row.poster,
-      score: communityScore !== null ? Math.round(communityScore * 10) / 10 : row.imdbRating ?? row.tmdbScore,
+      score: communityScore !== null ? Math.round(communityScore * 10) / 10 : row.imdbRating,
       mediaType: row.mediaType === 'tv' ? 'tv' : 'movie', href: `/movies/${row.slug}`,
       source: 'catalogue'
     };
@@ -67,9 +67,9 @@ export async function searchEverywhere(input: string): Promise<UnifiedSearchResu
       year: Number(item.year) || 0,
       poster: item.cover_url || '/posters/placeholder.svg',
       score: typeof item.rating === 'number' ? item.rating : null,
-      mediaType: item.kind?.toLowerCase().includes('tv') ? 'tv' : 'movie',
+      mediaType: item.kind?.toLowerCase().includes('tv') ? 'tv' as const : 'movie' as const,
       href: `/imdb/${item.imdbId || item.id}`,
-      source: 'imdb',
+      source: 'imdb' as const,
     }));
 
   return [...local.slice(0, 8), ...external.slice(0, 12)].slice(0, 20);
