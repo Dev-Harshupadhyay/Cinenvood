@@ -1,25 +1,62 @@
 # Cinevood IMDbio service
 
-This is a small Python HTTP service that exposes the upstream `imdbio` package to the Next.js application.
+This folder contains a small FastAPI service that runs the Python `imdbio` package. The Next.js app on Vercel calls this service over HTTPS because Vercel's Next.js runtime does not execute Python library code directly.
 
-## Deploy on Render
+IMDbio itself does **not** require an IMDb API key. The service token below is only a private shared secret between your Vercel app and this Render service.
 
-Create a new **Web Service** from the Cinevood repository and configure:
+## Deploy on Render (recommended: Blueprint)
 
-- Root Directory: `imdbio-service`
+The repository now has a root-level `render.yaml`, which Render can detect.
+
+1. Push/merge this branch into the GitHub branch you want Render to deploy.
+2. Open [Render Dashboard](https://dashboard.render.com/).
+3. Click **New +** → **Blueprint**.
+4. Connect the GitHub repository `Dev-Harshupadhyay/Cinenvood`.
+5. Select the branch containing `render.yaml` (currently `feat/imdbio-youtube-trailers`, unless you merge it first).
+6. Render reads the root `render.yaml` and creates the `cinevood-imdbio` web service. Review the settings and apply.
+
+The Blueprint config sets:
+
 - Runtime: Python
-- Build command: `pip install -r requirements.txt`
-- Start command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
-- Health check path: `/health`
+- Root Directory: `imdbio-service`
+- Build Command: `pip install -r requirements.txt`
+- Start Command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+- Health Check Path: `/health`
+- Plan: Free (the service may spin down after inactivity and the first request can be slow)
 
-Set `IMDBIO_SERVICE_TOKEN` to a long random secret in the service environment. The Render blueprint in this folder can also be used as a starting point.
+### If you prefer creating a Web Service manually
 
-## Configure Cinevood
+1. Render Dashboard → **New +** → **Web Service**.
+2. Connect `Dev-Harshupadhyay/Cinenvood` and choose the deployment branch.
+3. Set **Root Directory** to `imdbio-service`.
+4. Set **Runtime** to **Python**.
+5. Set **Build Command** to `pip install -r requirements.txt`.
+6. Set **Start Command** to `uvicorn main:app --host 0.0.0.0 --port $PORT`.
+7. Add an environment variable named `IMDBIO_SERVICE_TOKEN`. Generate a long random secret in Render (or use Render's Generate Value option if shown). Save it.
+8. Create the service and wait for the deploy to finish.
 
-In the Next.js service environment, set:
+After deployment, copy the service's public URL, for example `https://cinevood-imdbio.onrender.com`. Check `https://YOUR-RENDER-URL/health`; it should return JSON with `"ok": true`.
 
-- `IMDBIO_API_URL`: the deployed service base URL, e.g. `https://cinevood-imdbio.onrender.com`
-- `IMDBIO_API_TOKEN`: exactly the same secret as `IMDBIO_SERVICE_TOKEN`
-- `YOUTUBE_API_KEY`: YouTube Data API v3 key for embeddable trailer discovery
+## Configure the Vercel app
 
-IMDbio uses IMDb's public website endpoints and can be affected by upstream changes, rate limits, or WAF challenges. The app degrades gracefully when the service is unavailable. Do not expose the service token or YouTube API key in browser code.
+In Vercel → Cinevood project → **Settings** → **Environment Variables**, add:
+
+| Variable | Value |
+|---|---|
+| `IMDBIO_API_URL` | Your actual Render service URL, without a trailing slash |
+| `IMDBIO_API_TOKEN` | The exact same secret value as Render's `IMDBIO_SERVICE_TOKEN` |
+| `YOUTUBE_API_KEY` | A YouTube Data API v3 key, only for automatic trailer discovery/search |
+
+Select the environments you use (Production, Preview, Development), save, then redeploy the Vercel project.
+
+**Important:** `IMDBIO_API_TOKEN` is not an IMDb-issued token. You create it yourself and copy the same value to both services. Keep it server-side; do not prefix it with `NEXT_PUBLIC_`.
+
+## YouTube trailer behaviour
+
+The YouTube IFrame Player API can play a known YouTube video ID without an API key. However, finding a trailer automatically from a movie title requires YouTube Data API v3, so `YOUTUBE_API_KEY` is needed for the automatic discovery feature. Keep that key server-side too.
+
+## Notes
+
+- IMDbio uses IMDb's public endpoints and does not provide an official IMDb API. IMDb can change its endpoints, throttle requests, or block requests, so availability is not guaranteed.
+- The Render free service may sleep when idle; the first request after sleep can take longer.
+- Do not commit real tokens, API keys, or other secrets to GitHub.
