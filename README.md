@@ -40,7 +40,7 @@ That is a deliberate product decision — it keeps the site legal, advertiser-sa
 | **Admin verdict** | Any review by an ADMIN gets a premium animated card — conic gradient border, Instrument Serif headline, drop cap, PINNED badge, signature |
 | **Dashboard** | Stats (reviews, likes received, comments, watchlist), my reviews, watchlist, editable profile |
 | **Admin panel** | Responsive control room: KPIs, moderation, catalogue, members, evidence-based Jarvis editorial summaries, TMDB import, YouTube trailer search, analytics and audit trail — password-only admin session |
-| **Trailers** | On-demand YouTube trailer discovery by title + year, embeddable-result filtering, an in-page player and YouTube search fallback; saved English/Hindi links remain supported |
+| **Trailers** | Saved English/Hindi links first; otherwise TMDB-linked YouTube trailers are tried before optional YouTube Data API search. In-page player, selected-video YouTube link, and manual search fallback remain available |
 | **Jarvis** | Ask grounded movie questions, draft an editable review with explicit consent, or click **Jarvis Review** on a search result/title page to generate and cache a bilingual owner-style editorial review with a distinct Jarvis verdict score; no catalogue-wide batch generation; uses IMDbio title facts and available non-spoiler reviews |
 | **Auth** | Google OAuth for members; separate `ADMIN_EMAIL` + `ADMIN_PASSWORD` sign-in at `/admin/login`; a Google session alone never grants admin access |
 | **Guest mode** | Signed-out visitors get a `localStorage` guest id and **read-only** access — browse catalogue and read every review, no account created |

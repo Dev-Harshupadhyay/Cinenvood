@@ -31,12 +31,14 @@ Members use `/dashboard` for their own profile, reviews and watchlist. Guests re
 
 ## English + Hindi YouTube trailers
 
-The home hero and movie detail page show a **Watch trailer** button once a trailer is saved. The player offers English/Hindi tabs when both are available. Admin → **Titles** has trailer fields for each movie and a **Search YouTube API** action. Search results are suggestions: select the correct official trailer, then save. This avoids silently attaching the wrong video.
+On a movie/series detail page, the **Trailer** action first checks TMDB's videos linked to that title (using the saved TMDB ID, or an exact title/year/type match). If TMDB has no YouTube trailer/teaser, the app can search YouTube directly. Saved English/Hindi trailer IDs remain the curated first choice; when a saved video is unavailable, **Find another trailer** opens the fallback finder. The player also links straight to the selected YouTube video if embedding is blocked.
 
-Create a YouTube Data API v3 key in Google Cloud Console, enable **YouTube Data API v3**, and add this server-only variable in Vercel:
+Admin → **Titles** has separate English/Hindi trailer fields and a **Search YouTube API** action. Search results are suggestions: select the correct official trailer, then save. This avoids silently attaching the wrong video.
+
+A TMDB-linked YouTube video can work with the existing server-side `TMDB_API_KEY`. For broader on-demand search and admin suggestions, create a YouTube Data API v3 key in Google Cloud Console, enable **YouTube Data API v3**, and add this server-only variable in Vercel:
 
 ```env
 YOUTUBE_API_KEY=your-youtube-data-api-key
 ```
 
-Redeploy afterward. The key is only used by the server-side admin search route; it is never sent to the browser. If no key is configured, manual YouTube URLs/video IDs can still be pasted and saved. The existing `TMDB_API_KEY` is separate and does not need to be changed.
+Redeploy afterward. The key is only used by server-side routes; it is never sent to the browser. If no YouTube key is configured and TMDB has no linked trailer, the title page still offers a direct YouTube search link. Manual YouTube URLs/video IDs can also be pasted and saved. `TMDB_API_KEY` remains separate and does not need to be changed for this feature if it is already configured.

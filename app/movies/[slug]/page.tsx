@@ -67,6 +67,9 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
     ...r,
     title: { id: title.id, slug: title.slug, title: title.title, year: title.year, poster: title.poster, imdbId: title.imdbId, mediaType: title.mediaType, imdbRating: title.imdbRating }
   }));
+  const savedJarvisReview = reviews.find((review) =>
+    review.editorial && review.authorName?.trim().toLowerCase() === 'jarvis' && review.sourceLang?.startsWith('jarvis-auto')
+  ) ?? null;
   const reviewsForCards = allReviewsForCards.filter((review) => !review.sourceLang?.startsWith('jarvis-auto'));
   const myReview = sessionUser ? reviewsForCards.find((r) => r.user?.email === sessionUser.email) ?? null : null;
   const related = similar.filter((t) => t.id !== title.id).slice(0, 5);
@@ -164,8 +167,16 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
             <Link href="#review" className="btn btn-primary">
               Write a review
             </Link>
-            <Link href={`/jarvis?titleId=${encodeURIComponent(title.id)}`} className="btn btn-ghost">Ask Jarvis</Link>
-            {title.trailerEn || title.trailerHi ? <TrailerModal title={title.title} trailerEn={title.trailerEn} trailerHi={title.trailerHi} /> : <ImdbTrailer title={title.title} year={title.year} />}
+            <Link href={`/jarvis?titleId=${encodeURIComponent(title.id)}`} className="btn btn-ghost">Ask Jarvis a question</Link>
+            <Link href="#jarvis-review" className="btn btn-ghost">Jarvis Review</Link>
+            {title.trailerEn || title.trailerHi ? <TrailerModal title={title.title} trailerEn={title.trailerEn} trailerHi={title.trailerHi} /> : null}
+            <ImdbTrailer
+              title={title.title}
+              year={title.year}
+              tmdbId={title.tmdbId}
+              mediaType={title.mediaType === 'tv' ? 'tv' : 'movie'}
+              buttonLabel={title.trailerEn || title.trailerHi ? 'Find another trailer' : 'Trailer'}
+            />
           </div>
 
           {displayCast.length > 0 ? (
@@ -200,16 +211,7 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
       <div className="divider-line" style={{ margin: '30px 0 22px' }} />
 
       <div className="split">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }} id="review">
-          <ReviewComposer
-            titleId={title.id}
-            titleName={title.title}
-            authed={Boolean(sessionUser)}
-            existing={myReview ? { id: myReview.id, rating: myReview.rating, headline: myReview.headline, body: myReview.body, spoiler: myReview.spoiler } : null}
-          />
-
-          <JarvisAutoReview titleId={title.id} imdbId={title.imdbId} title={title.title} />
-
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, scrollMarginTop: 92 }} id="review">
           <div className="section-head" style={{ marginBottom: 0 }}>
             <div>
               <div className="eyebrow">Community</div>
@@ -217,6 +219,30 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
             </div>
             <EditionSwitch current={edition} compact />
           </div>
+
+          <div id="jarvis-review" style={{ scrollMarginTop: 92 }}>
+            <JarvisAutoReview
+              titleId={title.id}
+              imdbId={title.imdbId}
+              title={title.title}
+              initialReview={savedJarvisReview ? {
+                id: savedJarvisReview.id,
+                rating: savedJarvisReview.rating,
+                headlineHi: savedJarvisReview.headlineHi,
+                bodyHi: savedJarvisReview.bodyHi,
+                headlineEn: savedJarvisReview.headlineEn,
+                bodyEn: savedJarvisReview.bodyEn
+              } : null}
+              initialImdbRating={imdbRating}
+            />
+          </div>
+
+          <ReviewComposer
+            titleId={title.id}
+            titleName={title.title}
+            authed={Boolean(sessionUser)}
+            existing={myReview ? { id: myReview.id, rating: myReview.rating, headline: myReview.headline, body: myReview.body, spoiler: myReview.spoiler } : null}
+          />
 
           {reviewsForCards.length === 0 ? (
             <div className="empty">

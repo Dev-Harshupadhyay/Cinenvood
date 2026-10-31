@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { clientIp, LIMITS, rateLimit } from '@/lib/rate-limit';
+import { fetchTitleVideos, searchTitles, tmdbConfigured, type MediaType, type TmdbVideo } from '@/lib/tmdb';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,8 +27,55 @@ type TrailerResult = {
   likelyOfficial: boolean;
 };
 
+function normalizeTitle(value: string) {
+  return value.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, ' ').trim();
+}
+
 function isLikelyOfficial(title: string, channel: string) {
   return /\bofficial\b/i.test(`${title} ${channel}`);
+}
+
+async function findTmdbTrailers(title: string, year: number, mediaType: MediaType, requestedTmdbId: number | null): Promise<TrailerResult[]> {
+  if (!tmdbConfigured()) return [];
+  let tmdbId = requestedTmdbId;
+  if (!tmdbId) {
+    const results = (await searchTitles(title)).results;
+    const wanted = normalizeTitle(title);
+    const match = results
+      .filter((item) => item.media_type === mediaType)
+      .filter((item) => normalizeTitle(item.title ?? item.name ?? '') === wanted)
+      .filter((item) => {
+        const resultYear = Number((item.release_date ?? item.first_air_date ?? '').slice(0, 4)) || 0;
+        return !year || !resultYear || Math.abs(resultYear - year) <= 1;
+      })
+      .sort((a, b) => {
+        const yearOf = (value: typeof a) => Number((value.release_date ?? value.first_air_date ?? '').slice(0, 4)) || 0;
+        return Number(yearOf(b) === year) - Number(yearOf(a) === year);
+      })[0];
+    tmdbId = match?.id ?? null;
+  }
+  if (!tmdbId) return [];
+
+  const isPlayableCandidate = (video: TmdbVideo) =>
+    video.site === 'YouTube' && (video.type === 'Trailer' || video.type === 'Teaser') && /^[A-Za-z0-9_-]{11}$/.test(video.key);
+  let videos = (await fetchTitleVideos(tmdbId, mediaType, 'en-US')).filter(isPlayableCandidate);
+  if (!videos.length) videos = (await fetchTitleVideos(tmdbId, mediaType, 'hi-IN')).filter(isPlayableCandidate);
+  return videos
+    .sort((a, b) =>
+      Number(b.official) - Number(a.official) ||
+      Number(b.type === 'Trailer') - Number(a.type === 'Trailer') ||
+      Number(b.iso_639_1 === 'en') - Number(a.iso_639_1 === 'en')
+    )
+    .slice(0, 8)
+    .map((video) => ({
+      videoId: video.key,
+      title: video.name || `${title} ${video.type.toLowerCase()}`,
+      channelTitle: video.official ? 'Official trailer listing · TMDB' : 'TMDB video listing',
+      thumbnail: `https://img.youtube.com/vi/${video.key}/hqdefault.jpg`,
+      publishedAt: video.published_at ?? null,
+      watchUrl: `https://www.youtube.com/watch?v=${encodeURIComponent(video.key)}`,
+      likelyOfficial: video.official
+    }));
 }
 
 async function searchYouTube(key: string, query: string) {
@@ -76,20 +124,32 @@ export async function GET(req: Request) {
   const url = new URL(req.url);
   const title = (url.searchParams.get('title') || '').trim().slice(0, 100);
   const yearValue = (url.searchParams.get('year') || '').trim();
-  const year = /^\d{4}$/.test(yearValue) ? yearValue : '';
+  const year = /^\d{4}$/.test(yearValue) ? Number(yearValue) : 0;
+  const mediaType: MediaType = url.searchParams.get('mediaType') === 'tv' ? 'tv' : 'movie';
+  const tmdbIdValue = (url.searchParams.get('tmdbId') || '').trim();
+  const parsedTmdbId = /^\d+$/.test(tmdbIdValue) ? Number(tmdbIdValue) : 0;
+  const tmdbId = Number.isSafeInteger(parsedTmdbId) && parsedTmdbId > 0 ? parsedTmdbId : null;
   if (title.length < 2) return NextResponse.json({ results: [], code: 'invalid_title' }, { status: 400 });
 
   const gate = await rateLimit(`imdb-trailer:${clientIp(req)}`, LIMITS.search.limit, LIMITS.search.windowMs);
   if (!gate.ok) return NextResponse.json({ results: [], limited: true, code: 'rate_limited' }, { status: 429 });
 
-  const key = process.env.YOUTUBE_API_KEY?.trim();
-  if (!key) return NextResponse.json({ results: [], configured: false, code: 'missing_api_key' }, { status: 503 });
-
   try {
-    // Keep the first query precise, but do not require YouTube's extra syndicated flag.
-    // If there are no matches, retry with a broader query (still embeddable for IFrame playback).
-    const precise = [title, year, 'official trailer'].filter(Boolean).join(' ');
-    const fallback = [title, year, 'trailer'].filter(Boolean).join(' ');
+    const tmdbResults = await findTmdbTrailers(title, year, mediaType, tmdbId).catch(() => []);
+    if (tmdbResults.length) {
+      return NextResponse.json({ results: tmdbResults, configured: true, source: 'tmdb' }, {
+        headers: { 'Cache-Control': 'public, s-maxage=1800, stale-while-revalidate=3600' }
+      });
+    }
+
+    const key = process.env.YOUTUBE_API_KEY?.trim();
+    if (!key) {
+      return NextResponse.json({ results: [], configured: false, code: 'no_trailer_source' }, { status: 503 });
+    }
+
+    // TMDB video records are tried first; YouTube search is the broader second source.
+    const precise = [title, year || '', 'official trailer'].filter(Boolean).join(' ');
+    const fallback = [title, year || '', 'trailer'].filter(Boolean).join(' ');
     let result: Awaited<ReturnType<typeof searchYouTube>> | null = null;
     let parsed: TrailerResult[] = [];
     let usedFallback = false;
@@ -99,7 +159,6 @@ export async function GET(req: Request) {
       parsed = parseResults(result.data.items ?? []);
     } catch {
       if (fallback === precise) throw new Error('YouTube search request failed');
-      // A transient failure on the narrow query should not prevent the broader retry.
       usedFallback = true;
     }
     if (!parsed.length && fallback !== precise) {
@@ -110,7 +169,7 @@ export async function GET(req: Request) {
     }
     parsed.sort((a, b) => Number(b.likelyOfficial) - Number(a.likelyOfficial));
 
-    return NextResponse.json({ results: parsed, configured: true, query: usedFallback ? fallback : precise }, {
+    return NextResponse.json({ results: parsed, configured: true, source: 'youtube', query: usedFallback ? fallback : precise }, {
       headers: { 'Cache-Control': 'public, s-maxage=1800, stale-while-revalidate=3600' }
     });
   } catch {

@@ -34,17 +34,19 @@ function isReviewData(value: unknown): value is ReviewData {
     (value.bodyEn === null || typeof value.bodyEn === 'string');
 }
 
-export default function JarvisAutoReview({ imdbId, titleId, title, compact = false }: {
+export default function JarvisAutoReview({ imdbId, titleId, title, compact = false, initialReview = null, initialImdbRating = null }: {
   imdbId?: string | null;
   titleId?: string;
   title?: string;
   compact?: boolean;
+  initialReview?: ReviewData | null;
+  initialImdbRating?: number | null;
 }) {
-  const [review, setReview] = useState<ReviewData | null>(null);
-  const [imdbRating, setImdbRating] = useState<number | null>(null);
-  const [sources, setSources] = useState('');
+  const [review, setReview] = useState<ReviewData | null>(initialReview);
+  const [imdbRating, setImdbRating] = useState<number | null>(initialImdbRating);
+  const [sources, setSources] = useState(initialReview ? 'Saved Jarvis review · shared with everyone' : '');
   const [language, setLanguage] = useState<'hi' | 'en'>('hi');
-  const [state, setState] = useState<State>('idle');
+  const [state, setState] = useState<State>(initialReview ? 'ready' : 'idle');
   const [message, setMessage] = useState('');
 
   async function requestReview() {
