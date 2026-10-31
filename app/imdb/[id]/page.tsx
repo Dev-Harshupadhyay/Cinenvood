@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getImdbReviews, getImdbTitle } from '@/lib/imdbio';
 import ImdbTrailer from '@/components/ImdbTrailer';
+import JarvisAutoReview from '@/components/JarvisAutoReview';
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -81,6 +82,8 @@ export default async function ImdbTitlePage({ params }: Props) {
           </div>
         </section>
       ) : null}
+
+      <div style={{ marginTop: 28 }}><JarvisAutoReview imdbId={title.imdbId} /></div>
 
       <section style={{ marginTop: 38 }}>
         <div className="section-head">

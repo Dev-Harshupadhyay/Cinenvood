@@ -33,12 +33,12 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     }),
     prisma.titleLike.findMany({
       where: { userId: user.id, kind: 'LIKE' },
-      include: { title: { include: { reviews: { where: { status: 'PUBLISHED' }, select: { rating: true } }, _count: { select: { reviews: true, likes: true } } } } },
+      include: { title: { include: { reviews: { where: { status: 'PUBLISHED', editorial: false }, select: { rating: true } }, _count: { select: { reviews: { where: { status: 'PUBLISHED', editorial: false } }, likes: true } } } } },
       orderBy: { createdAt: 'desc' }
     }),
     prisma.titleLike.findMany({
       where: { userId: user.id, kind: 'WATCHLIST' },
-      include: { title: { include: { reviews: { where: { status: 'PUBLISHED' }, select: { rating: true } }, _count: { select: { reviews: true, likes: true } } } } },
+      include: { title: { include: { reviews: { where: { status: 'PUBLISHED', editorial: false }, select: { rating: true } }, _count: { select: { reviews: { where: { status: 'PUBLISHED', editorial: false } }, likes: true } } } } },
       orderBy: { createdAt: 'desc' }
     }),
     prisma.reviewLike.count({ where: { review: { userId: user.id } } }),

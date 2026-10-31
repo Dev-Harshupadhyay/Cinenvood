@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { searchEverywhere } from '@/lib/search';
+import JarvisAutoReview from '@/components/JarvisAutoReview';
 
 export const metadata: Metadata = {
   title: 'Search movies & series',
@@ -14,6 +15,13 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
   const results = query.length >= 2 ? await searchEverywhere(query).catch(() => []) : [];
   const films = results.filter((result) => result.mediaType === 'movie');
   const series = results.filter((result) => result.mediaType === 'tv');
+  const normalizeTitle = (value: string) => value.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, ' ').trim();
+  const requestedTitle = normalizeTitle(query);
+  const titleWithoutReleaseYear = normalizeTitle(query.replace(/\s+(?:19|20)\d{2}\s*$/, ''));
+  const primaryMatch = results.find((result) => {
+    const candidate = normalizeTitle(result.title);
+    return candidate === requestedTitle || candidate === titleWithoutReleaseYear;
+  });
 
   function cards(items: typeof results) {
     return (
@@ -46,6 +54,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
       ) : (
         <>
           <div className="search-results-count">{results.length} matching titles · {films.length} films · {series.length} series</div>
+          {primaryMatch && (primaryMatch.imdbId || primaryMatch.titleId) ? <JarvisAutoReview imdbId={primaryMatch.imdbId} titleId={primaryMatch.titleId} compact /> : null}
           {films.length ? <section className="search-results-section"><div className="panel-title"><span>Films</span><span>{films.length}</span></div>{cards(films)}</section> : null}
           {series.length ? <section className="search-results-section"><div className="panel-title"><span>TV series</span><span>{series.length}</span></div>{cards(series)}</section> : null}
         </>

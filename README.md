@@ -41,7 +41,7 @@ That is a deliberate product decision — it keeps the site legal, advertiser-sa
 | **Dashboard** | Stats (reviews, likes received, comments, watchlist), my reviews, watchlist, editable profile |
 | **Admin panel** | Responsive control room: KPIs, moderation, catalogue, members, evidence-based Jarvis editorial summaries, TMDB import, YouTube trailer search, analytics and audit trail — password-only admin session |
 | **Trailers** | On-demand YouTube trailer discovery by title + year, embeddable-result filtering, an in-page player and YouTube search fallback; saved English/Hindi links remain supported |
-| **Jarvis** | Ask grounded movie questions or draft a review in your own style; the draft tool uses IMDbio search, poster thumbnails, cast, your own past reviews + notes, and server-side Gemini with explicit consent and no auto-publish |
+| **Jarvis** | Ask grounded movie questions, draft an editable review with explicit consent, or generate/cache a public bilingual AI editorial review in the owner's style when no owner-authored manual review exists; uses IMDbio title facts and available non-spoiler reviews |
 | **Auth** | Google OAuth for members; separate `ADMIN_EMAIL` + `ADMIN_PASSWORD` sign-in at `/admin/login`; a Google session alone never grants admin access |
 | **Guest mode** | Signed-out visitors get a `localStorage` guest id and **read-only** access — browse catalogue and read every review, no account created |
 | **Rate limiting** | Two-layer (instance memory + shared Postgres counter) on search, admin pages/actions, sign-in, reviews, comments, likes and analytics beacons — 429 + `Retry-After`, no bypass flag |
@@ -154,7 +154,7 @@ TMDB_API_KEY=""                      # v3 key or v4 read token — both auto-det
 YOUTUBE_API_KEY=""                   # optional: YouTube Data API v3 trailer search
 IMDBIO_API_URL=""                    # optional: Render FastAPI service URL
 IMDBIO_API_TOKEN=""                  # same private token configured on Render
-GEMINI_API_KEY=""                    # optional: Jarvis Q&A, personal-style review drafts and translations
+GEMINI_API_KEY=""                    # optional: Jarvis Q&A, cached public reviews, consent-gated drafts and translations
 OMDB_API_KEY=""                      # optional: RT / Metacritic scores
 ```
 

@@ -11,8 +11,11 @@ type Review = {
   rating: number;
   headline: string | null;
   headlineEn?: string | null;
+  headlineHi?: string | null;
   body: string;
   bodyEn?: string | null;
+  bodyHi?: string | null;
+  sourceLang?: string | null;
   spoiler: boolean;
   featured?: boolean;
   homeSpot?: boolean;
@@ -46,6 +49,7 @@ export default function ReviewCard({
   const verified = isEditorial || isAdmin;
   // Jarvis = the house AI. Uska apna chip aur glyph, taaki AI-written review dikh jaaye.
   const isJarvis = isEditorial && byline.trim().toLowerCase() === 'jarvis';
+  const isAutoJarvis = isJarvis && review.sourceLang === 'jarvis-auto';
   const supporters = review._count.likes;
 
   return (
@@ -92,7 +96,7 @@ export default function ReviewCard({
           </div>
           <div className="rv-role">
             {isJarvis ? (
-              <span className="rv-role-chip rv-role-chip--ai">JARVIS · AI GHOSTWRITER</span>
+              <span className="rv-role-chip rv-role-chip--ai">{isAutoJarvis ? 'JARVIS · AI REVIEW' : 'JARVIS · AI GHOSTWRITER'}</span>
             ) : isEditorial ? (
               <span className="rv-role-chip rv-role-chip--gold">FOUNDER · EDITOR-IN-CHIEF</span>
             ) : review.user.role === 'ADMIN' ? (
@@ -145,7 +149,7 @@ export default function ReviewCard({
       )}
 
       {/* score comes AFTER the review so the words get read first */}
-      <VerdictBlock rating={review.rating} size="card" edition={edition} />
+      {!isAutoJarvis ? <VerdictBlock rating={review.rating} size="card" edition={edition} /> : null}
 
       <div className="rv-foot">
         <LikeButton

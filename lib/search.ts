@@ -9,6 +9,7 @@ export type UnifiedSearchResult = {
   score: number | null;
   mediaType: 'movie' | 'tv';
   href: string;
+  titleId?: string;
   source: 'catalogue' | 'imdb';
   imdbId?: string;
   overview?: string;
@@ -35,7 +36,7 @@ export async function searchEverywhere(input: string): Promise<UnifiedSearchResu
       select: {
         id: true, slug: true, imdbId: true, mediaType: true, title: true, year: true,
         poster: true, imdbRating: true, tmdbScore: true,
-        reviews: { where: { status: 'PUBLISHED' }, select: { rating: true } }
+        reviews: { where: { status: 'PUBLISHED', editorial: false }, select: { rating: true } }
       }
     }).catch(() => []),
     searchImdbTitles(q).catch(() => [])
@@ -49,6 +50,7 @@ export async function searchEverywhere(input: string): Promise<UnifiedSearchResu
       key: `catalogue-${row.id}`, title: row.title, year: row.year, poster: row.poster,
       score: communityScore !== null ? Math.round(communityScore * 10) / 10 : row.tmdbScore ?? row.imdbRating,
       mediaType: (row.mediaType === 'tv' ? 'tv' : 'movie') as 'tv' | 'movie', href: `/movies/${row.slug}`,
+      titleId: row.id,
       source: 'catalogue' as const,
       ...(row.imdbId ? { imdbId: row.imdbId } : {})
     };
