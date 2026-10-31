@@ -34,6 +34,26 @@ function isReviewData(value: unknown): value is ReviewData {
     (value.bodyEn === null || typeof value.bodyEn === 'string');
 }
 
+function conciseDisplay(body: string | null) {
+  const fullText = (body ?? '').replace(/\s+/g, ' ').trim();
+  const sentences = fullText.match(/[^.!?।]+[.!?।]+|[^.!?।]+$/g) ?? [fullText];
+  const kept: string[] = [];
+  let wordCount = 0;
+  for (const sentence of sentences) {
+    if (kept.length >= 3) break;
+    const words = sentence.trim().split(/\s+/).filter(Boolean);
+    const remaining = 75 - wordCount;
+    if (words.length > remaining) {
+      if (remaining > 0 && kept.length === 0) kept.push(`${words.slice(0, remaining).join(' ')}…`);
+      break;
+    }
+    kept.push(sentence.trim());
+    wordCount += words.length;
+  }
+  const text = kept.join(' ').trim();
+  return { text, shortened: text !== fullText };
+}
+
 export default function JarvisAutoReview({ imdbId, titleId, title, compact = false, initialReview = null, initialImdbRating = null }: {
   imdbId?: string | null;
   titleId?: string;
@@ -84,7 +104,7 @@ export default function JarvisAutoReview({ imdbId, titleId, title, compact = fal
 
   if (state === 'ready' && review) {
     const headline = language === 'hi' ? review.headlineHi : review.headlineEn;
-    const body = language === 'hi' ? review.bodyHi : review.bodyEn;
+    const body = conciseDisplay(language === 'hi' ? review.bodyHi : review.bodyEn);
     return (
       <article className={`panel jarvis-auto-review${compact ? ' jarvis-auto-review--compact' : ''}`} data-jarvis-auto-review="true">
         <div className="panel-title">
@@ -101,7 +121,8 @@ export default function JarvisAutoReview({ imdbId, titleId, title, compact = fal
           <button type="button" role="tab" aria-selected={language === 'en'} data-active={language === 'en'} onClick={() => setLanguage('en')}>English</button>
         </div>
         {headline ? <h3 className="jarvis-auto-review-headline">{headline}</h3> : null}
-        <p className="jarvis-auto-review-copy">{body}</p>
+        <p className="jarvis-auto-review-copy">{body.text}</p>
+        {body.shortened ? <p className="faint">Showing a concise excerpt from the saved review.</p> : null}
         <p className="jarvis-auto-review-disclosure">AI-generated in the owner’s editorial style from published review examples and IMDbio information. It is not a personal viewing claim by the owner.</p>
       </article>
     );
