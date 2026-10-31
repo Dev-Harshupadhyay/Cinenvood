@@ -64,8 +64,8 @@ export default function ImdbTrailer({ title, year }: { title: string; year?: num
 
   return (
     <>
-      <button type="button" className="btn btn-primary" onClick={findTrailers}>
-        <span aria-hidden="true">▶</span> Find trailer
+      <button type="button" className="btn btn-primary trailer-search-button" onClick={findTrailers}>
+        <span aria-hidden="true">▶</span> Trailer
       </button>
       {open ? (
         <div className="modal-backdrop" role="presentation" onClick={() => setOpen(false)}>
