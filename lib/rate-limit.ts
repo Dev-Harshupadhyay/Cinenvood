@@ -93,5 +93,8 @@ export const LIMITS = {
   like: { limit: 45, windowMs: 60_000 },
   track: { limit: 200, windowMs: 60_000 },
   profile: { limit: 20, windowMs: 10 * 60_000 },
-  ghostwrite: { limit: 8, windowMs: 10 * 60_000 }
+  ghostwrite: { limit: 8, windowMs: 10 * 60_000 },
+  jarvis: { limit: 12, windowMs: 60_000 },
+  jarvisReview: { limit: 5, windowMs: 15 * 60_000 },
+  jarvisAutoReview: { limit: 4, windowMs: 15 * 60_000 }
 } as const;

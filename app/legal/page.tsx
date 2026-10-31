@@ -14,17 +14,18 @@ export default function LegalPage() {
       <div className="panel" style={{ marginBottom: 14 }}>
         <h2 style={{ fontSize: 17, marginBottom: 8 }}>1. Reviews and metadata only</h2>
         <p style={{ fontSize: 14, lineHeight: 1.85, color: 'var(--muted)' }}>
-          CINE·MOOD ek <b>editorial aur community review platform</b> hai. Hum koi film, series, audio ya video file host,
-          stream, embed ya distribute nahi karte — na koi download link, na torrent, na mirror. Site par jo bhi media dikhta hai
-          wo third-party metadata providers (jaise TMDB) ke posters/backdrops hain, jo unke attribution terms ke under use hote hain.
+          CINE·MOOD ek <b>editorial aur community review platform</b> hai. Hum full film ya episode files host ya distribute nahi karte —
+          na download links, torrents, na mirrors. Trailer playback official YouTube IFrame Player ke zariye hota hai. Posters aur
+          metadata third-party providers se aate hain; unke respective attribution terms apply hote hain.
         </p>
       </div>
 
       <div className="panel" style={{ marginBottom: 14 }}>
         <h2 style={{ fontSize: 17, marginBottom: 8 }}>2. Metadata attribution</h2>
         <p style={{ fontSize: 14, lineHeight: 1.85, color: 'var(--muted)' }}>
-          This product uses the TMDB API but is not endorsed or certified by TMDB. Posters, backdrops, titles, synopsis aur cast
-          jaankari unke respective owners ki property hai aur sirf identification/commentary ke purpose se dikhayi jaati hai.
+          This product uses the TMDB API but is not endorsed or certified by TMDB. IMDb metadata is accessed via the third-party IMDbio
+          service; CINE·MOOD is not endorsed by IMDb. Posters, backdrops, titles, synopsis aur cast jaankari unke respective owners
+          ki property hai aur identification/commentary ke purpose se dikhayi jaati hai.
         </p>
       </div>
 
@@ -54,7 +55,7 @@ export default function LegalPage() {
         <p style={{ fontSize: 14, lineHeight: 1.85, color: 'var(--muted)' }}>
           Hum sirf wahi data store karte hain jo account banane ke liye chahiye: naam, email, avatar URL (Google se), reviews,
           comments aur watchlist. Passwords store nahi hote — Google OAuth ya demo email login use hota hai. Koi data bechа
-          nahi karte. Account delete karne ke liye admin se request karein.
+          nahi karte. Account delete karne ke liye admin se request karein. Jarvis Q&amp;A ke liye selected title ka catalogue metadata aur published, non-spoiler reviews configured Google Gemini API ko bheje jaate hain. Movie search/detail kholne par, agar owner ka manual editorial review nahi hai, Jarvis IMDbio title metadata aur available public non-spoiler review evidence ke saath owner ke apne published non-spoiler reviews se high-level style samples use karke bilingual review bana sakta hai. Ye AI editorial review public hota hai aur future visitors ke liye cache hota hai; ise owner ka personal viewing claim nahi maana jaana chahiye. Owner ka manual review hamesha priority leta hai. Is mode mein owner ke style samples Gemini ko bheje jaate hain; doosre users ke reviews, profiles, email ya private account details style samples ke roop mein nahi bheje jaate. Review-draft mode alag hai: aapki explicit consent par notes, IMDbio title metadata, aur aapke apne up to five published non-spoiler reviews (ya aapka pasted writing sample) Gemini ko bheje jaate hain; drafts auto-save ya auto-publish nahi hote. AI content galat ho sakta hai, isliye source/details verify karein.
         </p>
       </div>
 

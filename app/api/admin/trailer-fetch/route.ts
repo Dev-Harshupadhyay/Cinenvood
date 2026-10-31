@@ -12,34 +12,52 @@ type YoutubeItem = {
   id?: { kind?: string; videoId?: string };
   snippet?: { title?: string; channelTitle?: string; thumbnails?: { medium?: { url?: string }; default?: { url?: string } } };
 };
+type YoutubeResponse = { items?: YoutubeItem[]; error?: { errors?: { reason?: string }[] } };
+type YoutubeCandidate = { key: string; title: string; channel: string; thumbnail: string | null; likelyOfficial: boolean };
 
-async function searchTrailer(apiKey: string, query: string, language: string, region: string) {
+class YoutubeSearchError extends Error {
+  constructor(message: string, readonly status: number) {
+    super(message);
+  }
+}
+
+async function searchTrailer(apiKey: string, query: string, language: string, region: string): Promise<YoutubeCandidate[]> {
   const params = new URLSearchParams({
-    part: 'snippet',
-    type: 'video',
-    maxResults: '5',
-    q: query,
-    videoDuration: 'short',
-    videoEmbeddable: 'true',
-    safeSearch: 'moderate',
-    relevanceLanguage: language,
-    regionCode: region,
-    key: apiKey
+    part: 'snippet', type: 'video', maxResults: '5', q: query,
+    videoDuration: 'short', videoEmbeddable: 'true', safeSearch: 'moderate',
+    relevanceLanguage: language, regionCode: region, key: apiKey
   });
   const response = await fetch(`https://www.googleapis.com/youtube/v3/search?${params}`, {
     headers: { accept: 'application/json' },
+    signal: AbortSignal.timeout(7000),
     cache: 'no-store'
   });
-  const data = (await response.json().catch(() => ({}))) as { items?: YoutubeItem[]; error?: { message?: string } };
-  if (!response.ok) throw new Error(data.error?.message ?? `YouTube API returned ${response.status}`);
+  const data = await response.json().catch(() => ({})) as YoutubeResponse;
+  if (!response.ok) {
+    const reason = data.error?.errors?.[0]?.reason;
+    if (reason === 'quotaExceeded' || reason === 'dailyLimitExceeded') {
+      throw new YoutubeSearchError('YouTube search quota is exhausted for now.', 429);
+    }
+    if (reason === 'keyInvalid' || reason === 'accessNotConfigured' || response.status === 403) {
+      throw new YoutubeSearchError('YouTube API is unavailable. Check the server key and Data API settings.', 503);
+    }
+    throw new YoutubeSearchError('YouTube search is temporarily unavailable.', 502);
+  }
+
   return (data.items ?? [])
-    .filter((item) => item.id?.kind === 'youtube#video' && item.id.videoId)
-    .map((item) => ({
-      key: item.id!.videoId!,
-      title: item.snippet?.title ?? 'YouTube video',
-      channel: item.snippet?.channelTitle ?? 'YouTube channel',
-      thumbnail: item.snippet?.thumbnails?.medium?.url ?? item.snippet?.thumbnails?.default?.url ?? null
-    }));
+    .filter((item) => item.id?.kind === 'youtube#video' && /^[A-Za-z0-9_-]{11}$/.test(item.id.videoId ?? ''))
+    .map((item) => {
+      const title = item.snippet?.title ?? 'YouTube video';
+      const channel = item.snippet?.channelTitle ?? 'YouTube channel';
+      return {
+        key: item.id!.videoId!,
+        title,
+        channel,
+        thumbnail: item.snippet?.thumbnails?.medium?.url ?? item.snippet?.thumbnails?.default?.url ?? null,
+        likelyOfficial: /\bofficial\b/i.test(`${title} ${channel}`)
+      };
+    })
+    .sort((a, b) => Number(b.likelyOfficial) - Number(a.likelyOfficial));
 }
 
 export async function POST(req: Request) {
@@ -67,7 +85,7 @@ export async function POST(req: Request) {
     ]);
     return NextResponse.json({ en, hi, query: title.title });
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'YouTube search failed';
-    return NextResponse.json({ error: message }, { status: 502 });
+    if (error instanceof YoutubeSearchError) return NextResponse.json({ error: error.message }, { status: error.status });
+    return NextResponse.json({ error: 'YouTube search is temporarily unavailable.' }, { status: 502 });
   }
 }

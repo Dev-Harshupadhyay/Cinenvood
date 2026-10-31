@@ -20,6 +20,11 @@ const TABS = [
     )
   },
   {
+    href: '/jarvis',
+    label: 'Jarvis',
+    icon: <path d="m12 3 1.9 5.8L20 11l-6.1 2.2L12 19l-2-5.8L4 11l6-2.2z" />
+  },
+  {
     href: '/reviews',
     label: 'Reviews',
     icon: <path d="M21 12a8 8 0 0 1-11.5 7.2L4 21l1.8-5.5A8 8 0 1 1 21 12z" />

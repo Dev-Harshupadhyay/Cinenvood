@@ -32,11 +32,14 @@ export async function POST(req: Request) {
   if (!film) return NextResponse.json({ error: 'Title not found' }, { status: 404 });
 
   const samples = await prisma.review.findMany({
-    where: { editorial: true, body: { not: '' } },
+    where: { titleId: film.id, status: 'PUBLISHED', spoiler: false, editorial: false, body: { not: '' } },
     orderBy: { createdAt: 'desc' },
-    take: 3,
-    select: { body: true }
+    take: 10,
+    select: { body: true, headline: true, rating: true }
   });
+  if (samples.length === 0) {
+    return NextResponse.json({ error: 'Jarvis needs at least one published, non-spoiler community review to create a grounded summary.' }, { status: 409 });
+  }
 
   const cast = (() => {
     try {
@@ -57,7 +60,7 @@ export async function POST(req: Request) {
       cast,
       imdbRating: film.imdbRating
     },
-    samples: samples.map((s) => ({ text: s.body })),
+    samples: samples.map((s) => ({ text: s.body, rating: s.rating, headline: s.headline })),
     notes: parsed.data.notes,
     ratingHint: parsed.data.rating ?? null
   });

@@ -15,6 +15,9 @@ import EditionSwitch from '@/components/EditionSwitch';
 import TrailerModal from '@/components/TrailerModal';
 import { avatarGradient, formatRuntime, initials } from '@/lib/format';
 import { prisma } from '@/lib/prisma';
+import { getImdbReviews, getImdbTitle } from '@/lib/imdbio';
+import ImdbTrailer from '@/components/ImdbTrailer';
+import JarvisAutoReview from '@/components/JarvisAutoReview';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -34,6 +37,19 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
   const [title, sessionUser, edition] = await Promise.all([getTitleBySlug(slug), getSessionUser(), getEdition()]);
   if (!title) notFound();
 
+  const [imdbData, imdbReviewResults] = title.imdbId
+    ? await Promise.all([getImdbTitle(title.imdbId), getImdbReviews(title.imdbId)])
+    : [null, []];
+  const imdbReviews = imdbReviewResults.filter((review) => review.spoiler === false);
+  const imdbRating = imdbData?.rating ?? (title.imdbId ? title.imdbRating : null);
+  const imdbPoster = imdbData?.coverUrl || title.poster;
+  const imdbOverview = imdbData?.plot || imdbData?.summaries[0] || title.overview;
+  const imdbGenres = imdbData?.genres.length ? imdbData.genres : title.genres;
+  const imdbRuntime = imdbData?.duration ?? title.runtime;
+  const imdbDirector = imdbData?.directors.map((person) => person.name).filter(Boolean).join(', ') || title.director;
+  const displayCast: { name: string; role?: string; img?: string | null }[] = imdbData?.stars.length
+    ? imdbData.stars.slice(0, 12).map((person) => ({ name: person.name, role: person.characters.join(', '), img: person.pictureUrl }))
+    : title.cast;
   const viewerId = sessionUser?.id;
   const [likes, watch, similar, reviews] = await Promise.all([
     viewerId ? prisma.titleLike.findUnique({ where: { userId_titleId_kind: { userId: viewerId, titleId: title.id, kind: 'LIKE' } } }) : null,
@@ -42,27 +58,27 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
     withViewerLikes(title.reviews, viewerId)
   ]);
 
-  const reviewsForCards = reviews.map((r) => ({
+  const allReviewsForCards = reviews.map((r) => ({
     ...r,
-    title: { id: title.id, slug: title.slug, title: title.title, year: title.year, poster: title.poster }
+    title: { id: title.id, slug: title.slug, title: title.title, year: title.year, poster: title.poster, imdbRating: title.imdbRating }
   }));
-  const adminVerdict = reviewsForCards.find((r) => r.user?.role === 'ADMIN' || r.editorial) ?? null;
+  const reviewsForCards = allReviewsForCards.filter((review) => review.sourceLang !== 'jarvis-auto');
   const myReview = sessionUser ? reviewsForCards.find((r) => r.user?.email === sessionUser.email) ?? null : null;
   const related = similar.filter((t) => t.id !== title.id).slice(0, 5);
-  const score = title.communityScore ?? title.tmdbScore ?? title.imdbRating ?? 0;
+  const score = title.communityScore ?? imdbRating ?? title.tmdbScore ?? 0;
 
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': title.mediaType === 'tv' ? 'TVSeries' : 'Movie',
     name: title.title,
-    description: title.overview,
-    datePublished: String(title.year),
-    genre: title.genres,
-    image: title.poster,
-    director: title.director ? { '@type': 'Person', name: title.director } : undefined,
+    description: imdbOverview,
+    datePublished: String(imdbData?.year ?? title.year),
+    genre: imdbGenres,
+    image: imdbPoster,
+    director: imdbDirector ? { '@type': 'Person', name: imdbDirector } : undefined,
     aggregateRating:
-      title.communityScore && title.reviews.length > 0
-        ? { '@type': 'AggregateRating', ratingValue: title.communityScore, bestRating: 10, worstRating: 1, ratingCount: title.reviews.length }
+      title.communityScore && title.communityReviewCount > 0
+        ? { '@type': 'AggregateRating', ratingValue: title.communityScore, bestRating: 10, worstRating: 1, ratingCount: title.communityReviewCount }
         : undefined
   };
 
@@ -83,12 +99,12 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
           })
         }}
       />
-      <div className="backdrop-strip" style={{ backgroundImage: `url(${title.backdrop || title.poster})` }} />
+      <div className="backdrop-strip" style={{ backgroundImage: `url(${title.backdrop || imdbPoster})` }} />
 
       <div className="detail-hero">
         <div className="detail-poster">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={title.poster} alt={`${title.title} poster`} width={500} height={750} />
+          <img src={imdbPoster} alt={`${title.title} poster`} width={500} height={750} />
         </div>
 
         <div className="detail-intro">
@@ -96,15 +112,16 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
           <h1 className="detail-title">{title.title}</h1>
 
           <div className="detail-meta">
-            <span className="tag">{title.mediaType === 'tv' ? `${formatRuntime(title.runtime)} / ep` : formatRuntime(title.runtime)}</span>
-            {title.genres.map((g) => (
+            <span className="tag">{title.mediaType === 'tv' ? `${formatRuntime(imdbRuntime)} / ep` : formatRuntime(imdbRuntime)}</span>
+            {imdbGenres.map((g) => (
               <Link key={g} href={`/movies?genre=${encodeURIComponent(g)}`} className="tag">
                 {g}
               </Link>
             ))}
-            {title.tmdbScore ? <span className="tag tag-gold">★ {title.tmdbScore.toFixed(1)} TMDB</span> : null}
-            <span className="tag tag-accent">{title.reviews.length} community reviews</span>
-            {title.director ? <span className="tag">Dir. {title.director}</span> : null}
+            {imdbRating !== null ? <span className="tag tag-gold">★ {imdbRating.toFixed(1)} IMDb</span> : null}
+            {title.tmdbScore !== null ? <span className="tag">★ {title.tmdbScore.toFixed(1)} TMDB</span> : null}
+            <span className="tag tag-accent">{title.communityReviewCount} community reviews</span>
+            {imdbDirector ? <span className="tag">Dir. {imdbDirector}</span> : null}
           </div>
         </div>
 
@@ -112,16 +129,16 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
           <RatingScene
             score={score}
             communityVotes={title._count.likes}
-            reviewCount={title.reviews.length}
-            tmdbScore={title.tmdbScore}
+            reviewCount={title.communityReviewCount}
+            imdbRating={imdbRating}
             myRating={myReview?.rating ?? null}
             buckets={title.ratingBuckets}
-            genres={title.genres}
-            runtime={title.runtime}
+            genres={imdbGenres}
+            runtime={imdbRuntime}
             mediaType={title.mediaType === 'tv' ? 'tv' : 'movie'}
           />
 
-          <p className="detail-overview">{title.overview}</p>
+          <p className="detail-overview">{imdbOverview}</p>
 
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
             <TitleActions
@@ -134,17 +151,18 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
             <Link href="#review" className="btn btn-primary">
               Write a review
             </Link>
-            <TrailerModal title={title.title} trailerEn={(title as any).trailerEn} trailerHi={(title as any).trailerHi} />
+            <Link href={`/jarvis?titleId=${encodeURIComponent(title.id)}`} className="btn btn-ghost">Ask Jarvis</Link>
+            {title.trailerEn || title.trailerHi ? <TrailerModal title={title.title} trailerEn={title.trailerEn} trailerHi={title.trailerHi} /> : <ImdbTrailer title={title.title} year={title.year} />}
           </div>
 
-          {title.cast.length > 0 ? (
+          {displayCast.length > 0 ? (
             <>
               <div className="divider-line" />
               <div className="panel-title" style={{ marginBottom: 8 }}>
                 <span>Top cast</span>
               </div>
               <div className="cast-grid">
-                {title.cast.map((c: { name: string; role?: string; img?: string | null }) => (
+                {displayCast.map((c) => (
                   <div key={c.name} className="cast-card">
                     <span className="cast-photo">
                       {c.img ? (
@@ -177,15 +195,17 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
             existing={myReview ? { id: myReview.id, rating: myReview.rating, headline: myReview.headline, body: myReview.body, spoiler: myReview.spoiler } : null}
           />
 
+          <JarvisAutoReview titleId={title.id} imdbId={title.imdbId} />
+
           <div className="section-head" style={{ marginBottom: 0 }}>
             <div>
               <div className="eyebrow">Community</div>
-              <h2 style={{ fontSize: 24 }}>Reviews · {reviews.length}</h2>
+              <h2 style={{ fontSize: 24 }}>Reviews · {reviewsForCards.length}</h2>
             </div>
             <EditionSwitch current={edition} compact />
           </div>
 
-          {reviews.length === 0 ? (
+          {reviewsForCards.length === 0 ? (
             <div className="empty">
               <b>No reviews yet</b>
               Pehla verdict tumhara ho sakta hai.
@@ -203,6 +223,31 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
               ))}
             </div>
           )}
+
+          {imdbReviews.length ? (
+            <section style={{ display: 'grid', gap: 12, marginTop: 14 }}>
+              <div className="section-head" style={{ marginBottom: 0 }}>
+                <div><div className="eyebrow">External source · IMDb</div><h2 style={{ fontSize: 22 }}>IMDb non-spoiler reviews</h2></div>
+                {title.imdbId ? <a href={`https://www.imdb.com/title/${title.imdbId}/reviews/`} target="_blank" rel="noreferrer" className="link-more">View all ↗</a> : null}
+              </div>
+              {imdbReviews.slice(0, 5).map((review, index) => (
+                <article className="panel" key={`${review.summary ?? 'review'}-${index}`}>
+                  <div className="panel-title">
+                    <span>{review.summary || 'IMDb user review'}</span>
+                    {review.authorRating !== null ? <span className="tag tag-gold">★ {review.authorRating}/10</span> : null}
+                  </div>
+                  {review.text ? <p style={{ whiteSpace: 'pre-wrap' }}>{review.text}</p> : null}
+                  <div className="faint mono" style={{ fontSize: 11 }}>
+                    IMDb member
+                    {review.upVotes !== null || review.downVotes !== null
+                      ? ` · ${review.upVotes ?? 0} helpful · ${review.downVotes ?? 0} not helpful`
+                      : ''}
+                  </div>
+                </article>
+              ))}
+              <p className="faint" style={{ fontSize: 11 }}>Only non-spoiler IMDb reviews are shown separately; your Cinevood community reviews and My Reviews data are unchanged.</p>
+            </section>
+          ) : null}
         </div>
 
         <aside style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -212,12 +257,12 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
             </div>
             <div style={{ display: 'grid', gap: 10, fontSize: 13 }}>
               {[
-                ['Year', title.year],
-                [title.mediaType === 'tv' ? 'Episode runtime' : 'Runtime', title.mediaType === 'tv' ? `${formatRuntime(title.runtime)} / ep` : formatRuntime(title.runtime)],
-                ['Genres', title.genres.join(', ') || '—'],
-                ['Director', title.director ?? '—'],
+                ['Year', imdbData?.year ?? title.year],
+                [title.mediaType === 'tv' ? 'Episode runtime' : 'Runtime', title.mediaType === 'tv' ? `${formatRuntime(imdbRuntime)} / ep` : formatRuntime(imdbRuntime)],
+                ['Genres', imdbGenres.join(', ') || '—'],
+                ['Director', imdbDirector ?? '—'],
                 ['Likes', title._count.likes],
-                ['Reviews', title.reviews.length]
+                ['Reviews', reviewsForCards.length]
               ].map(([k, v]) => (
                 <div key={k as string} style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
                   <span className="faint mono" style={{ fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase' }}>

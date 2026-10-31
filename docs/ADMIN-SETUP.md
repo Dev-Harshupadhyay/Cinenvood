@@ -22,7 +22,7 @@ The redesigned control room includes:
 - Overview and site statistics
 - Review/comment moderation, hide/publish/pin/delete
 - Movie catalogue, feature/hide and trailer management
-- Editorial/Jarvis drafts
+- Editorial/Jarvis review summaries grounded in published, non-spoiler Cinevood community reviews
 - Member management
 - Analytics and audit trail
 - TMDB import and quick links

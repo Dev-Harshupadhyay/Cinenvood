@@ -14,7 +14,8 @@ export default async function Header() {
     { href: '/', label: t(lang, 'home') },
     { href: '/movies', label: t(lang, 'movies') },
     { href: '/reviews', label: t(lang, 'reviews') },
-    { href: '/community', label: t(lang, 'community') }
+    { href: '/community', label: t(lang, 'community') },
+    { href: '/jarvis', label: 'Jarvis' }
   ];
 
   return (

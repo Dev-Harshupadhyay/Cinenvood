@@ -35,17 +35,18 @@ That is a deliberate product decision — it keeps the site legal, advertiser-sa
 | --- | --- |
 | **Discovery** | Poster-first homepage with a featured title, genre chips, movie + TV-series poster rails, and no review-feed cards |
 | **Catalogue** | 270 seeded films plus TMDB-imported films and TV series; poster, backdrops, cast, director, runtime, and TMDB scores. Filter by title type, genre, and trending / rating / newest / title |
-| **Title page** | Movie and TV-series details, score ring, rating distribution, cast, LIKE + WATCHLIST, review composer, review list, similar titles, JSON-LD |
+| **Title page** | Movie and TV-series details, score ring, rating distribution, cast, LIKE + WATCHLIST, review composer, local community reviews, separate IMDb reviews, similar titles, JSON-LD |
 | **Reviews** | 10-star picker, headline, body, spoiler blur-reveal, one review per user per film (upsert), likes, threaded comments |
 | **Admin verdict** | Any review by an ADMIN gets a premium animated card — conic gradient border, Instrument Serif headline, drop cap, PINNED badge, signature |
 | **Dashboard** | Stats (reviews, likes received, comments, watchlist), my reviews, watchlist, editable profile |
-| **Admin panel** | Redesigned responsive control room: KPIs, moderation, catalogue, members, editorial/Jarvis, TMDB import, YouTube trailer search, analytics and audit trail — password-only admin session |
-| **Trailers** | English + Hindi trailer links open directly on YouTube; the official privacy-enhanced iframe player remains available. Admin can search YouTube Data API v3 and save selected video IDs |
+| **Admin panel** | Responsive control room: KPIs, moderation, catalogue, members, evidence-based Jarvis editorial summaries, TMDB import, YouTube trailer search, analytics and audit trail — password-only admin session |
+| **Trailers** | On-demand YouTube trailer discovery by title + year, embeddable-result filtering, an in-page player and YouTube search fallback; saved English/Hindi links remain supported |
+| **Jarvis** | Ask grounded movie questions, draft an editable review with explicit consent, or generate/cache a public bilingual AI editorial review in the owner's style when no owner-authored manual review exists; uses IMDbio title facts and available non-spoiler reviews |
 | **Auth** | Google OAuth for members; separate `ADMIN_EMAIL` + `ADMIN_PASSWORD` sign-in at `/admin/login`; a Google session alone never grants admin access |
 | **Guest mode** | Signed-out visitors get a `localStorage` guest id and **read-only** access — browse catalogue and read every review, no account created |
 | **Rate limiting** | Two-layer (instance memory + shared Postgres counter) on search, admin pages/actions, sign-in, reviews, comments, likes and analytics beacons — 429 + `Retry-After`, no bypass flag |
 | **Analytics** | Cookie-less first-party page views, 14-day chart, top pages/titles, devices, referrers, guests vs members, plus Vercel Analytics |
-| **Search** | Debounced animated search, keyboard navigation, calm empty/error states, local catalogue + TMDB multi-search for movies and TV series |
+| **Search** | Debounced animated search, keyboard navigation, local catalogue + optional IMDbio movie/series discovery |
 | **i18n** | One-click **English / हिंदी / Hinglish** switcher in the header (cookie-persisted) |
 | **Design** | 5 accent themes (emerald, cyan, rose, violet, amber), real light mode, Instrument Serif display type, mobile-first at 390px |
 | **SEO/PWA** | Dynamic sitemap, robots, OG image, manifest, JSON-LD (WebSite, Organization, Movie, TVSeries, Review, BreadcrumbList), canonical URLs |
@@ -115,9 +116,9 @@ That is a deliberate product decision — it keeps the site legal, advertiser-sa
 | Auth | Auth.js v5 — Google OAuth for members; password-only admin credentials, JWT sessions | free |
 | Database | **Supabase Postgres** (dedicated `cinemood` schema) | free tier |
 | ORM | Prisma 6 (`db push`, seed script included) | free |
-| Metadata | **TMDB API** via server-side proxy (ISP-block safe) | free |
-| Ratings | **OMDb** (IMDb / Rotten Tomatoes / Metacritic) — optional | free tier |
-| Hosting | Vercel Hobby + Supabase + Cloudflare Worker (optional relay) | ₹0 |
+| Metadata | **TMDB API** for the existing catalogue/imports; optional **IMDbio** FastAPI service for IMDb search/details | free tiers |
+| Ratings | Live IMDbio rating; optional OMDb for IMDb / Rotten Tomatoes / Metacritic | free tiers |
+| Hosting | Vercel + Supabase + Render IMDbio service; Cloudflare Worker relay optional | free tiers |
 
 ---
 
@@ -151,7 +152,10 @@ AUTH_GOOGLE_ID=""                    # regular members
 AUTH_GOOGLE_SECRET=""
 TMDB_API_KEY=""                      # v3 key or v4 read token — both auto-detected
 YOUTUBE_API_KEY=""                   # optional: YouTube Data API v3 trailer search
-OMDB_API_KEY=""                      # optional: IMDb / RT / Metacritic scores
+IMDBIO_API_URL=""                    # optional: Render FastAPI service URL
+IMDBIO_API_TOKEN=""                  # same private token configured on Render
+GEMINI_API_KEY=""                    # optional: Jarvis Q&A, cached public reviews, consent-gated drafts and translations
+OMDB_API_KEY=""                      # optional: RT / Metacritic scores
 ```
 
 ### Signing in
@@ -302,10 +306,11 @@ legacy-vite/       original Vite + Express version (kept for reference)
 
 ## ⚖️ Legal
 
-Metadata and artwork belong to their owners (TMDB attribution). This product uses the TMDB API but is not
-endorsed or certified by TMDB. User content is moderated. DMCA process and privacy notes: [`/legal`](./app/legal/page.tsx).
+Metadata and artwork belong to their owners. This product uses the TMDB API but is not endorsed or certified by TMDB; IMDb
+metadata is accessed through the third-party IMDbio service and does not imply IMDb endorsement. User content is moderated.
+DMCA process and privacy notes: [`/legal`](./app/legal/page.tsx).
 
-**No copyrighted media is hosted, streamed or linked here — by design.**
+**No full film or episode files are hosted or distributed. Trailer playback uses the official YouTube IFrame Player API.**
 
 ---
 

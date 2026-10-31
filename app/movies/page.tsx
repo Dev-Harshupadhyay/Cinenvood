@@ -96,7 +96,7 @@ export default async function MoviesPage({
       {titles.length === 0 ? (
         <div className="empty">
           <b>{mediaType === 'tv' ? 'No TV series in the catalogue yet' : 'No titles found'}</b>
-          {mediaType === 'tv' ? 'Try the header search for wider TMDB discovery, or import a series from the admin panel.' : 'Filter badlo ya search clear karo.'}
+          {mediaType === 'tv' ? 'Try the header search for IMDb discovery, or import a series from the admin panel.' : 'Filter badlo ya search clear karo.'}
         </div>
       ) : (
         <div className="grid-posters">

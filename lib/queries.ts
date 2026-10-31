@@ -37,8 +37,8 @@ const titleSelect = {
   trailerHi: true,
   imdbRating: true,
   tmdbScore: true,
-  _count: { select: { reviews: true, likes: true } },
-  reviews: { where: { status: 'PUBLISHED' as const }, select: { rating: true } }
+  _count: { select: { reviews: { where: { status: 'PUBLISHED' as const, editorial: false } }, likes: true } },
+  reviews: { where: { status: 'PUBLISHED' as const, editorial: false }, select: { rating: true } }
 } as const;
 
 function mapTitle(t: any): PosterTitle {
@@ -110,14 +110,15 @@ export async function getTitleBySlug(slug: string) {
     }
   });
   if (!row) return null;
-  const ratings = row.reviews.map((r) => r.rating);
+  const communityRatings = row.reviews.filter((review) => !review.editorial).map((review) => review.rating);
   return {
     ...row,
     reviews: withAuthors(row.reviews) as typeof row.reviews,
     genres: parseList<string>(row.genres),
     cast: parseList<{ name: string; role: string }>(row.cast),
-    communityScore: ratings.length ? Math.round((ratings.reduce((a, b) => a + b, 0) / ratings.length) * 10) / 10 : null,
-    ratingBuckets: [10, 9, 8, 7, 6, 5, 4, 3, 2, 1].map((n) => ({ rating: n, count: ratings.filter((r) => r === n).length }))
+    communityReviewCount: communityRatings.length,
+    communityScore: communityRatings.length ? Math.round((communityRatings.reduce((a, b) => a + b, 0) / communityRatings.length) * 10) / 10 : null,
+    ratingBuckets: [10, 9, 8, 7, 6, 5, 4, 3, 2, 1].map((n) => ({ rating: n, count: communityRatings.filter((r) => r === n).length }))
   };
 }
 
@@ -135,6 +136,7 @@ export async function getLatestReviews(take = 6, opts: { excludeTitleId?: string
   const rows = await prisma.review.findMany({
     where: {
       status: 'PUBLISHED',
+      OR: [{ sourceLang: null }, { sourceLang: { not: 'jarvis-auto' } }],
       ...(opts.excludeTitleId ? { titleId: { not: opts.excludeTitleId } } : {}),
       ...(opts.userId ? { userId: opts.userId } : {})
     },
@@ -151,7 +153,7 @@ export async function getLatestReviews(take = 6, opts: { excludeTitleId?: string
 
 export async function getTopReviews(take = 5) {
   const rows = await prisma.review.findMany({
-    where: { status: 'PUBLISHED' },
+    where: { status: 'PUBLISHED', OR: [{ sourceLang: null }, { sourceLang: { not: 'jarvis-auto' } }] },
     orderBy: [{ homeSpot: 'desc' }, { editorial: 'desc' }, { featured: 'desc' }, { likes: { _count: 'desc' } }, { createdAt: 'desc' }],
     take,
     include: {
@@ -195,7 +197,7 @@ export async function getPlatformStats() {
   const [users, titles, reviews, comments, likes, watchlists] = await Promise.all([
     prisma.user.count(),
     prisma.title.count({ where: { status: 'PUBLISHED' } }),
-    prisma.review.count({ where: { status: 'PUBLISHED' } }),
+    prisma.review.count({ where: { status: 'PUBLISHED', OR: [{ sourceLang: null }, { sourceLang: { not: 'jarvis-auto' } }] } }),
     prisma.comment.count({ where: { status: 'PUBLISHED' } }),
     prisma.reviewLike.count(),
     prisma.titleLike.count({ where: { kind: 'WATCHLIST' } })
