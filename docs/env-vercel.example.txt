@@ -21,7 +21,7 @@ YOUTUBE_API_KEY=<youtube-data-api-v3-key>
 IMDBIO_API_URL=https://<your-imdbio-service>.onrender.com
 IMDBIO_API_TOKEN=<same-private-token-as-IMDBIO_SERVICE_TOKEN-on-Render>
 
-# Optional Google AI Studio key; server-side only
+# Optional server-side Google AI Studio key for Jarvis Q&A, personal-style review drafts, and translations
 GEMINI_API_KEY=<google-ai-studio-key>
 
 # Already present — do NOT overwrite

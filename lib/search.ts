@@ -10,6 +10,7 @@ export type UnifiedSearchResult = {
   mediaType: 'movie' | 'tv';
   href: string;
   source: 'catalogue' | 'imdb';
+  imdbId?: string;
   overview?: string;
 };
 
@@ -48,7 +49,8 @@ export async function searchEverywhere(input: string): Promise<UnifiedSearchResu
       key: `catalogue-${row.id}`, title: row.title, year: row.year, poster: row.poster,
       score: communityScore !== null ? Math.round(communityScore * 10) / 10 : row.tmdbScore ?? row.imdbRating,
       mediaType: (row.mediaType === 'tv' ? 'tv' : 'movie') as 'tv' | 'movie', href: `/movies/${row.slug}`,
-      source: 'catalogue' as const
+      source: 'catalogue' as const,
+      ...(row.imdbId ? { imdbId: row.imdbId } : {})
     };
   }).sort((a, b) => {
     const aExact = normalize(a.title) === normalizedQuery ? 1 : 0;
@@ -70,7 +72,8 @@ export async function searchEverywhere(input: string): Promise<UnifiedSearchResu
       score: item.rating,
       mediaType: item.kind === 'tvSeries' || item.kind === 'tvMiniSeries' ? 'tv' as const : 'movie' as const,
       href: `/imdb/${item.imdbId}`,
-      source: 'imdb' as const
+      source: 'imdb' as const,
+      imdbId: item.imdbId
     }));
 
   return [...local.slice(0, 8), ...external.slice(0, 12)].slice(0, 20);

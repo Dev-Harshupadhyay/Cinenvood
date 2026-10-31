@@ -73,4 +73,6 @@ node prisma/ghostwrite.mjs --title colony-2026 --notes "summarize the pacing opi
 node prisma/ghostwrite.mjs --title colony-2026 --save
 ```
 
-The assistant endpoint is `POST /api/jarvis`, rate-limited per client IP. Gemini requires the server-only `GEMINI_API_KEY`; without it the feature reports that it is unavailable rather than returning fabricated answers.
+The Q&amp;A endpoint is `POST /api/jarvis`, rate-limited per client IP. Gemini requires the server-only `GEMINI_API_KEY`; without it the feature reports that it is unavailable rather than returning fabricated answers.
+
+The **Review in my style** mode searches IMDbio directly for a title, displays its poster and cast, and creates an editable draft using the signed-in user’s own published non-spoiler reviews as voice references plus the user’s notes. It never writes a review from other users’ opinions, changes the user’s rating, or auto-publishes. The user must explicitly consent before their notes, selected IMDbio title data, and up to five of their own reviews (or their own pasted style sample) are sent to Gemini. The key remains server-side. Sign-in is required; no own reviews means the user can paste a writing sample they authored. This is per-request prompting, not model fine-tuning.

@@ -41,12 +41,12 @@ That is a deliberate product decision — it keeps the site legal, advertiser-sa
 | **Dashboard** | Stats (reviews, likes received, comments, watchlist), my reviews, watchlist, editable profile |
 | **Admin panel** | Responsive control room: KPIs, moderation, catalogue, members, evidence-based Jarvis editorial summaries, TMDB import, YouTube trailer search, analytics and audit trail — password-only admin session |
 | **Trailers** | On-demand YouTube trailer discovery by title + year, embeddable-result filtering, an in-page player and YouTube search fallback; saved English/Hindi links remain supported |
+| **Jarvis** | Ask grounded movie questions or draft a review in your own style; the draft tool uses IMDbio search, poster thumbnails, cast, your own past reviews + notes, and server-side Gemini with explicit consent and no auto-publish |
 | **Auth** | Google OAuth for members; separate `ADMIN_EMAIL` + `ADMIN_PASSWORD` sign-in at `/admin/login`; a Google session alone never grants admin access |
 | **Guest mode** | Signed-out visitors get a `localStorage` guest id and **read-only** access — browse catalogue and read every review, no account created |
 | **Rate limiting** | Two-layer (instance memory + shared Postgres counter) on search, admin pages/actions, sign-in, reviews, comments, likes and analytics beacons — 429 + `Retry-After`, no bypass flag |
 | **Analytics** | Cookie-less first-party page views, 14-day chart, top pages/titles, devices, referrers, guests vs members, plus Vercel Analytics |
 | **Search** | Debounced animated search, keyboard navigation, local catalogue + optional IMDbio movie/series discovery |
-| **Jarvis** | Movie Q&A and review-opinion analysis grounded in catalogue metadata and published non-spoiler reviews, with source labels; no private profile data or invented evidence |
 | **i18n** | One-click **English / हिंदी / Hinglish** switcher in the header (cookie-persisted) |
 | **Design** | 5 accent themes (emerald, cyan, rose, violet, amber), real light mode, Instrument Serif display type, mobile-first at 390px |
 | **SEO/PWA** | Dynamic sitemap, robots, OG image, manifest, JSON-LD (WebSite, Organization, Movie, TVSeries, Review, BreadcrumbList), canonical URLs |
@@ -154,7 +154,7 @@ TMDB_API_KEY=""                      # v3 key or v4 read token — both auto-det
 YOUTUBE_API_KEY=""                   # optional: YouTube Data API v3 trailer search
 IMDBIO_API_URL=""                    # optional: Render FastAPI service URL
 IMDBIO_API_TOKEN=""                  # same private token configured on Render
-GEMINI_API_KEY=""                    # optional: grounded Jarvis answers and translations
+GEMINI_API_KEY=""                    # optional: Jarvis Q&A, personal-style review drafts and translations
 OMDB_API_KEY=""                      # optional: RT / Metacritic scores
 ```
 

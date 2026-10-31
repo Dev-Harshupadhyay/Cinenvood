@@ -55,9 +55,7 @@ export default function LegalPage() {
         <p style={{ fontSize: 14, lineHeight: 1.85, color: 'var(--muted)' }}>
           Hum sirf wahi data store karte hain jo account banane ke liye chahiye: naam, email, avatar URL (Google se), reviews,
           comments aur watchlist. Passwords store nahi hote — Google OAuth ya demo email login use hota hai. Koi data bechа
-          nahi karte. Account delete karne ke liye admin se request karein. Jarvis questions ke liye selected title ka catalogue metadata aur
-          published, non-spoiler reviews configured Google Gemini API ko bheje jaate hain; user profiles, email ya private account data nahi.
-          AI answers source-grounded hone ki koshish karte hain, phir bhi unhe galat samjha ja sakta hai — source labels check karein.
+          nahi karte. Account delete karne ke liye admin se request karein. Jarvis Q&amp;A ke liye selected title ka catalogue metadata aur published, non-spoiler reviews configured Google Gemini API ko bheje jaate hain. Review-draft mode mein, aapki explicit consent par, aapke notes, IMDbio title metadata, aur aapke apne up to five published non-spoiler reviews (ya aapka pasted writing sample) Gemini ko bheje jaate hain. Doosre users ke reviews, profiles, email ya private account details style samples ke roop mein nahi bheje jaate. Drafts auto-save ya auto-publish nahi hote; AI answers galat ho sakte hain, isliye source/details verify karke edit karein.
         </p>
       </div>
 

@@ -3047,3 +3047,66 @@ html, body { max-width: 100%; overflow-x: clip; }
   .jarvis-mark { width: 43px; height: 43px; border-radius: 13px; font-size: 21px; }
   .jarvis-form, .jarvis-answer { padding: 16px; }
 }
+
+/* Jarvis author-voice review drafts */
+.jarvis-mode-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+}
+.jarvis-mode-tabs button {
+  flex: 1;
+  min-width: 180px;
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: var(--muted);
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.jarvis-mode-tabs button[data-active='true'] {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+.jarvis-writer { display: grid; gap: 16px; }
+.jarvis-title-results { display: grid; max-height: 340px; overflow-y: auto; border: 1px solid var(--border); border-radius: 12px; }
+.jarvis-title-result {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 12px;
+  color: var(--text);
+  background: var(--surface);
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  cursor: pointer;
+}
+.jarvis-title-result:last-child { border-bottom: 0; }
+.jarvis-title-result:hover, .jarvis-title-result:focus-visible { background: color-mix(in srgb, var(--accent) 9%, var(--surface)); }
+.jarvis-title-result img { width: 42px; height: 62px; flex: none; object-fit: cover; border-radius: 6px; background: var(--panel); }
+.jarvis-title-result span { display: grid; gap: 4px; min-width: 0; }
+.jarvis-title-result b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
+.jarvis-title-result small, .jarvis-title-result em { color: var(--faint); font-size: 11px; font-style: normal; }
+.jarvis-title-result em { margin-left: auto; white-space: nowrap; }
+.jarvis-imdb-card { padding: 12px; }
+.jarvis-imdb-overview { display: flex; gap: 14px; align-items: flex-start; }
+.jarvis-imdb-poster { width: 76px; height: 114px; flex: none; object-fit: cover; border-radius: 8px; background: var(--panel); }
+.jarvis-imdb-overview > div { min-width: 0; display: grid; gap: 5px; }
+.jarvis-imdb-overview > div > b { font-size: 15px; }
+.jarvis-imdb-plot { margin: 3px 0; font-size: 12px; line-height: 1.6; }
+.jarvis-review-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.jarvis-draft-headline { margin: 6px 0 12px; font-family: var(--font-display, inherit); }
+@media (max-width: 600px) {
+  .jarvis-mode-tabs button { min-width: 0; font-size: 12px; }
+  .jarvis-review-options { grid-template-columns: 1fr; gap: 10px; }
+  .jarvis-imdb-poster { width: 64px; height: 96px; }
+}
+.jarvis-writer button.link-more { padding: 0; border: 0; background: transparent; font: inherit; cursor: pointer; }

@@ -4,7 +4,7 @@ import { searchEverywhere } from '@/lib/search';
 
 export const metadata: Metadata = {
   title: 'Search movies & series',
-  description: 'Search the CINE·MOOD catalogue and discover movie and TV titles from IMDb when available.',
+  description: 'Search the CINE·MOOD catalogue and discover movie and TV titles, posters, and metadata through IMDbio.',
   robots: { index: false, follow: false }
 };
 
@@ -27,7 +27,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
               {item.score ? <span className="search-result-score">★ {item.score.toFixed(1)}</span> : null}
             </div>
             <div className="search-result-title">{item.title}</div>
-            <div className="search-result-meta">{item.year || 'Year TBA'} · {item.source === 'catalogue' ? 'In catalogue' : item.source === 'imdb' ? 'IMDb discovery' : 'TMDB discovery'}</div>
+            <div className="search-result-meta">{item.year || 'Year TBA'} · {item.source === 'catalogue' ? 'In catalogue' : item.source === 'imdb' ? 'IMDbio discovery' : 'TMDB discovery'}</div>
           </Link>
         ))}
       </div>

@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: { default: 'CINE·MOOD — cinematic discovery & community reviews', template: '%s · CINE·MOOD' },
   description:
-    'CINE·MOOD is a film discovery and review platform with IMDbio metadata, community verdicts, official YouTube trailers and grounded Jarvis movie Q&A.',
+    'CINE·MOOD is a film discovery and review platform with IMDbio search, posters, cast, official YouTube trailers and Gemini-powered Jarvis review drafts in your own voice.',
   openGraph: {
     type: 'website',
     url: siteUrl,

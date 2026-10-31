@@ -46,6 +46,7 @@ export default function AboutPage() {
             <li><b>Like and comment</b> on other people&apos;s reviews — login required, Google or demo</li>
             <li><b>Watchlist</b> films you want to see, and like the ones you loved</li>
             <li><b>Browse</b> by genre, sort by trending, rating, newest or title</li>
+            <li><b>Jarvis</b> — ask grounded movie questions or draft a review in your own style using your own review samples and thoughts</li>
             <li><b>Admin verdicts</b> — pinned editorial reviews show first, everywhere</li>
           </ul>
         </div>

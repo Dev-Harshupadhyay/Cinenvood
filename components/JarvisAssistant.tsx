@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import JarvisReviewWriter from '@/components/JarvisReviewWriter';
 
 type TitleOption = { id: string; title: string; year: number; poster: string };
 type AnswerSource = { id: string; label: string };
@@ -10,10 +11,13 @@ function isAssistantResponse(value: unknown): value is AssistantResponse {
   return typeof value === 'object' && value !== null;
 }
 
-export default function JarvisAssistant({ titles, initialTitleId = '' }: {
+export default function JarvisAssistant({ titles, initialTitleId = '', catalogueUnavailable = false, signedIn = false }: {
   titles: TitleOption[];
   initialTitleId?: string;
+  catalogueUnavailable?: boolean;
+  signedIn?: boolean;
 }) {
+  const [mode, setMode] = useState<'ask' | 'review'>('review');
   const [titleId, setTitleId] = useState(initialTitleId);
   const [query, setQuery] = useState('');
   const [question, setQuestion] = useState('');
@@ -65,11 +69,19 @@ export default function JarvisAssistant({ titles, initialTitleId = '' }: {
         <div className="jarvis-mark" aria-hidden="true">✦</div>
         <div>
           <div className="eyebrow">CINE·MOOD INTELLIGENCE</div>
-          <h1>Ask Jarvis</h1>
-          <p className="sub">Movie facts and opinion summaries, grounded in Cinevood catalogue data and available published reviews.</p>
+          <h1>{mode === 'review' ? 'Jarvis Review Studio' : 'Ask Jarvis'}</h1>
+          <p className="sub">{mode === 'review' ? 'IMDbio metadata + your real thoughts + the way you write.' : 'Movie facts and opinion summaries, grounded in Cinevood catalogue data and available published reviews.'}</p>
         </div>
       </div>
 
+      <div className="jarvis-mode-tabs" role="tablist" aria-label="Jarvis modes">
+        <button type="button" role="tab" aria-selected={mode === 'review'} data-active={mode === 'review'} onClick={() => setMode('review')}>Review in my style</button>
+        <button type="button" role="tab" aria-selected={mode === 'ask'} data-active={mode === 'ask'} onClick={() => setMode('ask')}>Ask about a movie</button>
+      </div>
+
+      {mode === 'review' ? <JarvisReviewWriter signedIn={signedIn} /> : catalogueUnavailable ? (
+        <div className="empty"><b>Catalogue is temporarily unavailable</b>Ask mode needs a Cinevood title record. Review drafting can still use IMDbio above.</div>
+      ) : <>
       <form className="panel jarvis-form" onSubmit={ask}>
         <label className="field">
           <span>Choose a Cinevood title</span>
@@ -114,6 +126,7 @@ export default function JarvisAssistant({ titles, initialTitleId = '' }: {
           ) : null}
         </article>
       ) : null}
+      </>}
     </section>
   );
 }
