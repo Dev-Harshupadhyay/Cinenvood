@@ -112,7 +112,7 @@ export default function YouTubePlayer({ videoId, title, fallbackUrl }: {
         <div className="empty" role="status">
           <b>Trailer playback unavailable</b>
           This video may be restricted or the YouTube player could not load.
-          <a href={fallbackUrl} target="_blank" rel="noreferrer" className="btn btn-sm btn-ghost">Open YouTube search ↗</a>
+          <a href={fallbackUrl} target="_blank" rel="noreferrer" className="btn btn-sm btn-ghost">Open on YouTube ↗</a>
         </div>
       ) : null}
     </>

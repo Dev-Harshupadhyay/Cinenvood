@@ -57,6 +57,17 @@ export type TmdbSearchItem = {
   popularity?: number;
 };
 
+export type TmdbVideo = {
+  id: string;
+  key: string;
+  name: string;
+  site: string;
+  type: string;
+  official: boolean;
+  iso_639_1?: string;
+  published_at?: string;
+};
+
 export type TmdbDetails = {
   id: number;
   title?: string;
@@ -103,6 +114,13 @@ export async function searchTitles(query: string) {
 export async function trendingTitles() {
   const data = await tmdbFetch<{ results: TmdbSearchItem[] }>('/trending/all/week', { language: 'en-US' }, 1800);
   return (data?.results ?? []).filter((item) => item.media_type === 'movie' || item.media_type === 'tv');
+}
+
+/** Fetch YouTube-hosted trailer/teaser IDs already associated with a TMDB title. */
+export async function fetchTitleVideos(id: number, mediaType: MediaType = 'movie', language = 'en-US') {
+  if (!Number.isSafeInteger(id) || id <= 0) return [] as TmdbVideo[];
+  const data = await tmdbFetch<{ results?: TmdbVideo[] }>(`/${mediaType}/${id}/videos`, { language }, 1800);
+  return Array.isArray(data?.results) ? data.results : [];
 }
 
 export type NormalizedTmdbTitle = {

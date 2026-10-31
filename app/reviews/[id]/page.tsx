@@ -198,7 +198,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
                     src={r.title.poster}
                     title={r.title.title}
                     year={r.title.year}
-                    mediaType={r.title.mediaType}
+                    mediaType={r.title.mediaType === 'tv' ? 'tv' : 'movie'}
                     imdbId={r.title.imdbId}
                     alt=""
                     width={36}

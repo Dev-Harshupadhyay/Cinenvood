@@ -168,13 +168,13 @@ export async function POST(req: Request) {
     const titleId = await ensureImdbTitleRecord(imdb, resolved.title ? { id: resolved.title.id, imdbId: resolved.title.imdbId } : null);
     if (!titleId) return NextResponse.json({ status: 'unavailable', error: 'IMDbio title did not match the selected catalogue record.' }, { status: 409 });
 
-    const ownerContext = await getOwnerContext();
-    if (await hasManualReview(titleId, ownerContext.ownerId)) return NextResponse.json({ status: 'manual' });
-
     const cached = await getJarvisRecord(titleId);
     if (cached) {
       return NextResponse.json({ status: 'ready', cached: true, review: cached, imdbRating: imdb.rating, sources: 'IMDbio metadata; non-spoiler reviews used when available' }, { headers: { 'Cache-Control': 'no-store' } });
     }
+
+    const ownerContext = await getOwnerContext();
+    if (await hasManualReview(titleId, ownerContext.ownerId)) return NextResponse.json({ status: 'manual' });
 
     const gate = await rateLimit(`jarvis-auto:${clientIp(req)}`, LIMITS.jarvisAutoReview.limit, LIMITS.jarvisAutoReview.windowMs);
     if (!gate.ok) return NextResponse.json({ status: 'limited', error: 'Jarvis is drafting other movie reviews right now. Please try again shortly.' }, { status: 429 });

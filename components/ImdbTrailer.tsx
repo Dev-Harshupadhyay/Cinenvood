@@ -15,6 +15,7 @@ type Trailer = {
 type TrailerResponse = {
   results?: Trailer[];
   configured?: boolean;
+  source?: 'tmdb' | 'youtube';
   code?: string;
 };
 
@@ -23,6 +24,7 @@ function isTrailerResponse(value: unknown): value is TrailerResponse {
 }
 
 function errorMessage(code?: string, configured?: boolean) {
+  if (code === 'no_trailer_source') return 'No TMDB trailer was found, and YouTube search is not configured yet.';
   if (configured === false || code === 'missing_api_key') return 'YouTube trailer search is not configured yet.';
   if (code === 'quota_exceeded') return 'YouTube search quota is temporarily exhausted.';
   if (code === 'rate_limited') return 'Too many trailer searches. Please wait and try again.';
@@ -30,12 +32,19 @@ function errorMessage(code?: string, configured?: boolean) {
   return 'Trailer search is temporarily unavailable.';
 }
 
-export default function ImdbTrailer({ title, year }: { title: string; year?: number | null }) {
+export default function ImdbTrailer({ title, year, tmdbId, mediaType = 'movie', buttonLabel = 'Trailer' }: {
+  title: string;
+  year?: number | null;
+  tmdbId?: number | null;
+  mediaType?: 'movie' | 'tv';
+  buttonLabel?: string;
+}) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [trailers, setTrailers] = useState<Trailer[]>([]);
   const [selected, setSelected] = useState('');
+  const [source, setSource] = useState<'tmdb' | 'youtube' | ''>('');
 
   async function findTrailers() {
     setOpen(true);
@@ -43,14 +52,16 @@ export default function ImdbTrailer({ title, year }: { title: string; year?: num
     setLoading(true);
     setError('');
     try {
-      const params = new URLSearchParams({ title, year: year ? String(year) : '' });
+      const params = new URLSearchParams({ title, year: year ? String(year) : '', mediaType });
+      if (tmdbId) params.set('tmdbId', String(tmdbId));
       const response = await fetch(`/api/imdb/trailer?${params}`, { headers: { accept: 'application/json' } });
       const payload: unknown = await response.json();
       const data = isTrailerResponse(payload) ? payload : {};
       if (!response.ok) throw new Error(errorMessage(data.code, data.configured));
       const matches = Array.isArray(data.results) ? data.results : [];
       setTrailers(matches);
-      if (matches.length === 0) setError('No embeddable trailer match found.');
+      setSource(data.source === 'tmdb' ? 'tmdb' : 'youtube');
+      if (matches.length === 0) setError('No trailer match found.');
       else setSelected(matches[0].videoId);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Trailer search failed.');
@@ -65,16 +76,16 @@ export default function ImdbTrailer({ title, year }: { title: string; year?: num
   return (
     <>
       <button type="button" className="btn btn-primary trailer-search-button" onClick={findTrailers}>
-        <span aria-hidden="true">▶</span> Trailer
+        <span aria-hidden="true">▶</span> {buttonLabel}
       </button>
       {open ? (
         <div className="modal-backdrop" role="presentation" onClick={() => setOpen(false)}>
           <div className="modal-panel" role="dialog" aria-modal="true" aria-label={`${title} YouTube trailers`} onClick={(event) => event.stopPropagation()}>
             <div className="modal-head">
-              <div><div className="eyebrow" style={{ margin: 0 }}>YouTube · Embeddable results</div><div style={{ fontWeight: 700 }}>{title}</div></div>
+              <div><div className="eyebrow" style={{ margin: 0 }}>Trailer matches · {source === 'tmdb' ? 'TMDB videos' : 'YouTube search'}</div><div style={{ fontWeight: 700 }}>{title}</div></div>
               <button type="button" className="btn btn-sm btn-ghost" onClick={() => setOpen(false)} aria-label="Close trailer search">✕</button>
             </div>
-            {loading ? <div className="empty">Searching YouTube for trailer matches…</div> : null}
+            {loading ? <div className="empty">Checking TMDB and searching YouTube for trailer matches…</div> : null}
             {error ? (
               <div className="empty">
                 <b>Trailer not available</b>
@@ -84,7 +95,7 @@ export default function ImdbTrailer({ title, year }: { title: string; year?: num
             ) : null}
             {current ? (
               <div className="yt-frame">
-                <YouTubePlayer videoId={current.videoId} title={current.title} fallbackUrl={youtubeSearch} />
+                <YouTubePlayer videoId={current.videoId} title={current.title} fallbackUrl={current.watchUrl || youtubeSearch} />
               </div>
             ) : null}
             {trailers.length ? (
