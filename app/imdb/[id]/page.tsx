@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { getImdbReviews, getImdbTitle } from '@/lib/imdbio';
 import ImdbTrailer from '@/components/ImdbTrailer';
 import JarvisAutoReview from '@/components/JarvisAutoReview';
+import PosterImage from '@/components/PosterImage';
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -41,8 +42,16 @@ export default async function ImdbTitlePage({ params }: Props) {
       <Link href="/" className="tag">← Cinevood</Link>
       <div className="detail-hero" style={{ marginTop: 22 }}>
         <div className="detail-poster">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={title.coverUrl || '/posters/placeholder.svg'} alt={`${title.title} poster`} width={500} height={750} />
+          <PosterImage
+            src={title.coverUrl}
+            title={title.title}
+            year={title.year}
+            mediaType={title.kind?.toLowerCase().includes('series') ? 'tv' : 'movie'}
+            imdbId={title.imdbId}
+            fallbackSource="tmdb"
+            width={500}
+            height={750}
+          />
         </div>
         <div className="detail-intro">
           <div className="eyebrow">IMDb source · {title.kind || 'Title'}</div>

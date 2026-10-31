@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import PosterCard from '@/components/PosterCard';
 import ReviewCard from '@/components/ReviewCard';
+import PosterImage from '@/components/PosterImage';
 import ProfileForm from '@/components/ProfileForm';
 import { displayName } from '@/lib/format';
 import { requireUser } from '@/lib/session';
@@ -116,8 +117,17 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {catalogue.slice(0, 3).map((t) => (
               <Link key={t.id} href={`/movies/${t.slug}`} style={{ display: 'flex', gap: 9, alignItems: 'center' }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={t.poster} alt="" style={{ width: 32, height: 46, objectFit: 'cover', borderRadius: 6 }} />
+                <PosterImage
+                  src={t.poster}
+                  title={t.title}
+                  year={t.year}
+                  mediaType={t.mediaType}
+                  imdbId={t.imdbId}
+                  alt=""
+                  width={32}
+                  height={46}
+                  style={{ width: 32, height: 46, objectFit: 'cover', borderRadius: 6 }}
+                />
                 <span style={{ minWidth: 0 }}>
                   <span style={{ display: 'block', fontSize: 12.5, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.title}</span>
                   <span className="faint mono" style={{ fontSize: 10 }}>{t.year}</span>

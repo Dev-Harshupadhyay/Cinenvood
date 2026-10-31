@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { fetchTitle, type MediaType } from '@/lib/tmdb';
 import { formatRuntime } from '@/lib/format';
 import { getCurrentUser } from '@/lib/session';
+import PosterImage from '@/components/PosterImage';
 
 function validTitleRequest(mediaType: string, id: string) {
   return (mediaType === 'movie' || mediaType === 'tv') && /^\d+$/.test(id);
@@ -49,8 +50,12 @@ export default async function ExploreTitlePage({ params }: { params: Promise<{ m
       <div className="backdrop-strip" style={{ backgroundImage: `url(${title.backdrop || title.poster})` }} />
       <div className="explore-hero">
         <div className="explore-poster">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={title.poster} alt={`${title.title} poster`} />
+          <PosterImage
+            src={title.poster}
+            title={title.title}
+            year={title.year}
+            mediaType={title.mediaType === 'tv' ? 'tv' : 'movie'}
+          />
         </div>
         <div className="explore-copy">
           <div className="eyebrow">TMDB discovery · {title.mediaType === 'tv' ? 'TV series' : 'Film'}</div>

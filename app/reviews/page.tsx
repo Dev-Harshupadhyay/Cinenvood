@@ -7,6 +7,7 @@ import { settle, settleAll } from '@/lib/safe';
 import DataBanner from '@/components/DataBanner';
 import EditionSwitch from '@/components/EditionSwitch';
 import GuestNote from '@/components/GuestNote';
+import PosterImage from '@/components/PosterImage';
 
 export const metadata = {
   title: 'Reviews',
@@ -94,8 +95,17 @@ export default async function ReviewsFeed({ searchParams }: { searchParams: Prom
                   <span style={{ color: 'var(--accent-bright)' }}>{pick.rating}/10</span>
                 </div>
                 <Link href={`/reviews/${pick.id}`} style={{ display: 'flex', gap: 11, textDecoration: 'none', color: 'inherit' }}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={pick.title.poster} alt="" style={{ width: 56, height: 80, borderRadius: 9, objectFit: 'cover' }} />
+                  <PosterImage
+                    src={pick.title.poster}
+                    title={pick.title.title}
+                    year={pick.title.year}
+                    mediaType={pick.title.mediaType}
+                    imdbId={pick.title.imdbId}
+                    alt=""
+                    width={56}
+                    height={80}
+                    style={{ width: 56, height: 80, borderRadius: 9, objectFit: 'cover' }}
+                  />
                   <div>
                     <div style={{ fontFamily: 'var(--font-serif), Georgia, serif', fontVariant: 'small-caps', letterSpacing: '0.01em', fontSize: 17, lineHeight: 1.2 }}>
                       {pick.headline || pick.title.title}
@@ -115,8 +125,16 @@ export default async function ReviewsFeed({ searchParams }: { searchParams: Prom
               </div>
               {topRaw.map((t: any) => (
                 <Link key={t.slug} href={`/movies/${t.slug}`} className="rail-item" style={{ textDecoration: 'none', color: 'inherit' }}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={t.poster} alt="" loading="lazy" />
+                  <PosterImage
+                    src={t.poster}
+                    title={t.title}
+                    year={t.year}
+                    mediaType={t.mediaType}
+                    imdbId={t.imdbId}
+                    alt=""
+                    loading="lazy"
+                    className="rank-poster"
+                  />
                   <div style={{ minWidth: 0 }}>
                     <div className="ri-title">{t.title}</div>
                     <div className="ri-sub">{t.year} · {(t.communityScore ?? t.tmdbScore ?? '—')}/10</div>

@@ -9,6 +9,7 @@ export type PosterTitle = {
   year: number;
   runtime: number;
   poster: string;
+  imdbId?: string | null;
   genres: string[];
   imdbRating: number | null;
   tmdbScore: number | null;
@@ -30,6 +31,7 @@ const titleSelect = {
   year: true,
   runtime: true,
   poster: true,
+  imdbId: true,
   backdrop: true,
   overview: true,
   genres: true,
@@ -53,6 +55,7 @@ function mapTitle(t: any): PosterTitle {
     year: t.year,
     runtime: t.runtime,
     poster: t.poster,
+    imdbId: t.imdbId ?? null,
     genres: parseList<string>(t.genres),
     imdbRating: t.imdbRating,
     tmdbScore: t.tmdbScore ?? null,
@@ -144,7 +147,7 @@ export async function getLatestReviews(take = 6, opts: { excludeTitleId?: string
     take,
     include: {
       user: { select: { id: true, name: true, image: true, email: true, role: true } },
-      title: { select: { id: true, slug: true, title: true, year: true, poster: true } },
+      title: { select: { id: true, slug: true, title: true, year: true, poster: true, mediaType: true, imdbId: true } },
       _count: { select: { likes: true, comments: true } }
     }
   });
@@ -158,7 +161,7 @@ export async function getTopReviews(take = 5) {
     take,
     include: {
       user: { select: { id: true, name: true, image: true, email: true, role: true } },
-      title: { select: { id: true, slug: true, title: true, year: true, poster: true } },
+      title: { select: { id: true, slug: true, title: true, year: true, poster: true, mediaType: true, imdbId: true } },
       _count: { select: { likes: true, comments: true } }
     }
   });

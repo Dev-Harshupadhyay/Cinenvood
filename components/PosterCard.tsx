@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { PosterTitle } from '@/lib/queries';
 import { formatRuntime } from '@/lib/format';
+import PosterImage from '@/components/PosterImage';
 
 export default function PosterCard({
   title,
@@ -16,14 +17,13 @@ export default function PosterCard({
   return (
     <Link href={`/movies/${title.slug}`} className="poster-card" data-poster-only={posterOnly} data-media-type={isSeries ? 'tv' : 'movie'}>
       <div className="poster-media">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <PosterImage
           src={title.poster}
-          alt={`${title.title} poster`}
+          title={title.title}
+          year={title.year}
+          mediaType={isSeries ? 'tv' : 'movie'}
+          imdbId={title.imdbId}
           loading={priority ? 'eager' : 'lazy'}
-          decoding="async"
-          width={500}
-          height={750}
         />
         {isSeries ? <span className="poster-kind">SERIES</span> : null}
         {score ? <span className="poster-score"><b>★</b>{score.toFixed(1)}</span> : null}
