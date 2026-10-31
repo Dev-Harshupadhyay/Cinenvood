@@ -37,7 +37,7 @@ export async function POST(req: Request) {
     if (action === 'delete') {
       if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
       await prisma.review.delete({ where: { id } });
-      await prisma.adminLog.create({ data: { actor: user.email, action: 'editorial.delete', target: id } });
+      await prisma.adminLog.create({ data: { actor: user.email, action: 'editorial.delete', target: id } }).catch(() => null);
       return NextResponse.json({ ok: true });
     }
 
@@ -60,16 +60,15 @@ export async function POST(req: Request) {
     if (action === 'update') {
       if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
       const review = await prisma.review.update({ where: { id }, data });
-      await prisma.adminLog.create({ data: { actor: user.email, action: 'editorial.update', target: id } });
+      await prisma.adminLog.create({ data: { actor: user.email, action: 'editorial.update', target: id } }).catch(() => null);
       return NextResponse.json({ review });
     }
 
     if (!titleId) return NextResponse.json({ error: 'titleId required' }, { status: 400 });
-    const existing = await prisma.review.findFirst({ where: { titleId, editorial: true }, select: { id: true } });
-    const review = existing
-      ? await prisma.review.update({ where: { id: existing.id }, data })
-      : await prisma.review.create({ data: { ...data, titleId } });
-    await prisma.adminLog.create({ data: { actor: user.email, action: existing ? 'editorial.update' : 'editorial.create', target: review.id } });
+    // A second editorial verdict (including another Jarvis draft) should create a
+    // separate published review instead of silently replacing the title's first one.
+    const review = await prisma.review.create({ data: { ...data, titleId } });
+    await prisma.adminLog.create({ data: { actor: user.email, action: 'editorial.create', target: review.id } }).catch(() => null);
     return NextResponse.json({ review });
   } catch (err) {
     console.error('[editorial]', err);

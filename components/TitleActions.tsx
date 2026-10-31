@@ -46,7 +46,7 @@ export default function TitleActions({ titleId, authed, initialLike, likes, init
   }
 
   return (
-    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+    <div className="title-action-buttons">
       <button
         type="button"
         className="btn"

@@ -99,7 +99,7 @@ export default function ImdbTrailer({ title, year, tmdbId, mediaType = 'movie', 
               </div>
             ) : null}
             {trailers.length ? (
-              <div style={{ padding: 14, display: 'grid', gap: 8 }}>
+              <div className="trailer-options-list" style={{ padding: 14, display: 'grid', gap: 8 }}>
                 {trailers.map((item) => (
                   <button
                     type="button"

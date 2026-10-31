@@ -18,7 +18,7 @@ type ResponseData = {
   error?: string;
 };
 
-type State = 'idle' | 'loading' | 'ready' | 'manual' | 'unavailable';
+type State = 'idle' | 'loading' | 'ready' | 'unavailable';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
@@ -67,10 +67,6 @@ export default function JarvisAutoReview({ imdbId, titleId, title, compact = fal
       });
       const payload: unknown = await response.json().catch(() => null);
       const data = isResponseData(payload) ? payload : {};
-      if (data.status === 'manual') {
-        setState('manual');
-        return;
-      }
       if (data.status === 'ready' && isReviewData(data.review)) {
         setReview(data.review);
         setImdbRating(typeof data.imdbRating === 'number' ? data.imdbRating : null);
@@ -84,10 +80,6 @@ export default function JarvisAutoReview({ imdbId, titleId, title, compact = fal
       setMessage(cause instanceof Error ? cause.message : 'Jarvis review is temporarily unavailable.');
       setState('unavailable');
     }
-  }
-
-  if (state === 'manual') {
-    return <section className={`panel jarvis-auto-review${compact ? ' jarvis-auto-review--compact' : ''}`} role="status"><b>A published review already exists for this title.</b><span className="faint">Jarvis will not replace a manual review.</span></section>;
   }
 
   if (state === 'ready' && review) {
@@ -117,12 +109,12 @@ export default function JarvisAutoReview({ imdbId, titleId, title, compact = fal
 
   return (
     <section className={`panel jarvis-auto-review${compact ? ' jarvis-auto-review--compact' : ''}`} aria-live="polite">
-      <div className="panel-title"><span>✦ Jarvis Review</span><span className="tag">On demand</span></div>
-      {state === 'loading' ? <p className="faint">Jarvis is preparing a grounded Hinglish and English review…</p> : null}
+      <div className="panel-title"><span>✦ Generate Jarvis Review</span><span className="tag">On demand</span></div>
+      {state === 'loading' ? <p className="faint">Jarvis is preparing the Hinglish and English editions…</p> : null}
       {message ? <p className="faint" role="status">{message}</p> : null}
       {state === 'idle' ? <p className="faint">Use the owner’s published reviews as style examples. Jarvis will save one bilingual review and verdict for this title.</p> : null}
       <button type="button" className={`btn btn-primary jarvis-review-trigger${compact ? ' btn-sm' : ''}`} onClick={requestReview} disabled={state === 'loading'}>
-        {state === 'loading' ? 'Jarvis is reviewing…' : state === 'unavailable' ? 'Try Jarvis Review again' : '✦ Jarvis Review'}
+        {state === 'loading' ? 'Generating bilingual review…' : state === 'unavailable' ? 'Try Generate Jarvis Review again' : '✦ Generate Jarvis Review'}
       </button>
     </section>
   );

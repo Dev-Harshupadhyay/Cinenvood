@@ -176,6 +176,21 @@ function normalizeTitle(value: string) {
   return value.normalize('NFKC').toLowerCase().replace(/[^\p{L}\p{M}\p{N}]+/gu, ' ').trim();
 }
 
+/** Match a catalogue's shortened title to a longer official title only after exact matches are exhausted. */
+export function imdbTitleNamesMatch(left: string, right: string) {
+  const cleanOfficialSuffix = (value: string) => normalizeTitle(value).replace(/\s+part\s+1$/, '').trim();
+  const a = cleanOfficialSuffix(left);
+  const b = cleanOfficialSuffix(right);
+  if (!a || !b) return false;
+  if (a === b) return true;
+  // Don't collapse sequels/remakes (e.g. "Pushpa" into "Pushpa 2").
+  const numberTokens = (value: string) => value.split(' ').filter((token) => /^\d+$/.test(token)).join(' ');
+  if (numberTokens(a) !== numberTokens(b)) return false;
+  const shorter = a.length < b.length ? a : b;
+  const longer = a.length < b.length ? b : a;
+  return shorter.length >= 5 && longer.startsWith(`${shorter} `);
+}
+
 function mediaKindMatches(kind: string | null, mediaType: 'movie' | 'tv') {
   if (!kind) return true;
   const normalized = kind.toLowerCase();
@@ -184,23 +199,35 @@ function mediaKindMatches(kind: string | null, mediaType: 'movie' | 'tv') {
     : normalized === 'movie' || normalized === 'tvmovie' || normalized === 'short';
 }
 
-/** Resolve a catalogue title to IMDbio when it lacks a saved IMDb ID. Exact name/year matching only. */
+/** Resolve a catalogue title to IMDbio by saved ID or a conservative title/year/type match. */
 export async function getImdbTitleForCatalogue(input: {
   title: string;
   year: number;
   mediaType: 'movie' | 'tv';
   imdbId?: string | null;
 }): Promise<ImdbTitle | null> {
-  if (input.imdbId) return getImdbTitle(input.imdbId);
+  if (input.imdbId) {
+    const linked = await getImdbTitle(input.imdbId);
+    if (linked) {
+      const namesMatch = [linked.title, linked.titleLocalized].some((name) => name && imdbTitleNamesMatch(input.title, name));
+      const typeMatches = mediaKindMatches(linked.kind, input.mediaType);
+      const yearMatches = !input.year || !linked.year || Math.abs(linked.year - input.year) <= 1;
+      if (namesMatch && typeMatches && yearMatches) return linked;
+    }
+  }
   const query = `${input.title} ${input.year > 0 ? input.year : ''}`.trim();
   const candidates = await searchImdbTitles(query);
   const wanted = normalizeTitle(input.title);
   if (!wanted) return null;
+  const titleNames = (candidate: ImdbSearchTitle) => [candidate.title, candidate.titleLocalized].filter((value): value is string => Boolean(value));
   const match = candidates
     .filter((candidate) => mediaKindMatches(candidate.kind, input.mediaType))
-    .filter((candidate) => normalizeTitle(candidate.title) === wanted || normalizeTitle(candidate.titleLocalized ?? '') === wanted)
+    .filter((candidate) => titleNames(candidate).some((name) => imdbTitleNamesMatch(input.title, name)))
     .filter((candidate) => !input.year || !candidate.year || Math.abs(candidate.year - input.year) <= 1)
-    .sort((a, b) => Number(b.year === input.year) - Number(a.year === input.year))[0];
+    .sort((a, b) => {
+      const exact = (candidate: ImdbSearchTitle) => Number(titleNames(candidate).some((name) => normalizeTitle(name) === wanted));
+      return exact(b) - exact(a) || Number(b.year === input.year) - Number(a.year === input.year);
+    })[0];
   return match ? getImdbTitle(match.imdbId) : null;
 }
 

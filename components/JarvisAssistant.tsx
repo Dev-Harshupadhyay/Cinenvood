@@ -11,13 +11,14 @@ function isAssistantResponse(value: unknown): value is AssistantResponse {
   return typeof value === 'object' && value !== null;
 }
 
-export default function JarvisAssistant({ titles, initialTitleId = '', catalogueUnavailable = false, signedIn = false }: {
+export default function JarvisAssistant({ titles, initialTitleId = '', initialMode = 'review', catalogueUnavailable = false, signedIn = false }: {
   titles: TitleOption[];
   initialTitleId?: string;
+  initialMode?: 'ask' | 'review';
   catalogueUnavailable?: boolean;
   signedIn?: boolean;
 }) {
-  const [mode, setMode] = useState<'ask' | 'review'>('review');
+  const [mode, setMode] = useState<'ask' | 'review'>(initialMode);
   const [titleId, setTitleId] = useState(initialTitleId);
   const [query, setQuery] = useState('');
   const [question, setQuestion] = useState('');

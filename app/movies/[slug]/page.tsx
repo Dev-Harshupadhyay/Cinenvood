@@ -156,7 +156,7 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
 
           <p className="detail-overview">{imdbOverview}</p>
 
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+          <div className="movie-detail-actions">
             <TitleActions
               titleId={title.id}
               authed={Boolean(sessionUser)}
@@ -167,8 +167,7 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
             <Link href="#review" className="btn btn-primary">
               Write a review
             </Link>
-            <Link href={`/jarvis?titleId=${encodeURIComponent(title.id)}`} className="btn btn-ghost">Ask Jarvis a question</Link>
-            <Link href="#jarvis-review" className="btn btn-ghost">Jarvis Review</Link>
+            <Link href={`/jarvis?titleId=${encodeURIComponent(title.id)}&mode=ask`} className="btn btn-ghost">Ask Jarvis</Link>
             {title.trailerEn || title.trailerHi ? <TrailerModal title={title.title} trailerEn={title.trailerEn} trailerHi={title.trailerHi} /> : null}
             <ImdbTrailer
               title={title.title}

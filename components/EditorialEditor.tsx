@@ -130,6 +130,7 @@ export default function EditorialEditor({ titles, rows }: { titles: TitleOption[
 
         {!editing ? (
           <div style={{ display: 'grid', gap: 10 }}>
+            <p className="faint" style={{ margin: 0, fontSize: 12 }}>Same title par naya verdict publish karoge toh purana editorial review replace nahi hoga; dono alag reviews ke roop mein rahenge.</p>
             <input className="input" placeholder="Search a title…" value={query} onChange={(e) => setQuery(e.target.value)} />
             <select className="input" value={form.titleId} onChange={(e) => setForm({ ...form, titleId: e.target.value })}>
               <option value="">Select title…</option>
