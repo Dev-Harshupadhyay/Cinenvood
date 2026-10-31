@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getImdbReviews, getImdbTitle } from '@/lib/imdbio';
+import ImdbTrailer from '@/components/ImdbTrailer';
 
 type Props = { params: Promise<{ id: string }> };
 const list = (value: unknown): any[] => Array.isArray(value) ? value : [];
@@ -43,7 +44,7 @@ export default async function ImdbTitlePage({ params }: Props) {
           <p className="detail-overview">{title.plot || title.summaries?.[0] || 'No synopsis available from IMDb.'}</p>
           <div className="detail-meta">
             {directors.length ? <span className="tag">Dir. {directors.join(', ')}</span> : null}
-            <a className="btn btn-primary" href={`https://www.imdb.com/title/${id}/`} target="_blank" rel="noreferrer">Open on IMDb ↗</a>
+            <ImdbTrailer title={title.title} year={title.year} />\n            <a className="btn btn-primary" href={`https://www.imdb.com/title/${id}/`} target="_blank" rel="noreferrer">Open on IMDb ↗</a>
           </div>
         </div>
       </div>
