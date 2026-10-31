@@ -185,7 +185,6 @@ export async function POST(req: Request) {
     const draft = await generateAutoJarvisReviewOnce(imdb.imdbId, { title: imdb, styleSamples: ownerContext.samples, imdbReviews });
     if (!draft) return NextResponse.json({ status: 'unavailable', error: 'Jarvis could not prepare a grounded bilingual review right now.' }, { status: 502 });
 
-    const score = imdb.rating !== null && Number.isFinite(imdb.rating) ? Math.max(1, Math.min(10, Math.round(imdb.rating))) : 7;
     const saved = await prisma.$transaction(async (tx) => {
       await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${imdb.imdbId}, 0))`;
       const ownerReview = ownerContext.ownerId ? await tx.review.findFirst({
@@ -212,7 +211,7 @@ export async function POST(req: Request) {
         const refreshed = await tx.review.update({
           where: { id: legacy.id },
           data: {
-            rating: score,
+            rating: draft.rating,
             headline: draft.headlineHi,
             body: draft.bodyHi,
             headlineHi: draft.headlineHi,
@@ -228,7 +227,7 @@ export async function POST(req: Request) {
       const created = await tx.review.create({
         data: {
           titleId,
-          rating: score,
+          rating: draft.rating,
           headline: draft.headlineHi,
           body: draft.bodyHi,
           headlineHi: draft.headlineHi,

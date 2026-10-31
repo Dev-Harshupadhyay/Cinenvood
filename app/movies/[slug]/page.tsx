@@ -87,7 +87,7 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
   };
 
   return (
-    <div className="container page-clip" style={{ position: 'relative' }}>
+    <div className="container page-clip movie-detail-page" style={{ position: 'relative' }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <script
         type="application/ld+json"
@@ -199,7 +199,7 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
             existing={myReview ? { id: myReview.id, rating: myReview.rating, headline: myReview.headline, body: myReview.body, spoiler: myReview.spoiler } : null}
           />
 
-          <JarvisAutoReview titleId={title.id} imdbId={title.imdbId} />
+          <JarvisAutoReview titleId={title.id} imdbId={title.imdbId} title={title.title} />
 
           <div className="section-head" style={{ marginBottom: 0 }}>
             <div>

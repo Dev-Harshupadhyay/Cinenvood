@@ -83,7 +83,7 @@ export default async function ImdbTitlePage({ params }: Props) {
         </section>
       ) : null}
 
-      <div style={{ marginTop: 28 }}><JarvisAutoReview imdbId={title.imdbId} /></div>
+      <div style={{ marginTop: 28 }}><JarvisAutoReview imdbId={title.imdbId} title={title.title} /></div>
 
       <section style={{ marginTop: 38 }}>
         <div className="section-head">
