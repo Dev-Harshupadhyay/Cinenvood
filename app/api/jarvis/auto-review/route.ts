@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
-import { getImdbReviews, getImdbTitle, searchImdbTitles } from '@/lib/imdbio';
+import { getImdbReviews, getImdbTitle, imdbTitleNamesMatch, searchImdbTitles } from '@/lib/imdbio';
 import { generateAutoJarvisReviewOnce, imdbTitleFields } from '@/lib/jarvis-auto-review';
 import { clientIp, LIMITS, rateLimit } from '@/lib/rate-limit';
 
@@ -39,12 +39,18 @@ async function resolveImdbId(titleId: string | undefined, requestedImdbId: strin
   const title = await prisma.title.findUnique({ where: { id: titleId } });
   if (!title || title.status !== 'PUBLISHED') return { title: null, imdbId: null };
   if (requestedImdbId && title.imdbId && requestedImdbId !== title.imdbId) return { title, imdbId: null };
-  if (requestedImdbId || title.imdbId) return { title, imdbId: requestedImdbId ?? title.imdbId };
+  const linkedId = requestedImdbId ?? title.imdbId;
+  if (linkedId) {
+    const linked = await getImdbTitle(linkedId).catch(() => null);
+    const titleMatches = linked && [linked.title, linked.titleLocalized].some((name) => name && imdbTitleNamesMatch(title.title, name));
+    const yearMatches = !title.year || !linked?.year || Math.abs(title.year - linked.year) <= 1;
+    const typeMatches = !linked?.kind || mediaTypeForImdbKind(linked.kind) === title.mediaType;
+    if (linked && titleMatches && yearMatches && typeMatches) return { title, imdbId: linkedId };
+  }
 
   const candidates = await searchImdbTitles(`${title.title} ${title.year}`).catch(() => []);
-  const wanted = normalize(title.title);
-  const exact = wanted ? candidates.find((candidate) => {
-    const titleMatches = [candidate.title, candidate.titleLocalized].some((name) => name && normalize(name) === wanted);
+  const exact = title.title.trim() ? candidates.find((candidate) => {
+    const titleMatches = [candidate.title, candidate.titleLocalized].some((name) => name && imdbTitleNamesMatch(title.title, name));
     const typeMatches = !candidate.kind || mediaTypeForImdbKind(candidate.kind) === title.mediaType;
     const yearMatches = !title.year || !candidate.year || Math.abs(candidate.year - title.year) <= 1;
     return titleMatches && typeMatches && yearMatches;
@@ -121,21 +127,7 @@ async function getOwnerContext() {
     orderBy: { createdAt: 'desc' }, take: 5 - personalSamples.length,
     select: { headline: true, body: true, sourceLang: true }
   });
-  return { ownerId: owner?.id ?? null, samples: [...personalSamples, ...editorialSamples].slice(0, 5) };
-}
-
-async function hasManualReview(titleId: string, ownerId: string | null) {
-  const ownerReview = ownerId ? await prisma.review.findFirst({
-    where: { titleId, userId: ownerId, editorial: false },
-    select: { id: true }
-  }) : null;
-  if (ownerReview) return true;
-  const editorials = await prisma.review.findMany({
-    where: { titleId, editorial: true },
-    select: { authorName: true },
-    take: 30
-  });
-  return editorials.some((review) => review.authorName?.trim().toLowerCase() !== 'jarvis');
+  return { samples: [...personalSamples, ...editorialSamples].slice(0, 5) };
 }
 
 async function getJarvisRecord(titleId: string): Promise<JarvisRecord | null> {
@@ -159,8 +151,8 @@ export async function POST(req: Request) {
     const imdb = await getImdbTitle(resolved.imdbId);
     if (!imdb) return NextResponse.json({ status: 'unavailable', error: 'IMDbio title details are temporarily unavailable.' }, { status: 502 });
     if (resolved.title) {
-      const allowedNames = [imdb.title, imdb.titleLocalized].filter((name): name is string => Boolean(name)).map(normalize);
-      const titleMatches = allowedNames.includes(normalize(resolved.title.title));
+      const allowedNames = [imdb.title, imdb.titleLocalized].filter((name): name is string => Boolean(name));
+      const titleMatches = allowedNames.some((name) => imdbTitleNamesMatch(resolved.title!.title, name));
       const yearMatches = !resolved.title.year || !imdb.year || Math.abs(resolved.title.year - imdb.year) <= 1;
       const typeMatches = mediaTypeForImdbKind(imdb.kind) === resolved.title.mediaType;
       if (!titleMatches || !yearMatches || !typeMatches) return NextResponse.json({ status: 'unavailable', error: 'IMDbio details did not match the selected catalogue title.' }, { status: 409 });
@@ -174,7 +166,6 @@ export async function POST(req: Request) {
     }
 
     const ownerContext = await getOwnerContext();
-    if (await hasManualReview(titleId, ownerContext.ownerId)) return NextResponse.json({ status: 'manual' });
 
     const gate = await rateLimit(`jarvis-auto:${clientIp(req)}`, LIMITS.jarvisAutoReview.limit, LIMITS.jarvisAutoReview.windowMs);
     if (!gate.ok) return NextResponse.json({ status: 'limited', error: 'Jarvis is drafting other movie reviews right now. Please try again shortly.' }, { status: 429 });
@@ -187,17 +178,6 @@ export async function POST(req: Request) {
 
     const saved = await prisma.$transaction(async (tx) => {
       await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${imdb.imdbId}, 0))`;
-      const ownerReview = ownerContext.ownerId ? await tx.review.findFirst({
-        where: { titleId, userId: ownerContext.ownerId, editorial: false },
-        select: { id: true }
-      }) : null;
-      const editorialReviews = await tx.review.findMany({
-        where: { titleId, editorial: true },
-        select: { authorName: true },
-        take: 30
-      });
-      if (ownerReview || editorialReviews.some((item) => item.authorName?.trim().toLowerCase() !== 'jarvis')) return { kind: 'manual' as const };
-
       const prior = await tx.review.findFirst({
         where: { titleId, status: 'PUBLISHED', editorial: true, authorName: 'Jarvis', sourceLang: 'jarvis-auto-v2' },
         select: { id: true, rating: true, headline: true, body: true, headlineHi: true, bodyHi: true, headlineEn: true, bodyEn: true, createdAt: true }
@@ -247,7 +227,6 @@ export async function POST(req: Request) {
       return { kind: 'review' as const, review: created, created: true };
     });
 
-    if (saved.kind === 'manual') return NextResponse.json({ status: 'manual' });
     const sourceLabel = imdbReviews.some((item) => item.spoiler === false) ? 'IMDbio metadata and public non-spoiler reviews' : 'IMDbio metadata only; no non-spoiler public review evidence';
     return NextResponse.json({ status: 'ready', cached: !saved.created, review: saved.review, imdbRating: imdb.rating, sources: sourceLabel }, { headers: { 'Cache-Control': 'no-store' } });
   } catch (error) {

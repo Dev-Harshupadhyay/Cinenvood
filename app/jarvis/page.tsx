@@ -10,8 +10,8 @@ export const metadata: Metadata = {
   robots: { index: false, follow: true }
 };
 
-export default async function JarvisPage({ searchParams }: { searchParams: Promise<{ titleId?: string }> }) {
-  const { titleId = '' } = await searchParams;
+export default async function JarvisPage({ searchParams }: { searchParams: Promise<{ titleId?: string; mode?: string }> }) {
+  const { titleId = '', mode } = await searchParams;
   const session = await getSessionUser();
   let titles: { id: string; title: string; year: number; poster: string }[] = [];
   let unavailable = false;
@@ -28,7 +28,7 @@ export default async function JarvisPage({ searchParams }: { searchParams: Promi
 
   return (
     <main className="container page-clip jarvis-page">
-      <JarvisAssistant titles={titles} initialTitleId={titleId} catalogueUnavailable={unavailable || titles.length === 0} signedIn={Boolean(session?.email)} />
+      <JarvisAssistant titles={titles} initialTitleId={titleId} initialMode={mode === 'ask' ? 'ask' : 'review'} catalogueUnavailable={unavailable || titles.length === 0} signedIn={Boolean(session?.email)} />
       <div className="jarvis-back"><Link href="/movies" className="btn btn-ghost">Browse the catalogue</Link></div>
     </main>
   );
