@@ -15,6 +15,8 @@ import EditionSwitch from '@/components/EditionSwitch';
 import TrailerModal from '@/components/TrailerModal';
 import { avatarGradient, formatRuntime, initials } from '@/lib/format';
 import { prisma } from '@/lib/prisma';
+import { getImdbReviews, getImdbTitle } from '@/lib/imdbio';
+import ImdbTrailer from '@/components/ImdbTrailer';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -34,6 +36,10 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
   const [title, sessionUser, edition] = await Promise.all([getTitleBySlug(slug), getSessionUser(), getEdition()]);
   if (!title) notFound();
 
+  const [imdbData, imdbReviews] = title.imdbId
+    ? await Promise.all([getImdbTitle(title.imdbId), getImdbReviews(title.imdbId)])
+    : [null, [] as Record<string, any>[]];
+  const imdbRating = typeof imdbData?.rating === 'number' ? imdbData.rating : null;
   const viewerId = sessionUser?.id;
   const [likes, watch, similar, reviews] = await Promise.all([
     viewerId ? prisma.titleLike.findUnique({ where: { userId_titleId_kind: { userId: viewerId, titleId: title.id, kind: 'LIKE' } } }) : null,
@@ -49,7 +55,7 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
   const adminVerdict = reviewsForCards.find((r) => r.user?.role === 'ADMIN' || r.editorial) ?? null;
   const myReview = sessionUser ? reviewsForCards.find((r) => r.user?.email === sessionUser.email) ?? null : null;
   const related = similar.filter((t) => t.id !== title.id).slice(0, 5);
-  const score = title.communityScore ?? title.tmdbScore ?? title.imdbRating ?? 0;
+  const score = title.communityScore ?? imdbRating ?? 0;
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -102,7 +108,7 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
                 {g}
               </Link>
             ))}
-            {title.tmdbScore ? <span className="tag tag-gold">★ {title.tmdbScore.toFixed(1)} TMDB</span> : null}
+            {imdbRating !== null ? <span className="tag tag-gold">★ {imdbRating.toFixed(1)} IMDb</span> : null}
             <span className="tag tag-accent">{title.reviews.length} community reviews</span>
             {title.director ? <span className="tag">Dir. {title.director}</span> : null}
           </div>
@@ -113,7 +119,7 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
             score={score}
             communityVotes={title._count.likes}
             reviewCount={title.reviews.length}
-            tmdbScore={title.tmdbScore}
+            imdbRating={imdbRating}
             myRating={myReview?.rating ?? null}
             buckets={title.ratingBuckets}
             genres={title.genres}
@@ -134,7 +140,7 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
             <Link href="#review" className="btn btn-primary">
               Write a review
             </Link>
-            <TrailerModal title={title.title} trailerEn={(title as any).trailerEn} trailerHi={(title as any).trailerHi} />
+            {title.trailerEn || title.trailerHi ? <TrailerModal title={title.title} trailerEn={title.trailerEn} trailerHi={title.trailerHi} /> : <ImdbTrailer title={title.title} year={title.year} />}
           </div>
 
           {title.cast.length > 0 ? (
@@ -203,6 +209,23 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
               ))}
             </div>
           )}
+
+          {imdbReviews.length ? (
+            <section style={{ display: 'grid', gap: 12, marginTop: 14 }}>
+              <div className="section-head" style={{ marginBottom: 0 }}>
+                <div><div className="eyebrow">External source · IMDb</div><h2 style={{ fontSize: 22 }}>IMDb user reviews</h2></div>
+                {title.imdbId ? <a href={`https://www.imdb.com/title/${title.imdbId}/reviews/`} target="_blank" rel="noreferrer" className="link-more">View all ↗</a> : null}
+              </div>
+              {imdbReviews.slice(0, 5).map((review, index) => (
+                <article className="panel" key={review.id || review.title || index}>
+                  <div className="panel-title"><span>{review.title || review.summary || 'IMDb user review'}</span>{review.rating != null ? <span className="tag tag-gold">★ {review.rating}/10</span> : null}</div>
+                  <p style={{ whiteSpace: 'pre-wrap' }}>{review.text || review.content || review.reviewText || review.body || 'Review text unavailable.'}</p>
+                  <div className="faint mono" style={{ fontSize: 11 }}>{review.author || review.username || review.user?.name || 'IMDb user'}{review.date ? ` · ${review.date}` : ''}</div>
+                </article>
+              ))}
+              <p className="faint" style={{ fontSize: 11 }}>IMDb reviews are displayed separately; your Cinevood community reviews and My Reviews data are unchanged.</p>
+            </section>
+          ) : null}
         </div>
 
         <aside style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>

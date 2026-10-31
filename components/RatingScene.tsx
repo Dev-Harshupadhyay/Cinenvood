@@ -7,7 +7,7 @@ export default function RatingScene({
   score,
   communityVotes,
   reviewCount,
-  tmdbScore,
+  imdbRating,
   myRating,
   buckets,
   genres,
@@ -17,7 +17,7 @@ export default function RatingScene({
   score: number;
   communityVotes: number;
   reviewCount: number;
-  tmdbScore?: number | null;
+  imdbRating?: number | null;
   myRating?: number | null;
   buckets: Bucket[];
   genres: string[];
@@ -102,7 +102,7 @@ export default function RatingScene({
             <div className="rs-label">Side by side</div>
             <div className="cmp-row">
               <MiniDial label="MOOD" value={score} tone="site" />
-              <MiniDial label="TMDB" value={tmdbScore ?? null} tone="gold" />
+              <MiniDial label="IMDb" value={imdbRating ?? null} tone="gold" />
               <MiniDial label="YOU" value={myRating ?? null} tone="mine" />
             </div>
           </div>
