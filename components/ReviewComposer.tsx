@@ -9,11 +9,13 @@ type Existing = { id: string; rating: number; headline: string | null; body: str
 export default function ReviewComposer({
   titleId,
   titleName,
+  imdbId,
   authed,
   existing
 }: {
   titleId: string;
   titleName: string;
+  imdbId?: string | null;
   authed: boolean;
   existing: Existing;
 }) {
@@ -24,8 +26,16 @@ export default function ReviewComposer({
   const [spoiler, setSpoiler] = useState(existing?.spoiler ?? false);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [jarvisBusy, setJarvisBusy] = useState(false);
+  const [jarvisConsent, setJarvisConsent] = useState(false);
+  const [jarvisMessage, setJarvisMessage] = useState('');
   const router = useRouter();
   const verdict = verdictFor(rating);
+  function changeRating(value: number) {
+    setRating(value);
+    setJarvisConsent(false);
+    setJarvisMessage('');
+  }
 
   if (!authed) {
     return (
@@ -41,6 +51,53 @@ export default function ReviewComposer({
         </a>
       </div>
     );
+  }
+
+  async function askJarvis() {
+    setError('');
+    setJarvisMessage('');
+    const notes = body.trim();
+    if (notes.length < 40) {
+      setJarvisMessage('Jarvis ke liye apne thoughts 40+ characters mein pehle likho.');
+      return;
+    }
+    if (!jarvisConsent) {
+      setJarvisMessage('Jarvis draft banane se pehle consent tick karo.');
+      return;
+    }
+
+    setJarvisBusy(true);
+    try {
+      const response = await fetch('/api/jarvis/review', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', accept: 'application/json' },
+        body: JSON.stringify({
+          titleId,
+          ...(imdbId ? { imdbId } : {}),
+          notes,
+          rating,
+          language: 'match',
+          spoiler,
+          useOwnReviews: false,
+          styleSample: notes,
+          short: true,
+          consent: true
+        })
+      });
+      const payload: unknown = await response.json().catch(() => null);
+      const data = typeof payload === 'object' && payload !== null ? payload as { error?: unknown; draft?: unknown } : {};
+      if (!response.ok) throw new Error(typeof data.error === 'string' ? data.error : 'Jarvis short review nahi bana saka.');
+      const draft = typeof data.draft === 'object' && data.draft !== null ? data.draft as { headline?: unknown; body?: unknown } : null;
+      if (!draft || typeof draft.body !== 'string' || typeof draft.headline !== 'string') throw new Error('Jarvis ne incomplete draft diya.');
+      setBody(draft.body);
+      if (draft.headline.trim()) setHeadline(draft.headline.slice(0, 90));
+      setJarvisConsent(false);
+      setJarvisMessage('Short draft ready—publish se pehle edit/check kar lo.');
+    } catch (cause) {
+      setJarvisMessage(cause instanceof Error ? cause.message : 'Jarvis temporarily unavailable hai.');
+    } finally {
+      setJarvisBusy(false);
+    }
   }
 
   async function submit(e: React.FormEvent) {
@@ -114,9 +171,22 @@ export default function ReviewComposer({
           minLength={20}
           maxLength={4000}
           value={body}
-          onChange={(e) => setBody(e.target.value)}
+          onChange={(e) => { setBody(e.target.value); setJarvisMessage(''); setJarvisConsent(false); }}
           placeholder="What worked, what didn't, and who should watch it…"
         />
+      </div>
+
+      <div className="review-jarvis-assist">
+        <label className="checkbox">
+          <input type="checkbox" checked={jarvisConsent} onChange={(e) => setJarvisConsent(e.target.checked)} />
+          Jarvis ko mere notes aur title details bhejkar ek short editable draft banane ki permission deta/deti hoon. Draft apne aap publish nahi hoga.
+        </label>
+        <div className="review-jarvis-actions">
+          <button type="button" className="btn btn-ghost" onClick={askJarvis} disabled={jarvisBusy || body.trim().length < 40 || !jarvisConsent}>
+            {jarvisBusy ? 'Jarvis short draft bana raha hai…' : '✦ Jarvis se short review draft'}
+          </button>
+          {jarvisMessage ? <span className="faint" role="status">{jarvisMessage}</span> : <span className="faint">Pehle apne thoughts likho; Jarvis unhe 2–3 sentence mein shape karega.</span>}
+        </div>
       </div>
 
       {/* ── the verdict comes after the words, not before them ───────── */}
@@ -145,7 +215,7 @@ export default function ReviewComposer({
                     aria-label={`${value} out of 10`}
                     className="sb-tick"
                     data-on={value <= rating}
-                    onClick={() => setRating(value)}
+                    onClick={() => changeRating(value)}
                   >
                     <span />
                   </button>
@@ -164,7 +234,7 @@ export default function ReviewComposer({
           step={1}
           value={rating}
           aria-label="Rating out of 10"
-          onChange={(e) => setRating(Number(e.target.value))}
+          onChange={(e) => changeRating(Number(e.target.value))}
         />
         <div className="sb-scale" aria-hidden="true">
           <span>1 · SKIP</span>
@@ -174,14 +244,14 @@ export default function ReviewComposer({
       </div>
 
       <label className="checkbox" style={{ marginBottom: 14 }}>
-        <input type="checkbox" checked={spoiler} onChange={(e) => setSpoiler(e.target.checked)} />
+        <input type="checkbox" checked={spoiler} onChange={(e) => { setSpoiler(e.target.checked); setJarvisConsent(false); setJarvisMessage(''); }} />
         Contains spoilers
       </label>
 
       {error ? <p className="form-error">{error}</p> : null}
 
       <div style={{ display: 'flex', gap: 8 }}>
-        <button type="submit" className="btn btn-primary" disabled={busy}>
+        <button type="submit" className="btn btn-primary" disabled={busy || jarvisBusy}>
           {busy ? 'Saving…' : existing ? 'Update review' : 'Publish review'}
         </button>
         <button type="button" className="btn btn-ghost" onClick={() => setOpen(false)}>

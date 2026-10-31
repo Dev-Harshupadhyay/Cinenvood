@@ -112,7 +112,7 @@ export default function JarvisReviewWriter({ signedIn }: { signedIn: boolean }) 
         const payload: unknown = await response.json().catch(() => null);
         const data = isApiResponse(payload) ? payload : {};
         if (!response.ok) throw new Error(typeof data.error === 'string' ? data.error : 'IMDbio search is temporarily unavailable.');
-        setResults(Array.isArray(data.results) ? data.results.filter(isSearchTitle).slice(0, 8) : []);
+        setResults(Array.isArray(data.results) ? data.results.filter(isSearchTitle).slice(0, 16) : []);
       } catch (cause) {
         if (!controller.signal.aborted) {
           setResults([]);
@@ -170,7 +170,8 @@ export default function JarvisReviewWriter({ signedIn }: { signedIn: boolean }) 
           spoiler,
           useOwnReviews,
           styleSample: useOwnReviews ? '' : styleSample.trim(),
-          consent
+          consent,
+          short: true
         })
       });
       const payload: unknown = await response.json().catch(() => null);
@@ -201,7 +202,7 @@ export default function JarvisReviewWriter({ signedIn }: { signedIn: boolean }) 
   return (
     <div className="jarvis-writer">
       <form className="panel jarvis-form" onSubmit={generate}>
-        <div className="panel-title"><span>Write a review in my style</span><span className="tag">IMDbio search</span></div>
+        <div className="panel-title"><span>Write a short review with Jarvis</span><span className="tag">IMDbio search</span></div>
         <p className="faint" style={{ margin: 0, fontSize: 12, lineHeight: 1.6 }}>
           IMDbio supplies the title, poster, plot and cast. Your own notes supply the opinion; your own past reviews supply the voice.
         </p>
@@ -271,7 +272,7 @@ export default function JarvisReviewWriter({ signedIn }: { signedIn: boolean }) 
 
         {!signedIn ? <div className="empty"><b>Sign in to use your own review style</b><Link href="/login?next=%2Fjarvis" className="btn btn-sm btn-primary">Sign in</Link></div> : null}
         <div className="jarvis-actions">
-          <button type="submit" className="btn btn-primary" disabled={busy || !selected || rating === null || !consent || !signedIn}>{busy ? 'Jarvis is writing…' : 'Draft in my style →'}</button>
+          <button type="submit" className="btn btn-primary" disabled={busy || !selected || rating === null || !consent || !signedIn}>{busy ? 'Jarvis is writing a short review…' : 'Draft a short review →'}</button>
           {selected ? <span className="faint">IMDbio metadata · {rating === null ? 'choose your rating' : `your rating ${rating}/10`}</span> : null}
         </div>
         {error ? <div className="empty" role="alert"><b>Could not draft</b>{error}</div> : null}
@@ -279,7 +280,7 @@ export default function JarvisReviewWriter({ signedIn }: { signedIn: boolean }) 
 
       {draft ? (
         <article className="panel jarvis-answer" aria-live="polite">
-          <div className="panel-title"><span>Your editable review draft</span><span className="tag">Not published</span></div>
+          <div className="panel-title"><span>Your short review draft</span><span className="tag">Not published</span></div>
           {draft.headline ? <h2 className="jarvis-draft-headline">{draft.headline}</h2> : null}
           <div className="tag tag-gold" style={{ display: 'inline-flex', marginBottom: 10 }}>Your rating · {draft.rating}/10</div>
           <p className="jarvis-answer-copy">{draft.body}</p>

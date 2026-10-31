@@ -239,6 +239,7 @@ export default async function MoviePage({ params }: { params: Promise<{ slug: st
           <ReviewComposer
             titleId={title.id}
             titleName={title.title}
+            imdbId={title.imdbId}
             authed={Boolean(sessionUser)}
             existing={myReview ? { id: myReview.id, rating: myReview.rating, headline: myReview.headline, body: myReview.body, spoiler: myReview.spoiler } : null}
           />

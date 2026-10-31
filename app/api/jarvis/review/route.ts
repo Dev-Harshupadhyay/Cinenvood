@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
-import { getImdbTitle } from '@/lib/imdbio';
+import { getImdbTitle, getImdbTitleForCatalogue, type ImdbTitle } from '@/lib/imdbio';
+import { parseList } from '@/lib/format';
 import { getCurrentUser } from '@/lib/session';
 import { draftReviewInUserStyle } from '@/lib/jarvis-review';
 import { LIMITS, rateLimit } from '@/lib/rate-limit';
@@ -10,15 +11,52 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 const schema = z.object({
-  imdbId: z.string().regex(/^tt\d+$/),
+  imdbId: z.string().regex(/^tt\d+$/).optional(),
+  titleId: z.string().min(1).max(100).optional(),
   notes: z.string().trim().min(30).max(2400),
   rating: z.number().int().min(1).max(10),
   language: z.enum(['match', 'hinglish', 'english']).default('match'),
   spoiler: z.boolean().default(false),
   useOwnReviews: z.boolean().default(true),
   styleSample: z.string().trim().max(1800).optional().default(''),
+  short: z.boolean().optional().default(false),
   consent: z.literal(true)
-});
+}).refine((data) => Boolean(data.imdbId || data.titleId), { message: 'Choose a valid title.' });
+
+async function resolveReviewTitle(titleId?: string, imdbId?: string): Promise<ImdbTitle | null> {
+  if (!titleId) return imdbId ? getImdbTitle(imdbId) : null;
+  const local = await prisma.title.findUnique({ where: { id: titleId } });
+  if (!local || local.status !== 'PUBLISHED') return null;
+
+  const external = await getImdbTitleForCatalogue({
+    title: local.title,
+    year: local.year,
+    mediaType: local.mediaType === 'tv' ? 'tv' : 'movie',
+    imdbId: imdbId ?? local.imdbId
+  }).catch(() => null);
+  if (external) return external;
+
+  const cast = parseList<{ name?: string; role?: string; img?: string | null }>(local.cast);
+  return {
+    imdbId: local.imdbId ?? '',
+    title: local.title,
+    titleLocalized: null,
+    kind: local.mediaType === 'tv' ? 'tvSeries' : 'movie',
+    coverUrl: local.poster || null,
+    plot: local.overview || null,
+    summaries: [],
+    year: local.year || null,
+    duration: local.runtime || null,
+    rating: local.imdbRating,
+    genres: parseList<string>(local.genres),
+    directors: local.director ? [{ name: local.director, pictureUrl: null, characters: [] }] : [],
+    stars: cast.filter((person) => person.name).slice(0, 10).map((person) => ({
+      name: person.name!,
+      pictureUrl: person.img ?? null,
+      characters: person.role ? [person.role] : []
+    }))
+  };
+}
 
 export async function POST(req: Request) {
   const user = await getCurrentUser();
@@ -41,7 +79,7 @@ export async function POST(req: Request) {
   }
 
   const [title, ownReviews] = await Promise.all([
-    getImdbTitle(parsed.data.imdbId),
+    resolveReviewTitle(parsed.data.titleId, parsed.data.imdbId),
     parsed.data.useOwnReviews
       ? prisma.review.findMany({
           where: { userId: user.id, status: 'PUBLISHED', spoiler: false, editorial: false, body: { not: '' } },
@@ -69,7 +107,8 @@ export async function POST(req: Request) {
     language: parsed.data.language,
     spoiler: parsed.data.spoiler,
     ownReviews,
-    pastedStyleSample: parsed.data.useOwnReviews ? '' : parsed.data.styleSample
+    pastedStyleSample: parsed.data.useOwnReviews ? '' : parsed.data.styleSample,
+    short: parsed.data.short
   });
 
   if (!draft) {

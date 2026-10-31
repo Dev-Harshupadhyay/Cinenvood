@@ -3046,6 +3046,15 @@ html, body { max-width: 100%; overflow-x: clip; }
 .search-result-title { margin-top:9px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:650; font-size:13px; }
 .search-result-meta { margin-top:3px; color:var(--faint); font:9px var(--font-mono); }
 .search-page-actions { display:flex; justify-content:center; margin-top:30px; }
+.review-jarvis-assist { display:grid; gap:9px; padding:12px; border:1px solid var(--border); border-radius:var(--radius); background:color-mix(in srgb,var(--accent) 4%,var(--surface)); }
+.review-jarvis-assist .checkbox { margin:0; align-items:flex-start; line-height:1.55; }
+.review-jarvis-actions { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.review-jarvis-actions .btn { min-height:40px; }
+@media (max-width:600px) {
+  .review-jarvis-actions { align-items:stretch; flex-direction:column; }
+  .review-jarvis-actions .btn { width:100%; justify-content:center; }
+  .search-pop { max-height:58dvh; }
+}
 
 .poster-kind { position:absolute; top:9px; right:9px; z-index:2; border:1px solid rgba(185,167,255,.42); background:rgba(7,9,12,.78); color:#c4b8ff; border-radius:999px; padding:4px 7px; font:8px var(--font-mono); letter-spacing:.12em; }
 .poster-card[data-poster-only='true'] .poster-hover { background:linear-gradient(180deg,transparent 25%,rgba(0,0,0,.58)); }

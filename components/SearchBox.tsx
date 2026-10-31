@@ -84,7 +84,7 @@ export default function SearchBox({ placeholder = 'Search movies, series…' }: 
   }
 
   function onInputKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    const visibleCount = Math.min(items.length, 8);
+    const visibleCount = Math.min(items.length, 12);
     if (e.key === 'Escape') {
       setOpen(false);
       setActiveIndex(-1);
@@ -145,7 +145,7 @@ export default function SearchBox({ placeholder = 'Search movies, series…' }: 
             <div className="search-empty"><b>No match yet</b><span>Try another title or spelling.</span></div>
           ) : (
             <>
-              {items.slice(0, 8).map((item, index) => (
+              {items.slice(0, 12).map((item, index) => (
                 <Link
                   key={item.key}
                   id={`search-result-${index}`}

@@ -111,6 +111,39 @@ export async function searchTitles(query: string) {
   return { configured: true, results };
 }
 
+const SEARCH_GENRES: Record<string, { movie: string; tv: string }> = {
+  action: { movie: '28', tv: '10759' },
+  adventure: { movie: '12', tv: '10759' },
+  animation: { movie: '16', tv: '16' },
+  comedy: { movie: '35', tv: '35' },
+  crime: { movie: '80', tv: '80' },
+  documentary: { movie: '99', tv: '99' },
+  drama: { movie: '18', tv: '18' },
+  family: { movie: '10751', tv: '10751' },
+  fantasy: { movie: '14', tv: '10765' },
+  history: { movie: '36', tv: '10768' },
+  horror: { movie: '27', tv: '9648' },
+  romance: { movie: '10749', tv: '10749' },
+  thriller: { movie: '53', tv: '9648' }
+};
+
+/** Genre terms such as "drama" also discover popular matching movies and TV series. */
+export async function discoverTitlesByGenre(query: string): Promise<TmdbSearchItem[]> {
+  if (!tmdbConfigured()) return [];
+  const words = query.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, ' ').trim().split(/\s+/);
+  const genre = words.map((word) => SEARCH_GENRES[word] ?? SEARCH_GENRES[word.replace(/s$/, '')]).find(Boolean);
+  if (!genre) return [];
+  const params = (id: string) => ({ with_genres: id, include_adult: 'false', language: 'en-US', sort_by: 'popularity.desc', page: '1' });
+  const [movies, series] = await Promise.all([
+    tmdbFetch<{ results?: TmdbSearchItem[] }>('/discover/movie', params(genre.movie), 900),
+    tmdbFetch<{ results?: TmdbSearchItem[] }>('/discover/tv', params(genre.tv), 900)
+  ]);
+  return [
+    ...(movies?.results ?? []).map((item) => ({ ...item, media_type: 'movie' as const })),
+    ...(series?.results ?? []).map((item) => ({ ...item, media_type: 'tv' as const }))
+  ].slice(0, 40);
+}
+
 export async function trendingTitles() {
   const data = await tmdbFetch<{ results: TmdbSearchItem[] }>('/trending/all/week', { language: 'en-US' }, 1800);
   return (data?.results ?? []).filter((item) => item.media_type === 'movie' || item.media_type === 'tv');
