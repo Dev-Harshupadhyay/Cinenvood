@@ -65,7 +65,6 @@ export default function JarvisAutoReview({ imdbId, titleId, title, compact = fal
   const [review, setReview] = useState<ReviewData | null>(initialReview);
   const [imdbRating, setImdbRating] = useState<number | null>(initialImdbRating);
   const [sources, setSources] = useState(initialReview ? 'Saved Jarvis review · shared with everyone' : '');
-  const [language, setLanguage] = useState<'hi' | 'en'>('hi');
   const [state, setState] = useState<State>(initialReview ? 'ready' : 'idle');
   const [message, setMessage] = useState('');
 
@@ -103,22 +102,18 @@ export default function JarvisAutoReview({ imdbId, titleId, title, compact = fal
   }
 
   if (state === 'ready' && review) {
-    const headline = language === 'hi' ? review.headlineHi : review.headlineEn;
-    const body = conciseDisplay(language === 'hi' ? review.bodyHi : review.bodyEn);
+    const headline = review.headlineEn;
+    const body = conciseDisplay(review.bodyEn);
     return (
       <article className={`panel jarvis-auto-review${compact ? ' jarvis-auto-review--compact' : ''}`} data-jarvis-auto-review="true">
         <div className="panel-title">
-          <span>✦ Jarvis review{title ? ` · ${title}` : ''}</span>
+          <span>✦ Jarvis Auto Review · English{title ? ` · ${title}` : ''}</span>
           <span className="tag">Saved</span>
         </div>
         <div className="jarvis-auto-review-meta">
           <span className="tag tag-gold">Jarvis verdict · {review.rating}/10</span>
           {imdbRating !== null ? <span className="tag">IMDbio ★ {imdbRating.toFixed(1)}/10</span> : null}
           <span className="faint">{sources}</span>
-        </div>
-        <div className="jarvis-review-tabs" role="tablist" aria-label="Jarvis review language">
-          <button type="button" role="tab" aria-selected={language === 'hi'} data-active={language === 'hi'} onClick={() => setLanguage('hi')}>Hinglish</button>
-          <button type="button" role="tab" aria-selected={language === 'en'} data-active={language === 'en'} onClick={() => setLanguage('en')}>English</button>
         </div>
         {headline ? <h3 className="jarvis-auto-review-headline">{headline}</h3> : null}
         <p className="jarvis-auto-review-copy">{body.text}</p>
@@ -130,12 +125,12 @@ export default function JarvisAutoReview({ imdbId, titleId, title, compact = fal
 
   return (
     <section className={`panel jarvis-auto-review${compact ? ' jarvis-auto-review--compact' : ''}`} aria-live="polite">
-      <div className="panel-title"><span>✦ Generate Jarvis Review</span><span className="tag">On demand</span></div>
-      {state === 'loading' ? <p className="faint">Jarvis is preparing the Hinglish and English editions…</p> : null}
+      <div className="panel-title"><span>✦ Generate Short English Jarvis Review</span><span className="tag">On demand</span></div>
+      {state === 'loading' ? <p className="faint">Jarvis is preparing a short English review…</p> : null}
       {message ? <p className="faint" role="status">{message}</p> : null}
-      {state === 'idle' ? <p className="faint">Use the owner’s published reviews as style examples. Jarvis will save one bilingual review and verdict for this title.</p> : null}
+      {state === 'idle' ? <p className="faint">Jarvis uses the owner’s published reviews as style examples to create and save one short English review for this title.</p> : null}
       <button type="button" className={`btn btn-primary jarvis-review-trigger${compact ? ' btn-sm' : ''}`} onClick={requestReview} disabled={state === 'loading'}>
-        {state === 'loading' ? 'Generating bilingual review…' : state === 'unavailable' ? 'Try Generate Jarvis Review again' : '✦ Generate Jarvis Review'}
+        {state === 'loading' ? 'Generating short English review…' : state === 'unavailable' ? 'Try again' : '✦ Generate Short English Review'}
       </button>
     </section>
   );

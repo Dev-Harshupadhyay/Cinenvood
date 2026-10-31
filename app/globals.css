@@ -3178,12 +3178,9 @@ html, body { max-width: 100%; overflow-x: clip; }
 }
 .jarvis-writer button.link-more { padding: 0; border: 0; background: transparent; font: inherit; cursor: pointer; }
 
-/* Cached, bilingual Jarvis editorial review */
+/* Cached, concise English Jarvis editorial review */
 .jarvis-auto-review { display: grid; gap: 13px; padding: 20px; border-color: color-mix(in srgb, var(--accent) 38%, var(--border)); background: radial-gradient(ellipse at 0 0, color-mix(in srgb, var(--accent) 9%, transparent), transparent 58%), var(--surface); }
 .jarvis-auto-review-meta { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; font-size: 11px; }
-.jarvis-review-tabs { display: flex; gap: 6px; width: fit-content; padding: 4px; border: 1px solid var(--border); border-radius: 10px; background: var(--panel); }
-.jarvis-review-tabs button { border: 0; border-radius: 7px; padding: 6px 11px; color: var(--muted); background: transparent; font: inherit; font-size: 11px; font-weight: 700; cursor: pointer; }
-.jarvis-review-tabs button[data-active='true'] { color: var(--accent); background: color-mix(in srgb, var(--accent) 13%, transparent); }
 .jarvis-auto-review-headline { margin: 0; font-family: var(--font-display, inherit); font-size: clamp(20px, 3vw, 26px); }
 .jarvis-auto-review-copy { margin: 0; white-space: pre-wrap; line-height: 1.8; color: var(--text); }
 .jarvis-auto-review-disclosure { margin: 0; padding-top: 11px; border-top: 1px solid var(--border); color: var(--faint); font-size: 10px; line-height: 1.55; }
@@ -3204,8 +3201,6 @@ html, body { max-width: 100%; overflow-x: clip; }
   .movie-detail-actions .trailer-search-button,
   .movie-detail-actions .trailer-watch-link { width: 100%; min-width: 0; min-height: 44px; justify-content: center; text-align: center; white-space: normal; line-height: 1.25; padding-inline: 8px; }
   .movie-detail-actions > .title-action-buttons button { width: 100%; min-height: 44px; justify-content: center; padding-inline: 6px; font-size: 12px; }
-  .jarvis-review-tabs { width: 100%; }
-  .jarvis-review-tabs button { flex: 1; min-height: 40px; }
   .jarvis-review-trigger { width: 100%; min-height: 44px; justify-self: stretch; }
   .modal-backdrop { align-items: center; padding: max(8px, env(safe-area-inset-top)) 8px max(8px, env(safe-area-inset-bottom)); }
   .modal-panel { width: 100%; max-height: calc(100dvh - 16px); overflow-y: auto; overscroll-behavior: contain; border-radius: 14px; }
