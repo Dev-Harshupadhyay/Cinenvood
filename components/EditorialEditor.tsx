@@ -46,7 +46,7 @@ export default function EditorialEditor({ titles, rows }: { titles: TitleOption[
       headlineEn: form.headlineEn,
       bodyEn: form.bodyEn,
       featured: form.featured,
-      authorName: form.jarvis ? 'Jarvis' : 'CiNEMAsFLiX'
+      authorName: form.jarvis ? 'Jarvis' : 'Admin'
     };
     if (action === 'update') payload.id = editing;
     else payload.titleId = form.titleId;
@@ -125,7 +125,7 @@ export default function EditorialEditor({ titles, rows }: { titles: TitleOption[
       <div className="panel">
         <div className="panel-title">
           <span>{editing ? 'Edit editorial verdict' : 'New editorial verdict'}</span>
-          <span className="faint mono" style={{ fontSize: 10 }}>no user account · byline CiNEMAsFLiX</span>
+          <span className="faint mono" style={{ fontSize: 10 }}>admin-published · byline Admin</span>
         </div>
 
         {!editing ? (
@@ -225,7 +225,7 @@ export default function EditorialEditor({ titles, rows }: { titles: TitleOption[
                     <div className="t-sub">
                       {r.year}
                       {r.featured ? ' · pinned' : ''}
-                      {(r.authorName ?? '').toLowerCase() === 'jarvis' ? ' · ✦ Jarvis' : ''}
+                      {r.authorName?.trim() ? ` · ${(r.authorName ?? '').toLowerCase() === 'jarvis' ? '✦ Jarvis' : r.authorName}` : ' · Admin'}
                     </div>
                   </td>
                   <td className="mono">{r.rating}/10</td>

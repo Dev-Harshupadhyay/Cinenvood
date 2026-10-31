@@ -51,7 +51,7 @@ export async function POST(req: Request) {
       headlineEn: headlineEn?.trim() || null,
       bodyEn: bodyEn?.trim() || null,
       editorial: true,
-      authorName: (authorName ?? '').trim() || 'CiNEMAsFLiX',
+      authorName: (authorName ?? '').trim() || 'Admin',
       status: 'PUBLISHED' as const,
       spoiler: false,
       ...(typeof featured === 'boolean' ? { featured } : {})
